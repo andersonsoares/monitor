@@ -2,7 +2,6 @@ package models;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.bson.types.ObjectId;
 
@@ -52,7 +51,7 @@ public class Event {
 	/**
 	 * Keywords to be monitored. Ex: [#google,#android,#brasil,@dilma]
 	 */
-	private Map<String,TypeEnum> keywords;
+	private HashMap<String,TypeEnum> keywords;
 	
 	/**
 	 * Total number of tweets
@@ -119,11 +118,11 @@ public class Event {
 			this.createdAt = createdAt;
 		}
 
-		public Map<String, TypeEnum> getKeywords() {
+		public HashMap<String, TypeEnum> getKeywords() {
 			return keywords;
 		}
 
-		public void setKeywords(Map<String, TypeEnum> keywords) {
+		public void setKeywords(HashMap<String, TypeEnum> keywords) {
 			this.keywords = keywords;
 		}
 

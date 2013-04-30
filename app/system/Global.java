@@ -1,6 +1,8 @@
 package system;
 
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import listeners.TwitterStatusListener;
@@ -10,6 +12,7 @@ import models.Tweet;
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
+import play.cache.Cache;
 import play.libs.Akka;
 import scala.concurrent.duration.Duration;
 import twitter4j.TwitterFactory;
@@ -27,6 +30,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
+
+import enums.TypeEnum;
 
 /**
  * Class that will setup some tasks before
@@ -138,6 +143,8 @@ public class Global extends GlobalSettings {
 			Logger.error(e.getMessage()); 
 		}
 	    
+		// Add Map with Keywords to the Cache
+		Cache.set("keywordMap", new HashMap<String,Map<String,TypeEnum>>());
 		
 		startSchedulers();
 	   
