@@ -9,6 +9,7 @@ import java.util.Set;
 import models.Event;
 import play.cache.Cache;
 import system.Singletons;
+import twitter4j.FilterQuery;
 import akka.actor.UntypedActor;
 
 import com.google.code.morphia.Datastore;
@@ -38,12 +39,10 @@ public class EventMonitorActor extends UntypedActor {
 		
 		List<Event> activeEvents = dao.listBySituation(Situation.STARTED);
 		
-		HashMap<String, HashMap<String, TypeEnum>> keywordMap = (HashMap<String, HashMap<String, TypeEnum>>) Cache.get("keywordMap");
-		Set<String> eventKeys = keywordMap.keySet();
+		HashMap<Event, HashMap<String, TypeEnum>> keywordMap = (HashMap<Event, HashMap<String, TypeEnum>>) Cache.get("keywordMap");
+		Set<Event> eventsOnCache = keywordMap.keySet();
 		
-		System.out.println("Active events on DB: "+activeEvents.size());
-		System.out.println("Active events on CACHE: "+eventKeys.size());
-		if (activeEvents.size() != eventKeys.size()) {
+		if (activeEvents.size() != eventsOnCache.size()) {
 			System.out.println("Syncronizing cached keywords");
 			syncCacheWith(activeEvents);
 			System.out.println("Restarting twitter streamming");
@@ -86,11 +85,11 @@ public class EventMonitorActor extends UntypedActor {
 	 */
 	private void syncCacheWith(List<Event> activeEvents) {
 		
-		HashMap<String, HashMap<String, TypeEnum>> keywordMap = new HashMap<String, HashMap<String, TypeEnum>>();
+		HashMap<Event, HashMap<String, TypeEnum>> keywordMap = new HashMap<Event, HashMap<String, TypeEnum>>();
 		
 		for (Event event : activeEvents) {
 			
-			keywordMap.put(event.getName(), event.getKeywords());
+			keywordMap.put(event, event.getKeywords());
 			
 		}
 		Cache.set("keywordMap", keywordMap);
@@ -100,15 +99,15 @@ public class EventMonitorActor extends UntypedActor {
 
 		// Get Active Events on CACHE
 		@SuppressWarnings("unchecked")
-		HashMap<String, HashMap<String, TypeEnum>> keywordMap = (HashMap<String, HashMap<String, TypeEnum>>) Cache.get("keywordMap");
+		HashMap<Event, HashMap<String, TypeEnum>> keywordMap = (HashMap<Event, HashMap<String, TypeEnum>>) Cache.get("keywordMap");
 
 		// Separete Keywords(#hashtags / normal_keywords) from @users
-		Set<String> keys = keywordMap.keySet();
+		Set<Event> events = keywordMap.keySet();
 		List<String> keywords = new ArrayList<String>();
 		List<String> users = new ArrayList<String>();
-		for (String key : keys) {
+		for (Event event : events) {
 
-			HashMap<String, TypeEnum> map = keywordMap.get(key);
+			HashMap<String, TypeEnum> map = keywordMap.get(event);
 			Set<String> ks = map.keySet();
 			for (String k : ks) {
 				if (map.get(k).equals(TypeEnum.TEXT)) {
@@ -131,7 +130,17 @@ public class EventMonitorActor extends UntypedActor {
 	}
 
 	private void restartTwitterStream(List<String> keywords) {
-		// TODO Auto-generated method stub
+		
+		Singletons.twitterStream.shutdown();
+		Singletons.twitterStream.cleanUp();
+		
+		String[] keywordsArray = new String[keywords.size()];
+		keywordsArray = keywords.toArray(keywordsArray);
+		
+		FilterQuery filter = new FilterQuery();
+		filter.track(keywordsArray);
+		
+		Singletons.twitterStream.filter(filter);
 		
 	}
 	

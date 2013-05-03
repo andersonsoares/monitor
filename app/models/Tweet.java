@@ -49,12 +49,12 @@ public class Tweet {
 		this.id = id;
 	}
 
-	public Event getKeyword() {
+	public Event getEvent() {
 		return event;
 	}
 
-	public void setKeyword(Event keyword) {
-		this.event = keyword;
+	public void setEvent(Event event) {
+		this.event = event;
 	}
 
 	public String getTweetId() {

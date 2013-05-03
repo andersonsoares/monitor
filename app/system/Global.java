@@ -144,7 +144,7 @@ public class Global extends GlobalSettings {
 		}
 	    
 		// Add Map with Keywords to the Cache
-		Cache.set("keywordMap", new HashMap<String,Map<String,TypeEnum>>());
+		Cache.set("keywordMap", new HashMap<Event,Map<String,TypeEnum>>());
 		
 		startSchedulers();
 	   
