@@ -1,6 +1,7 @@
 package system;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -143,8 +144,10 @@ public class Global extends GlobalSettings {
 			Logger.error(e.getMessage()); 
 		}
 	    
-		// Add Map with Keywords to the Cache
+		// Create Map with Keywords to the Cache
 		Cache.set("keywordMap", new HashMap<Event,Map<String,TypeEnum>>());
+		// Create List with tweets to be storaged in Cache before save on DB
+		Cache.set("tweets", new ArrayList<Tweet>());
 		
 		startSchedulers();
 	   

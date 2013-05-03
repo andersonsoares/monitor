@@ -54,6 +54,10 @@ public class BaseDAO<T> {
     public Key<T> save(T entity) {
         return ds.save(entity);
     }
+    
+    public Iterable<Key<T>> saveCollection(List<T> entities) {
+    	return ds.save(entities);
+    }
 
     public Key<T> save(T entity, WriteConcern wc) {
         return ds.save(entity, wc);

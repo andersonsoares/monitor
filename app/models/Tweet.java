@@ -20,16 +20,16 @@ public class Tweet {
 	
 	// Tweets default attributes by Twitter
 //	@Indexed
-	private String tweetId;
+	private long tweetId;
 	
 	private String text;
 	
-	private int retweet_count;
+	private long retweet_count;
 
 	private boolean retweeted;
 	
 	// user author attributes
-	private String twitterUserId;
+	private long twitterUserId;
 	private String profile_image_url;
 	
 	@Indexed
@@ -57,11 +57,11 @@ public class Tweet {
 		this.event = event;
 	}
 
-	public String getTweetId() {
+	public long getTweetId() {
 		return tweetId;
 	}
 
-	public void setTweetId(String tweetId) {
+	public void setTweetId(long tweetId) {
 		this.tweetId = tweetId;
 	}
 
@@ -73,11 +73,11 @@ public class Tweet {
 		this.text = text;
 	}
 
-	public int getRetweet_count() {
+	public long getRetweet_count() {
 		return retweet_count;
 	}
 
-	public void setRetweet_count(int retweet_count) {
+	public void setRetweet_count(long retweet_count) {
 		this.retweet_count = retweet_count;
 	}
 
@@ -89,11 +89,11 @@ public class Tweet {
 		this.retweeted = retweeted;
 	}
 
-	public String getTwitterUserId() {
+	public long getTwitterUserId() {
 		return twitterUserId;
 	}
 
-	public void setTwitterUserId(String twitterUserId) {
+	public void setTwitterUserId(long twitterUserId) {
 		this.twitterUserId = twitterUserId;
 	}
 

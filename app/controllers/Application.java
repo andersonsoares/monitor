@@ -25,6 +25,7 @@ public class Application extends Controller {
 	
 	public Result index() {
 		
+		
 		List<Event> eventsList = dao.listBySituation(Situation.STARTED,Situation.FINISHED,Situation.NEVER_STARTED,Situation.ANALYSED);
 		
 		return ok(views.html.index.render(eventForm,eventsList));

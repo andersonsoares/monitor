@@ -1,4 +1,3 @@
-import system.Singletons;
 import twitter4j.DirectMessage;
 import twitter4j.FilterQuery;
 import twitter4j.StallWarning;
