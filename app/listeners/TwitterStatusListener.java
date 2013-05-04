@@ -80,7 +80,7 @@ public class TwitterStatusListener implements StatusListener {
 						if (size % 100 == 0) {
 							Logger.info("Got "+size+" on cache");
 						}
-						if (size < 500) {
+						if (size < 30) {
 							tweets.add(tweet);
 							Cache.set("tweets", tweets);	
 						} else {
