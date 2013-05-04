@@ -1,6 +1,5 @@
 package system;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +30,6 @@ import com.google.code.morphia.validation.MorphiaValidation;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoException;
 
 import dao.TweetDAO;
 import enums.TypeEnum;
@@ -142,13 +140,8 @@ public class Global extends GlobalSettings {
 			
 			
 			
-			
-		} catch (UnknownHostException e) {
-			Logger.error("Could not create 'mongo' singleton: "+e.getMessage());
-		} catch (MongoException e) {
-			Logger.error("Could not create 'mongo' singleton: "+e.getMessage());
 		} catch (Exception e) {
-			Logger.error("Ops...houston, we have a problem: "+e.getMessage());
+			Logger.error(e.getMessage());
 		}
 		
 	}

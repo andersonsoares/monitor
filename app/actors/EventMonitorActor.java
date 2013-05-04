@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import models.Event;
+import play.Logger;
 import play.cache.Cache;
 import system.Singletons;
 import twitter4j.FilterQuery;
@@ -47,9 +48,9 @@ public class EventMonitorActor extends UntypedActor {
 		Set<Event> eventsOnCache = keywordMap.keySet();
 		
 		if (activeEvents.size() != eventsOnCache.size()) {
-			System.out.println("Syncronizing cached keywords");
+			Logger.info("Syncronizing cached keywords");
 			syncCacheWith(activeEvents);
-			System.out.println("Restarting twitter streamming");
+			Logger.info("Restarting twitter streamming");
 			restartStream();
 		}
 		
@@ -65,14 +66,14 @@ public class EventMonitorActor extends UntypedActor {
 			if (event.getSituation().equals(Situation.NEVER_STARTED)) {
 				// Event Never Started
 				if (now.after(event.getStartDate()) && now.before(event.getFinishDate())) {
-					System.out.println("Iniciando "+event.getName());
+					Logger.info("Iniciando "+event.getName());
 					dao.setSituation(event.getId(), Situation.STARTED);
 					
 				}
 			} else {
 				// Event Started
 				if(now.after(event.getFinishDate())) {
-					System.out.println("Finalizando "+event.getName());
+					Logger.info("Finalizando "+event.getName());
 					dao.setSituation(event.getId(), Situation.FINISHED);
 					
 				}
@@ -164,7 +165,7 @@ public class EventMonitorActor extends UntypedActor {
 			for (User user : usersToFollow) {
 			
 				if (!alreadyFollowing(user.getId(),myFriendsIDs)) {
-					System.out.println("Creating relationship with: "+user.getScreenName());
+					Logger.info("Creating relationship with: "+user.getScreenName());
 					Singletons.twitter.createFriendship(user.getScreenName());
 				}
 				usersToFollowIDs.add(user.getId());
@@ -174,7 +175,7 @@ public class EventMonitorActor extends UntypedActor {
 			
 			for (long l : myFriendsIDs) {
 				if (!usersToFollowIDs.contains(l)) {
-					System.out.println("Removing friend ID: "+l);
+					Logger.info("Removing friend ID: "+l);
 					Singletons.twitter.destroyFriendship(l);
 				}
 			}
@@ -191,7 +192,7 @@ public class EventMonitorActor extends UntypedActor {
 			Singletons.userStream.user();
 		
 		} catch (TwitterException e) {
-			e.printStackTrace();
+			Logger.error(e.getMessage());
 		} 
 		
 	}
