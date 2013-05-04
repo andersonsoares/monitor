@@ -3,6 +3,7 @@ package system;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +33,7 @@ import com.google.inject.Injector;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 
+import dao.TweetDAO;
 import enums.TypeEnum;
 
 /**
@@ -42,28 +44,74 @@ import enums.TypeEnum;
  */
 public class Global extends GlobalSettings {
 	
-
-	private static String CONSUMER_KEY1 = "2Kvke6rMIvMwLhBACfnvjw";
-	private static final String CONSUMER_SECRET1 = "uNdKMLaHwU2QIqDcp5m0fhG8MvvSdTEb8s6OGQmDs0";
-	private static final String ACCESS_TOKEN1 = "728282665-qRaW39nLguHdVJAnHnKlbYSnrN6Hyv1iOkk99Y";
-	private static final String ACCESS_TOKEN_SECRET1 = "9fbfS9FtPkRfAFUheW7Mep5shw4fJT83OBxvsZHbs";
-
-	private static String CONSUMER_KEY2 = "aLLUylFk1W1sD9VV4LMDWA";
-	private static final String CONSUMER_SECRET2 = "5pMvboOc1G461u4450mnQk0aO0oc2665QdYpIq8GOg";
-	private static final String ACCESS_TOKEN2 = "1366473476-GKe7jKMmvkkK4mmFgV7j3MdhDp8LvN9XWvXWHeD";
-	private static final String ACCESS_TOKEN_SECRET2 = "6u9zZ5n47v3pPhuAm4B8F8HZEwnI0iuOtBqSVSEsLY";
-	
-	// Creating a Guice Injector for Dependency Injection
-	private static final Injector INJECTOR = createInjector(); 
-
-	static {
-        MorphiaLoggerFactory.reset();
-        MorphiaLoggerFactory.registerLogger(SLF4JLogrImplFactory.class);
-    }
-	
-	
 	@Override
 	public void onStart(Application app) {
+		
+		createMongoDbConnection();
+		
+		createTwitterStreams();
+		
+		createCache();
+		
+		startSchedulers();
+	   
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void onStop(Application app) {
+	
+		Logger.info("Stopping application");
+		List<Tweet> tweets = (List<Tweet>) Cache.get("tweets");
+		if (tweets != null && !tweets.isEmpty()) {
+			TweetDAO dao = new TweetDAO();
+			
+			dao.saveCollection(tweets);
+			Logger.info("Saving lasts tweets on cache");
+		}
+		
+		super.onStop(app);
+	}
+
+	private void createTwitterStreams() {
+		try {
+
+			// Configurando conta um - aersteste - monitor keywords
+			Singletons.twitterStream = new TwitterStreamFactory().getInstance();
+		    Singletons.twitterStream.setOAuthConsumer(CONSUMER_KEY1, CONSUMER_SECRET1);
+		    Singletons.twitterStream.setOAuthAccessToken(new AccessToken(ACCESS_TOKEN1, ACCESS_TOKEN_SECRET1));
+		    Singletons.twitterStatusListener = new TwitterStatusListener();
+		    Singletons.twitterStream.addListener(Singletons.twitterStatusListener);
+		    
+		    
+		    Singletons.userStream = new TwitterStreamFactory().getInstance();
+		    Singletons.userStream.setOAuthConsumer(CONSUMER_KEY2, CONSUMER_SECRET2);
+		    Singletons.userStream.setOAuthAccessToken(new AccessToken(ACCESS_TOKEN2, ACCESS_TOKEN_SECRET2));
+		    Singletons.userListener = new UserStreamListener();
+		    Singletons.userStream.addListener(Singletons.userListener);
+		    
+			// UserStream(aersmonitor) just need to run once
+//			Singletons.userStream.user();
+			
+			
+			Singletons.twitter = TwitterFactory.getSingleton();
+			Singletons.twitter.setOAuthConsumer(CONSUMER_KEY2, CONSUMER_SECRET2);
+			Singletons.twitter.setOAuthAccessToken(new AccessToken(ACCESS_TOKEN2,ACCESS_TOKEN_SECRET2));
+		} catch(Exception e) {
+			Logger.error(e.getMessage()); 
+		}
+	}
+
+	private void createCache() {
+		// Create Map with Keywords to the Cache
+		Cache.set("keywordMap", new HashMap<Event,Map<String,TypeEnum>>());
+		// Create List with tweets to be storaged in Cache before save on DB
+		Cache.set("tweets", new ArrayList<Tweet>());
+		
+	}
+
+	private void createMongoDbConnection() {
 		
 		Logger.info("Trying to connect with mongo database"); 
 		
@@ -102,57 +150,9 @@ public class Global extends GlobalSettings {
 		} catch (Exception e) {
 			Logger.error("Ops...houston, we have a problem: "+e.getMessage());
 		}
-
-	
-		// Create Twitter4j Instance
 		
-//		ConfigurationBuilder cb = new ConfigurationBuilder();
-//		cb.setDebugEnabled(true)
-//		  .setOAuthConsumerKey("2Kvke6rMIvMwLhBACfnvjw")
-//		  .setOAuthConsumerSecret("uNdKMLaHwU2QIqDcp5m0fhG8MvvSdTEb8s6OGQmDs0")
-//		  .setOAuthAccessToken("728282665-qRaW39nLguHdVJAnHnKlbYSnrN6Hyv1iOkk99Y")
-//		  .setOAuthAccessTokenSecret("9fbfS9FtPkRfAFUheW7Mep5shw4fJT83OBxvsZHbs");
-//		
-//		TwitterFactory tf = new TwitterFactory(cb.build());
-//		Singletons.twitter = tf.getInstance();
-		
-		
-		try {
-
-			// Configurando conta um - aersteste - monitor keywords
-			Singletons.twitterStream = new TwitterStreamFactory().getInstance();
-		    Singletons.twitterStream.setOAuthConsumer(CONSUMER_KEY1, CONSUMER_SECRET1);
-		    Singletons.twitterStream.setOAuthAccessToken(new AccessToken(ACCESS_TOKEN1, ACCESS_TOKEN_SECRET1));
-		    Singletons.twitterStatusListener = new TwitterStatusListener();
-		    Singletons.twitterStream.addListener(Singletons.twitterStatusListener);
-		    
-		    
-		    Singletons.userStream = new TwitterStreamFactory().getInstance();
-		    Singletons.userStream.setOAuthConsumer(CONSUMER_KEY2, CONSUMER_SECRET2);
-		    Singletons.userStream.setOAuthAccessToken(new AccessToken(ACCESS_TOKEN2, ACCESS_TOKEN_SECRET2));
-		    Singletons.userListener = new UserStreamListener();
-		    Singletons.userStream.addListener(Singletons.userListener);
-		    
-			// UserStream(aersmonitor) just need to run once
-			Singletons.userStream.user();
-			
-			
-			Singletons.twitter = TwitterFactory.getSingleton();
-			Singletons.twitter.setOAuthConsumer(CONSUMER_KEY2, CONSUMER_SECRET2);
-			Singletons.twitter.setOAuthAccessToken(new AccessToken(ACCESS_TOKEN2,ACCESS_TOKEN_SECRET2));
-		} catch(Exception e) {
-			Logger.error(e.getMessage()); 
-		}
-	    
-		// Create Map with Keywords to the Cache
-		Cache.set("keywordMap", new HashMap<Event,Map<String,TypeEnum>>());
-		// Create List with tweets to be storaged in Cache before save on DB
-		Cache.set("tweets", new ArrayList<Tweet>());
-		
-		startSchedulers();
-	   
 	}
-	
+
 	/**
 	 * Overrides getControllerInstance method to allow inject
 	 * dependencies. Note that controllers that will get injected
@@ -186,5 +186,23 @@ public class Global extends GlobalSettings {
 				Akka.system().dispatcher()
 			);
 	}
+	
+	private static String CONSUMER_KEY1 = "2Kvke6rMIvMwLhBACfnvjw";
+	private static final String CONSUMER_SECRET1 = "uNdKMLaHwU2QIqDcp5m0fhG8MvvSdTEb8s6OGQmDs0";
+	private static final String ACCESS_TOKEN1 = "728282665-qRaW39nLguHdVJAnHnKlbYSnrN6Hyv1iOkk99Y";
+	private static final String ACCESS_TOKEN_SECRET1 = "9fbfS9FtPkRfAFUheW7Mep5shw4fJT83OBxvsZHbs";
+
+	private static String CONSUMER_KEY2 = "1fUyBflftkkW2zsxspwDQ";
+	private static final String CONSUMER_SECRET2 = "STyruGMShCt3nAwBaITT1N3iute7bXIo3TvUTLsyxCw";
+	private static final String ACCESS_TOKEN2 = "1366473476-cbXy2moLqFComM1o2pGt1oneWMfLLfjMmgSXxPL";
+	private static final String ACCESS_TOKEN_SECRET2 = "DzpRIUPT1Rp9ovMkwaRGBGBPQOnVX53VgNjULcNy8";
+	
+	// Creating a Guice Injector for Dependency Injection
+	private static final Injector INJECTOR = createInjector(); 
+
+	static {
+        MorphiaLoggerFactory.reset();
+        MorphiaLoggerFactory.registerLogger(SLF4JLogrImplFactory.class);
+    }
 
 }

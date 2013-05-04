@@ -1,4 +1,3 @@
-import twitter4j.ResponseList;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -8,10 +7,10 @@ import twitter4j.auth.AccessToken;
 
 public class FollowTest {
 
-	private static String CONSUMER_KEY2 = "aLLUylFk1W1sD9VV4LMDWA";
-	private static final String CONSUMER_SECRET2 = "5pMvboOc1G461u4450mnQk0aO0oc2665QdYpIq8GOg";
-	private static final String ACCESS_TOKEN2 = "1366473476-GKe7jKMmvkkK4mmFgV7j3MdhDp8LvN9XWvXWHeD";
-	private static final String ACCESS_TOKEN_SECRET2 = "6u9zZ5n47v3pPhuAm4B8F8HZEwnI0iuOtBqSVSEsLY";
+	private static String CONSUMER_KEY2 = "1fUyBflftkkW2zsxspwDQ";
+	private static final String CONSUMER_SECRET2 = "STyruGMShCt3nAwBaITT1N3iute7bXIo3TvUTLsyxCw";
+	private static final String ACCESS_TOKEN2 = "1366473476-cbXy2moLqFComM1o2pGt1oneWMfLLfjMmgSXxPL";
+	private static final String ACCESS_TOKEN_SECRET2 = "DzpRIUPT1Rp9ovMkwaRGBGBPQOnVX53VgNjULcNy8";
 	
 	public static void main(String[] args) {
 	
@@ -23,11 +22,18 @@ public class FollowTest {
 			System.out.println(u.getName());
 			
 			
-			ResponseList<User> res = t.lookupUsers(new String[]{"rafinhabastos"});
-			for (User user : res) {
-				System.out.println(user.getName()+" - "+user.getName().toLowerCase().equals("g1")+" - "+user.getId());
-				
-			}
+//			t.createFriendship("g1");
+//			
+//			ResponseList<User> res = t.lookupUsers(new String[]{
+//					"rafinhabastos","andersonsoares","rsmourapi", "g1",
+//					"ufpi", "r7"
+//					
+//					});
+//			for (User user : res) {
+//				
+//				System.out.println(user.getScreenName()+" - "+user.getName()+" - "+user.getName().toLowerCase().equals("g1")+" - "+user.getId());
+//				
+//			}
 			
 		} catch (TwitterException e) {
 			// TODO Auto-generated catch block

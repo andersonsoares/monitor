@@ -13,6 +13,7 @@ import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
+import utils.Utils;
 import dao.TweetDAO;
 import enums.TypeEnum;
 
@@ -33,9 +34,7 @@ public class TwitterStatusListener implements StatusListener {
 	@Override
 	public void onStatus(Status status) {
 
-//		if (!status.isRetweet() && status.getUser().getLang().equals("pt")) {
-//			System.out.println(status.getUser().getLang()+" - "+status.getUser().getName()+" - "+status.getText());
-			
+		if (!status.isRetweet() && status.getUser().getLang().equals("pt")) {
 			
 			// Quebrar o tweet em tokens e verificar cada palavra com o 'Cache' para pegar o Evento associado
 			String[] tokens = status.getText().split(" ");
@@ -59,7 +58,7 @@ public class TwitterStatusListener implements StatusListener {
 				
 				// And compare if the array of tokens generatate from tweets contains any of the keywords
 				
-				if (verifyArrayContains(tokens, keywords) == true) {
+				if (Utils.verifyArrayContains(tokens, keywords) == true) {
 					
 					// TODO: TENTAR MELHORAR O DESEMPENHO AQUI
 					Tweet tweet = new Tweet();
@@ -72,11 +71,14 @@ public class TwitterStatusListener implements StatusListener {
 					tweet.setProfile_image_url(status.getUser().getOriginalProfileImageURL());
 					
 					List<Tweet> tweets = (List<Tweet>) Cache.get("tweets");
-					
+					int size = tweets.size();
 					// Verify it cache is full
 					// If is full, save to DB and clear cache
 					// else, just add to cache
-					if (tweets.size() < 1000) {
+					if (size % 100 == 0) {
+						Logger.info("Got "+size+" on cache");
+					}
+					if (size < 1000) {
 						tweets.add(tweet);
 						Cache.set("tweets", tweets);	
 					} else {
@@ -86,7 +88,7 @@ public class TwitterStatusListener implements StatusListener {
 						
 						Cache.set("tweets", new ArrayList<Tweet>());
 							
-						Logger.info("Saving "+tweets.size()+" tweets");
+						Logger.info("Saving "+size+" tweets");
 						Logger.info("Reseting tweets cache");
 					}
 					
@@ -95,29 +97,10 @@ public class TwitterStatusListener implements StatusListener {
 				
 			}
 			
-			
-			
-//		}
-	}
-
-	/**
-	 * Verify if the keywords list contains any of the tokens
-	 * @param tokens
-	 * @param keywords
-	 * @return
-	 */
-	private boolean verifyArrayContains(String[] tokens, List<String> keywords) {
-		
-		for (int i = 0; i < tokens.length; i++) {
-			if(keywords.contains( tokens[i] )) {
-				return true;
-			}
 		}
-		
-		return false;
 	}
 
-	@Override
+		@Override
 	public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
 		// TODO Auto-generated method stub
 		

@@ -1,5 +1,6 @@
 package controllers;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -13,6 +14,7 @@ import com.google.inject.Inject;
 
 import dao.EventDAO;
 import enums.Situation;
+import enums.TypeEnum;
 
 
 public class Application extends Controller {
@@ -35,21 +37,30 @@ public class Application extends Controller {
 	public Result addEvent() {
 		
 		Form<Event> filledForm = eventForm.bindFromRequest();
+		
 		if(filledForm.hasErrors()) {
-			System.out.println("Form has errors");
-			Set<String> keys = filledForm.errors().keySet();
-			for (Object key : keys) {
-				System.out.println(key+" - "+filledForm.errors().get(key));
-			}
-			filledForm.errors();
-			
-			
 			List<Event> eventsList = dao.listBySituation(Situation.STARTED,Situation.FINISHED,Situation.NEVER_STARTED,Situation.ANALYSED);
 			return badRequest(views.html.index.render(filledForm,eventsList));
 		}
 		
+		
 		Event event = filledForm.get();
+		
+		// transform keywords to lowercase
+		HashMap<String, TypeEnum> keywordsLowerCase = new HashMap<String, TypeEnum>();
+		
+		HashMap<String, TypeEnum> keywords = event.getKeywords();
+		
+		Set<String> keywordsKey = keywords.keySet();
+		for (String k : keywordsKey) {
+			keywordsLowerCase.put(k.toLowerCase(), keywords.get(k));
+		}
+		
+		
+		event.setKeywords(keywordsLowerCase);
+		
 		Key<Event> key = dao.save(event);
+		
 		
 		flash("success", "Event was successfully added: "+key.getId());
 		return index();

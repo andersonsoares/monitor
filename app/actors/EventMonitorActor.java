@@ -10,6 +10,9 @@ import models.Event;
 import play.cache.Cache;
 import system.Singletons;
 import twitter4j.FilterQuery;
+import twitter4j.ResponseList;
+import twitter4j.TwitterException;
+import twitter4j.User;
 import akka.actor.UntypedActor;
 
 import com.google.code.morphia.Datastore;
@@ -27,6 +30,7 @@ import enums.TypeEnum;
 public class EventMonitorActor extends UntypedActor {
 	
 	Datastore ds = Singletons.datastore;
+	
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -113,7 +117,7 @@ public class EventMonitorActor extends UntypedActor {
 				if (map.get(k).equals(TypeEnum.TEXT)) {
 					keywords.add(k);
 				} else if(map.get(k).equals(TypeEnum.BOTH)) {
-					keywords.add(k);
+					keywords.add('@'+k);
 					users.add(k);
 				} else {
 					users.add(k);
@@ -145,8 +149,62 @@ public class EventMonitorActor extends UntypedActor {
 	}
 	
 	private void restartUserStream(List<String> users) {
-		// TODO Auto-generated method stub
+
+		try {
+			// primeiro crio amizade com todos os users passados como parametro
+			// caso a amizade ainda nao exista...
+			String[] usersArray = new String[users.size()];
+			usersArray = users.toArray(usersArray);
+			
+			ResponseList<User> usersToFollow = Singletons.twitter.lookupUsers(usersArray);
 		
+			List<Long> usersToFollowIDs = new ArrayList<Long>(); 
+			long[] myFriendsIDs = Singletons.twitter.getFriendsIDs(-1).getIDs();// 0 = cursor, this application will not have 5000+ friends
+			
+			for (User user : usersToFollow) {
+			
+				if (!alreadyFollowing(user.getId(),myFriendsIDs)) {
+					System.out.println("Creating relationship with: "+user.getScreenName());
+					Singletons.twitter.createFriendship(user.getScreenName());
+				}
+				usersToFollowIDs.add(user.getId());
+			}
+		
+			
+			
+			for (long l : myFriendsIDs) {
+				if (!usersToFollowIDs.contains(l)) {
+					System.out.println("Removing friend ID: "+l);
+					Singletons.twitter.destroyFriendship(l);
+				}
+			}
+
+		
+		
+		
+		
+			// depois eu vejo minha lista de amigos e comparo com a de users
+			
+			Singletons.userStream.shutdown();
+			Singletons.userStream.cleanUp();
+			
+			Singletons.userStream.user();
+		
+		} catch (TwitterException e) {
+			e.printStackTrace();
+		} 
+		
+	}
+
+	private boolean alreadyFollowing(long id, long[] myFriendsIDs) {
+		
+		for (long l : myFriendsIDs) {
+			if (l == id) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 

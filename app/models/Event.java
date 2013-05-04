@@ -1,11 +1,17 @@
 package models;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bson.types.ObjectId;
 
 import play.data.validation.Constraints.Required;
+import play.data.validation.ValidationError;
 
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
@@ -39,7 +45,9 @@ public class Event {
 	/**
 	 * Start and Finish time to monitor
 	 */
+	@Required
 	private Date startDate;
+	@Required
 	private Date finishDate;
 	
 	/**
@@ -51,6 +59,7 @@ public class Event {
 	/**
 	 * Keywords to be monitored. Ex: [#google,#android,#brasil,@dilma]
 	 */
+	@Required
 	private HashMap<String,TypeEnum> keywords;
 	
 	/**
@@ -140,6 +149,45 @@ public class Event {
 
 		public void setSituation(Situation situation) {
 			this.situation = situation;
+		}
+
+		public List<ValidationError> validate() {
+			
+			List<ValidationError> errors = new ArrayList<ValidationError>();
+			
+			if (name.matches("^\\s*$")) {
+				errors.add(new ValidationError("name","Event name cant be white spaces"));
+			}
+			
+			if (startDate.after(finishDate)) {
+				errors.add(new ValidationError("startDate", "Start monitor date cant be after Finish monitor date"));
+			}
+			if (keywords.isEmpty()) {
+				errors.add(new ValidationError("keywords","You must add at least one keyword to monitor"));
+			} else {
+				Set<String> keywordsName = keywords.keySet();
+				for (String keyword : keywordsName) {
+					if (keyword.length() < 2) {
+						errors.add(new ValidationError("keywords","Keywords must be >= 2 letters"));
+					}
+					Pattern pattern = Pattern.compile("\\s");
+					Matcher matcher = pattern.matcher(keyword);
+					boolean found = matcher.find();
+					if (found) {
+						errors.add(new ValidationError("keywords","Keyword is a unique word and cant have white spaces"));
+					}
+					
+					if (!keywords.get(keyword).equals(TypeEnum.TEXT)) {
+						if (keyword.charAt(0) == '#') {
+							errors.add(new ValidationError("keywords", "Keywords Type 'USER' or 'BOTH' must not start with '#'"));
+						}
+					}
+				}
+			}
+			if (errors.size() != 0) {
+				return errors;
+			}
+			return null;
 		}
 		
 
