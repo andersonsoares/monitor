@@ -129,7 +129,7 @@ public class Global extends GlobalSettings {
 		Cache.set("tweets", new ArrayList<Tweet>());
 		Cache.set("userTweets", new ArrayList<Tweet>());
 		
-		Cache.set("has_new_tweets_on_db", false);
+		Cache.set("has_new_tweets_on_db", new Boolean(false));
 		
 	}
 

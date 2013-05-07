@@ -84,7 +84,7 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 							Logger.info("Saving "+size+" tweets");
 							Logger.info("Reseting userTweets cache");
 							
-							Cache.set("has_new_tweets_on_db", true);
+							Cache.set("has_new_tweets_on_db", new Boolean(true));
 						}
 						
 						
