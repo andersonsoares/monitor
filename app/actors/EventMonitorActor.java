@@ -189,7 +189,8 @@ public class EventMonitorActor extends UntypedActor {
 			Singletons.userStream.user();
 		
 		} catch (TwitterException e) {
-			Logger.error(e.getMessage());
+			Logger.error("Restarting again");
+			restartUserStream(users);
 		} 
 		
 	}
