@@ -203,7 +203,7 @@ public class Global extends GlobalSettings {
 				"null",
 				Akka.system().dispatcher()
 			);
-		
+		 
 		ActorRef updateTweetCountOnEventsActor = Akka.system().actorOf(new Props(UpdateTweetCountOnEventsActor.class));
 		
 		Akka.system().scheduler()
