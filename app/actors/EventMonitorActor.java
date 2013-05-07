@@ -132,17 +132,23 @@ public class EventMonitorActor extends UntypedActor {
 	}
 
 	private void restartTwitterStream(List<String> keywords) {
-		
-		Singletons.twitterStream.shutdown();
-		Singletons.twitterStream.cleanUp();
-		
-		String[] keywordsArray = new String[keywords.size()];
-		keywordsArray = keywords.toArray(keywordsArray);
-		
-		FilterQuery filter = new FilterQuery();
-		filter.track(keywordsArray);
-		
-		Singletons.twitterStream.filter(filter);
+		try {
+			Singletons.twitterStream.shutdown();
+			Singletons.twitterStream.cleanUp();
+			
+			if (keywords != null && !keywords.isEmpty()) {
+				String[] keywordsArray = new String[keywords.size()];
+				keywordsArray = keywords.toArray(keywordsArray);
+				
+				FilterQuery filter = new FilterQuery();
+				filter.track(keywordsArray);
+				
+				Singletons.twitterStream.filter(filter);
+			}
+		} catch(Exception e) {
+			Logger.error("Restarting again");
+			restartTwitterStream(keywords);
+		}
 		
 	}
 	
