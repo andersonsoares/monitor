@@ -5,10 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import com.google.code.morphia.Key;
+
 import models.Event;
 import models.Tweet;
 import play.Logger;
 import play.cache.Cache;
+import system.Constants;
 import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
@@ -39,7 +42,7 @@ public class TwitterStatusListener implements StatusListener {
 			if (!status.isRetweet() && status.getUser().getLang().equals("pt")) {
 				
 				// Quebrar o tweet em tokens e verificar cada palavra com o 'Cache' para pegar o Evento associado
-				String[] tokens = status.getText().split(" ");
+				String[] tokens = status.getText().toLowerCase().split(" ");
 				
 				HashMap<Event, HashMap<String, TypeEnum>> keywordMap = (HashMap<Event, HashMap<String, TypeEnum>>) Cache.get("keywordMap");
 				
@@ -53,7 +56,7 @@ public class TwitterStatusListener implements StatusListener {
 					List<String> keywords = new ArrayList<String>();
 					Set<String> ks = map.keySet();
 					for (String k : ks) {
-						if (map.get(k).equals(TypeEnum.TEXT) || map.get(k).equals(TypeEnum.BOTH)) {
+						if (map.get(k).equals(TypeEnum.TEXT)) {
 							keywords.add(k);
 						} 
 					}
@@ -64,7 +67,7 @@ public class TwitterStatusListener implements StatusListener {
 						
 						// TODO: TENTAR MELHORAR O DESEMPENHO AQUI
 						Tweet tweet = new Tweet();
-						tweet.setEvent(event);
+						tweet.setEvent(new Key<Event>(Event.class, event.getId()));
 						tweet.setText(status.getText());
 						tweet.setTweetId(status.getId());
 						tweet.setTwitterUserId(status.getUser().getId());
@@ -77,10 +80,8 @@ public class TwitterStatusListener implements StatusListener {
 						// Verify it cache is full
 						// If is full, save to DB and clear cache
 						// else, just add to cache
-						if (size % 100 == 0) {
-							Logger.info("Got "+size+" on cache");
-						}
-						if (size < 30) {
+						
+						if (size < Constants.CACHE_MAX_TWEETS) {
 							tweets.add(tweet);
 							Cache.set("tweets", tweets);	
 						} else {
@@ -95,7 +96,7 @@ public class TwitterStatusListener implements StatusListener {
 						}
 						
 						
-					}
+					} 
 					
 				}
 				

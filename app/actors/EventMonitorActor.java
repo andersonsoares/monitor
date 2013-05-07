@@ -117,9 +117,6 @@ public class EventMonitorActor extends UntypedActor {
 			for (String k : ks) {
 				if (map.get(k).equals(TypeEnum.TEXT)) {
 					keywords.add(k);
-				} else if(map.get(k).equals(TypeEnum.BOTH)) {
-					keywords.add('@'+k);
-					users.add(k);
 				} else {
 					users.add(k);
 				}

@@ -13,8 +13,20 @@ public class Utils {
 	 */
 	public static boolean verifyArrayContains(String[] tokens, List<String> keywords) {
 		
+		
 		for (int i = 0; i < tokens.length; i++) {
-			if(keywords.contains( tokens[i] )) {
+			if(contains( tokens[i], keywords )) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public static boolean contains(String str, List<String> list) {
+		
+		for (String string : list) {
+			if (str.contains(string)) {
 				return true;
 			}
 		}

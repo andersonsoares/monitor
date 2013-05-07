@@ -5,9 +5,13 @@ import java.util.List;
 import java.util.Set;
 
 import models.Event;
+
+import org.bson.types.ObjectId;
+
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
+import services.TweetService;
 
 import com.google.code.morphia.Key;
 import com.google.inject.Inject;
@@ -64,6 +68,15 @@ public class Application extends Controller {
 		
 		flash("success", "Event was successfully added: "+key.getId());
 		return index();
+	}
+	
+	public Result downloadTweets(String eventId) {
+		
+		TweetService service = new TweetService();
+		
+		service.createFileWithTweetsFrom(new ObjectId(eventId));
+		
+		return ok();
 	}
 	
 }

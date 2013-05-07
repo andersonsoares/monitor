@@ -5,10 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import com.google.code.morphia.Key;
+
 import models.Event;
 import models.Tweet;
 import play.Logger;
 import play.cache.Cache;
+import system.Constants;
 import twitter4j.DirectMessage;
 import twitter4j.StallWarning;
 import twitter4j.Status;
@@ -28,7 +31,7 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 			if (!status.isRetweet() && status.getUser().getLang().equals("pt")) {
 				
 				// Quebrar o tweet em tokens e verificar cada palavra com o 'Cache' para pegar o Evento associado
-				String[] tokens = status.getText().split(" ");
+				String[] tokens = status.getText().toLowerCase().split(" ");
 				
 				HashMap<Event, HashMap<String, TypeEnum>> keywordMap = (HashMap<Event, HashMap<String, TypeEnum>>) Cache.get("keywordMap");
 				
@@ -50,10 +53,9 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 					// And compare if the array of tokens generatate from tweets contains any of the keywords
 					
 					if (Utils.verifyArrayContains(tokens, keywords) == true) {
-						
 						// TODO: TENTAR MELHORAR O DESEMPENHO AQUI
 						Tweet tweet = new Tweet();
-						tweet.setEvent(event);
+						tweet.setEvent(new Key<Event>(Event.class, event.getId()));
 						tweet.setText(status.getText());
 						tweet.setTweetId(status.getId());
 						tweet.setTwitterUserId(status.getUser().getId());
@@ -61,30 +63,27 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 						tweet.setRetweet_count(status.getRetweetCount());
 						tweet.setProfile_image_url(status.getUser().getOriginalProfileImageURL());
 						
-						List<Tweet> tweets = (List<Tweet>) Cache.get("tweets");
+						List<Tweet> tweets = (List<Tweet>) Cache.get("userTweets");
 						int size = tweets.size();
 						// Verify it cache is full
 						// If is full, save to DB and clear cache
 						// else, just add to cache
-						if (size % 100 == 0) {
-							Logger.info("Got "+size+" on cache");
-						}
-						if (size < 30) {
+						if (size < Constants.CACHE_MAX_USERTWEETS) {
 							tweets.add(tweet);
-							Cache.set("tweets", tweets);	
+							Cache.set("userTweets", tweets);	
 						} else {
 							TweetDAO dao = new TweetDAO();
 							
 							dao.saveCollection(tweets);
 							
-							Cache.set("tweets", new ArrayList<Tweet>());
+							Cache.set("userTweets", new ArrayList<Tweet>());
 								
 							Logger.info("Saving "+size+" tweets");
-							Logger.info("Reseting tweets cache");
+							Logger.info("Reseting userTweets cache");
 						}
 						
 						
-					}
+					} 
 					
 				}
 				

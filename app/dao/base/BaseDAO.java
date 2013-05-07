@@ -123,6 +123,10 @@ public class BaseDAO<T> {
     public QueryResults<T> find() {
         return createQuery();
     }
+    
+    public T findById(ObjectId objectId) {
+    	return ds.get(entityClazz,objectId);
+    }
 
     public QueryResults<T> find(Query<T> q) {
         return q;

@@ -7,6 +7,6 @@ package enums;
  */
 public enum TypeEnum {
 
-	TEXT, USER, BOTH
+	TEXT, USER
 	
 }

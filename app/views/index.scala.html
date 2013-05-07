@@ -73,7 +73,6 @@
 								    <ul class="dropdown-menu">
 								      <li><a href="#" onclick="setButtonTypeEnum('TEXT');">TEXT</a></li>
 								      <li><a href="#" onclick="setButtonTypeEnum('USER');">@@USER</a></li>
-								      <li><a href="#" onclick="setButtonTypeEnum('BOTH');">BOTH</a></li>
 								    </ul>
 								</div>
 								
@@ -116,7 +115,8 @@
 						<th>#</th>
 						<th>Event name</th>
 						<th>Situation</th>
-						<th>Number Tweets</tH>
+						<th>Number Tweets</th>
+						<th></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -126,6 +126,7 @@
 							<td>@event.getName()</td>
 							<td>@event.getSituation()</td>
 							<td>@event.getNrTweets()</td>
+							<td><a href="downloadTweets/@event.getId()">Download</a></td>
 						</tr>
 					}		
 				</tbody> 
@@ -158,7 +159,7 @@
 			jQuery('#rowKeyword'+rowId).remove();
 		}
 		function setButtonTypeEnum(type) {
-			if(type === "TEXT" || type === "USER" || type === "BOTH" ) {
+			if(type === "TEXT" || type === "USER") {
 				jQuery('#buttonTypeEnum').html(type);
 			}
 		}

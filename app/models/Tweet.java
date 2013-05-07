@@ -2,10 +2,10 @@ package models;
 
 import org.bson.types.ObjectId;
 
+import com.google.code.morphia.Key;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Indexed;
-import com.google.code.morphia.annotations.Reference;
 
 @Entity("tweets")
 public class Tweet {
@@ -13,9 +13,8 @@ public class Tweet {
 	@Id
 	private ObjectId id;
 	
-	@Reference
 	@Indexed
-	private Event event;
+	private Key<Event> event;
 	
 	
 	// Tweets default attributes by Twitter
@@ -49,11 +48,11 @@ public class Tweet {
 		this.id = id;
 	}
 
-	public Event getEvent() {
+	public Key<Event> getEvent() {
 		return event;
 	}
 
-	public void setEvent(Event event) {
+	public void setEvent(Key<Event> event) {
 		this.event = event;
 	}
 

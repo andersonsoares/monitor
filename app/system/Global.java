@@ -45,7 +45,9 @@ public class Global extends GlobalSettings {
 	@Override
 	public void onStart(Application app) {
 		
-		createMongoDbConnection();
+		startGlobalVars(app);
+		
+		createMongoDbConnection(app);
 		
 		createTwitterStreams();
 		
@@ -56,6 +58,16 @@ public class Global extends GlobalSettings {
 	}
 	
 	
+	private void startGlobalVars(Application app) {
+		
+		Constants.CACHE_MAX_TWEETS 		= app.configuration().getInt("cache.maxtweets");
+		Constants.CACHE_MAX_USERTWEETS 	= app.configuration().getInt("cache.maxusertweets");
+		Constants.AKKA_START_IN 	= app.configuration().getInt("akka.start.in");
+		Constants.AKKA_LOOP_IN 	= app.configuration().getInt("akka.loop.in");
+		
+	}
+
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onStop(Application app) {
@@ -67,6 +79,14 @@ public class Global extends GlobalSettings {
 			
 			dao.saveCollection(tweets);
 			Logger.info("Saving lasts tweets on cache");
+		}
+		
+		tweets = (List<Tweet>) Cache.get("userTweets");
+		if (tweets != null && !tweets.isEmpty()) {
+			TweetDAO dao = new TweetDAO();
+			
+			dao.saveCollection(tweets);
+			Logger.info("Saving lasts user tweets on cache");
 		}
 		
 		super.onStop(app);
@@ -106,12 +126,14 @@ public class Global extends GlobalSettings {
 		Cache.set("keywordMap", new HashMap<Event,Map<String,TypeEnum>>());
 		// Create List with tweets to be storaged in Cache before save on DB
 		Cache.set("tweets", new ArrayList<Tweet>());
+		Cache.set("userTweets", new ArrayList<Tweet>());
 		
 	}
 
-	private void createMongoDbConnection() {
+	private void createMongoDbConnection(Application app) {
 		
 		Logger.info("Trying to connect with mongo database"); 
+		
 		
 		try {
 			
@@ -127,8 +149,10 @@ public class Global extends GlobalSettings {
 			Singletons.validation.applyTo(Singletons.morphia);
 			
 			
-			String userDb = "aers";
-			char[] passDb = "aers123".toCharArray();
+			
+			String userDb = app.configuration().getString("mongo.user");
+			
+			char[] passDb = app.configuration().getString("mongo.pass").toCharArray();
 			
 			Singletons.datastore = Singletons.morphia.createDatastore(Singletons.mongo, "monitor", userDb, passDb);
 			
@@ -172,8 +196,8 @@ public class Global extends GlobalSettings {
 		
 		Akka.system().scheduler()
 			.schedule(
-				Duration.create(20, TimeUnit.SECONDS),
-				Duration.create(10, TimeUnit.SECONDS),
+				Duration.create(Constants.AKKA_START_IN, TimeUnit.SECONDS),
+				Duration.create(Constants.AKKA_LOOP_IN, TimeUnit.SECONDS),
 				eventMonitorActor,
 				"null",
 				Akka.system().dispatcher()
