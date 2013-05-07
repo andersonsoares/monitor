@@ -20,7 +20,7 @@ public class UpdateTweetCountOnEventsActor extends UntypedActor {
 	@Override
 	public void onReceive(Object arg0) throws Exception {
 		
-		boolean has_new_tweets_on_db = (boolean) Cache.get("has_new_tweets_on_db");
+		Boolean has_new_tweets_on_db = (Boolean) Cache.get("has_new_tweets_on_db");
 		if (has_new_tweets_on_db) {
 		
 			Logger.info("Updating events twitter count");
@@ -37,7 +37,7 @@ public class UpdateTweetCountOnEventsActor extends UntypedActor {
 				
 			}
 			
-			Cache.set("has_new_tweets_on_db", false);
+			Cache.set("has_new_tweets_on_db", new Boolean(false));
 		}
 		
 	}

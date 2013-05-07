@@ -16,7 +16,6 @@ import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.User;
 import twitter4j.UserList;
-import utils.Utils;
 
 import com.google.code.morphia.Key;
 
@@ -32,8 +31,6 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 			if (!status.isRetweet() && status.getUser().getLang().equals("pt")) {
 				
 				// Quebrar o tweet em tokens e verificar cada palavra com o 'Cache' para pegar o Evento associado
-				String[] tokens = status.getText().toLowerCase().split(" ");
-				
 				HashMap<Event, HashMap<String, TypeEnum>> keywordMap = (HashMap<Event, HashMap<String, TypeEnum>>) Cache.get("keywordMap");
 				
 					
@@ -53,7 +50,9 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 					
 					// And compare if the array of tokens generatate from tweets contains any of the keywords
 					
-					if (Utils.verifyArrayContains(tokens, keywords) == true) {
+					if (keywords.contains(status.getUser().getScreenName().toLowerCase())) {
+					
+						Logger.info("Adding tweet from user");
 						// TODO: TENTAR MELHORAR O DESEMPENHO AQUI
 						Tweet tweet = new Tweet();
 						tweet.setEvent(new Key<Event>(Event.class, event.getId()));
