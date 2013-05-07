@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import com.google.code.morphia.Key;
-
 import models.Event;
 import models.Tweet;
 import play.Logger;
@@ -19,6 +17,9 @@ import twitter4j.StatusDeletionNotice;
 import twitter4j.User;
 import twitter4j.UserList;
 import utils.Utils;
+
+import com.google.code.morphia.Key;
+
 import dao.TweetDAO;
 import enums.TypeEnum;
 
@@ -71,6 +72,8 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 						if (size < Constants.CACHE_MAX_USERTWEETS) {
 							tweets.add(tweet);
 							Cache.set("userTweets", tweets);	
+							
+							
 						} else {
 							TweetDAO dao = new TweetDAO();
 							
@@ -80,6 +83,8 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 								
 							Logger.info("Saving "+size+" tweets");
 							Logger.info("Reseting userTweets cache");
+							
+							Cache.set("has_new_tweets_on_db", true);
 						}
 						
 						

@@ -129,6 +129,8 @@ public class Global extends GlobalSettings {
 		Cache.set("tweets", new ArrayList<Tweet>());
 		Cache.set("userTweets", new ArrayList<Tweet>());
 		
+		Cache.set("has_new_tweets_on_db", false);
+		
 	}
 
 	private void createMongoDbConnection(Application app) {
@@ -228,6 +230,7 @@ public class Global extends GlobalSettings {
 	
 	// Creating a Guice Injector for Dependency Injection
 	private static final Injector INJECTOR = createInjector(); 
+	
 
 	static {
         MorphiaLoggerFactory.reset();

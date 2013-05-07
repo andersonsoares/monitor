@@ -93,6 +93,8 @@ public class TwitterStatusListener implements StatusListener {
 								
 							Logger.info("Saving "+size+" tweets");
 							Logger.info("Reseting tweets cache");
+							
+							Cache.set("has_new_tweets_on_db", true);
 						}
 						
 						
