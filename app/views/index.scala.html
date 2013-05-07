@@ -114,6 +114,7 @@
 					<tr>
 						<th>#</th>
 						<th>Event name</th>
+						<th>Keywords</th>
 						<th>Situation</th>
 						<th>Number Tweets</th>
 						<th></th>
@@ -122,8 +123,27 @@
 				<tbody>
 					@for(event <- eventsList) {
 						<tr>
-							<td>@event.getId()</td>
+							<td></td>
 							<td>@event.getName()</td>
+							<td>
+								
+								@for((key, value) <- event.getKeywords()) {
+									<div class="row-fluid">
+										<div class="span6">
+											@if(value.name == "TEXT") {
+												Contains:		 	
+										 	} else {
+										 		Following:
+										 	}
+									 	</div>
+										<div class="span6">
+											<b>@key</b>								
+										</div>
+									</div>
+									
+								}	
+							</td>
+							
 							<td>@event.getSituation()</td>
 							<td>@event.getNrTweets()</td>
 							<td><a href="downloadTweets/@event.getId()">Download</a></td>
@@ -141,6 +161,12 @@
 	
 	<script>
 	
+		
+		function showKeywords(e, id) {
+			e.preventDefault();
+			
+			console.log(id);
+		}
 	
 		var numKeywords = 0;
 	

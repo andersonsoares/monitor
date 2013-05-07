@@ -140,7 +140,15 @@ public class Global extends GlobalSettings {
 		
 		try {
 			
-			Singletons.mongo = new MongoClient("127.0.0.1", 27017);
+			String userDb = 	app.configuration().getString("mongo.user");
+			char[] passDb = 	app.configuration().getString("mongo.pass").toCharArray();
+			String hostDb = 	app.configuration().getString("mongo.host");
+			int portDb =	 	app.configuration().getInt("mongo.port");
+			String database = 	app.configuration().getString("mongo.db");
+			
+			
+			
+			Singletons.mongo = new MongoClient(hostDb, portDb);
 			
 			 
 			Singletons.morphia = new Morphia();
@@ -153,11 +161,7 @@ public class Global extends GlobalSettings {
 			
 			
 			
-			String userDb = app.configuration().getString("mongo.user");
-			
-			char[] passDb = app.configuration().getString("mongo.pass").toCharArray();
-			
-			Singletons.datastore = Singletons.morphia.createDatastore(Singletons.mongo, "monitor", userDb, passDb);
+			Singletons.datastore = Singletons.morphia.createDatastore(Singletons.mongo, database, userDb, passDb);
 			
 			Singletons.datastore.ensureIndexes();   
 			Singletons.datastore.ensureCaps();  
