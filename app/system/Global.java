@@ -20,6 +20,7 @@ import twitter4j.TwitterFactory;
 import twitter4j.TwitterStreamFactory;
 import twitter4j.auth.AccessToken;
 import actors.EventMonitorActor;
+import actors.UpdateTweetCountOnEventsActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 
@@ -199,6 +200,17 @@ public class Global extends GlobalSettings {
 				Duration.create(Constants.AKKA_START_IN, TimeUnit.SECONDS),
 				Duration.create(Constants.AKKA_LOOP_IN, TimeUnit.SECONDS),
 				eventMonitorActor,
+				"null",
+				Akka.system().dispatcher()
+			);
+		
+		ActorRef updateTweetCountOnEventsActor = Akka.system().actorOf(new Props(UpdateTweetCountOnEventsActor.class));
+		
+		Akka.system().scheduler()
+			.schedule(
+				Duration.create(60, TimeUnit.SECONDS),
+				Duration.create(60, TimeUnit.SECONDS),
+				updateTweetCountOnEventsActor,
 				"null",
 				Akka.system().dispatcher()
 			);

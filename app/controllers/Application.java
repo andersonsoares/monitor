@@ -1,5 +1,6 @@
 package controllers;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -74,9 +75,12 @@ public class Application extends Controller {
 		
 		TweetService service = new TweetService();
 		
-		service.createFileWithTweetsFrom(new ObjectId(eventId));
+		File file = service.createFileWithTweetsFrom(new ObjectId(eventId));
 		
-		return ok();
+		response().setContentType("application/x-download"); 
+		response().setHeader("Content-disposition","attachment; filename="+file.getName());
+		
+		return ok(file);
 	}
 	
 }

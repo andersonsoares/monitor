@@ -1,12 +1,18 @@
 package services;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 import models.Event;
 import models.Tweet;
 
 import org.bson.types.ObjectId;
+
+import play.Logger;
+import play.libs.Json;
 
 import com.google.code.morphia.Key;
 
@@ -26,23 +32,36 @@ public class TweetService {
 		EventDAO eventDAO = new EventDAO();
 		Event event = eventDAO.findById(eventId);
 		
+		int LIMIT = 800;
+		
 		if (event != null) {
 			
-			System.out.println("Recuperando tweets from: "+event.getName());
+			try {
 			
-			TweetDAO dao = new TweetDAO();
-			
-			List<Tweet> list = dao.createQuery().filter("event", new Key<Object>(Event.class, event.getId())).asList();
-			
-			
-			
-			for (Tweet tweet : list) {
-				System.out.println(tweet.getText());
+				TweetDAO dao = new TweetDAO();
+				
+				long totalTweets = dao.createQuery().filter("event", new Key<Event>(Event.class, event.getId())).countAll();
+				
+				File file = new File(event.getName()+System.currentTimeMillis()+".json");
+				
+				
+				BufferedWriter out = new BufferedWriter(new FileWriter(file), 32768);
+				
+				
+				for (int i=0; i < totalTweets; i+=LIMIT) {
+					
+					List<Tweet> list = dao.createQuery().filter("event", new Key<Event>(Event.class, event.getId())).limit(LIMIT).offset(i).asList();
+					out.write(Json.toJson(list).toString());		
+				}
+				
+				out.flush();
+				out.close();
+				
+				return file;
+				
+			} catch (IOException e) {
+				Logger.error("Error on creating file to download: "+e.getMessage());
 			}
-			
-			System.out.println("Total: "+list.size());
-			
-			
 			
 		} else {
 			System.out.println();

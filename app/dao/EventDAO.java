@@ -50,4 +50,14 @@ public class EventDAO extends BaseDAO<Event> {
 		ds.update(query, ops);
 	}
 	
+	/**
+	 * Methot to update the tweet count for the event
+	 * @param eventId
+	 * @param new tweet count
+	 */
+	public void setTweetCount(ObjectId eventId, long tweetCount) {
+		Query<Event> query = ds.createQuery(entityClazz).field(Mapper.ID_KEY).equal(eventId);
+		UpdateOperations<Event> ops = ds.createUpdateOperations(entityClazz).set("nrTweets", tweetCount);
+		ds.update(query, ops);
+	}
 }
