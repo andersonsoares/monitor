@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import models.Event;
@@ -50,8 +51,13 @@ public class TweetService {
 				
 				for (int i=0; i < totalTweets; i+=LIMIT) {
 					
-					List<Tweet> list = dao.createQuery().filter("event", new Key<Event>(Event.class, event.getId())).limit(LIMIT).offset(i).asList();
-					out.write(Json.toJson(list).toString());		
+//					List<Tweet> list = dao.createQuery().filter("event", new Key<Event>(Event.class, event.getId())).limit(LIMIT).offset(i).asList();
+					List<Tweet> list = dao.createQuery().filter("event", new Key<Event>(Event.class, event.getId())).limit(LIMIT).offset(i).retrievedFields(true, "text").asList();
+					List<String> texts = new ArrayList<String>();
+					for (Tweet t : list) {
+						texts.add(t.getText());
+					}
+					out.write(Json.toJson(texts).toString());		
 				}
 				
 				out.flush();
