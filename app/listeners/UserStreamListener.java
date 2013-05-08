@@ -52,7 +52,6 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 					
 					if (keywords.contains(status.getUser().getScreenName().toLowerCase())) {
 					
-						Logger.info("Adding tweet from user");
 						// TODO: TENTAR MELHORAR O DESEMPENHO AQUI
 						Tweet tweet = new Tweet();
 						tweet.setEvent(new Key<Event>(Event.class, event.getId()));

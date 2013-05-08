@@ -170,17 +170,22 @@ public class Event {
 					if (keyword.length() < 2) {
 						errors.add(new ValidationError("keywords","Keywords must be >= 2 letters"));
 					}
-					Pattern pattern = Pattern.compile("\\s");
-					Matcher matcher = pattern.matcher(keyword);
-					boolean found = matcher.find();
-					if (found) {
-						errors.add(new ValidationError("keywords","Keyword is a unique word and cant have white spaces"));
-					}
+					
 					
 					if (!keywords.get(keyword).equals(TypeEnum.TEXT)) {
 						if (keyword.charAt(0) == '#') {
-							errors.add(new ValidationError("keywords", "Keywords Type 'USER' or 'BOTH' must not start with '#'"));
+							errors.add(new ValidationError("keywords", "Keywords Type 'USER' must not start with '#'"));
+						} else if (keyword.charAt(0) == '@') {
+							errors.add(new ValidationError("keywords", "Just type the username without @"));
+						} 
+						
+						Pattern pattern = Pattern.compile("\\s");
+						Matcher matcher = pattern.matcher(keyword);
+						boolean found = matcher.find();
+						if (found) {
+							errors.add(new ValidationError("keywords","Username is a unique word and cant have white spaces"));
 						}
+						
 					}
 				}
 			}
