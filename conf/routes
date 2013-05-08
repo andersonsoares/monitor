@@ -6,9 +6,10 @@ GET     /assets/img/glyphicons-halflings.png            controllers.Assets.at(pa
 
 # Home page
 GET     /                       			    @controllers.Application.index()
-POST    /            			                @controllers.Application.addEvent()
+GET		/events/create							@controllers.Events.pageCreate()
+POST    /events        			                @controllers.Events.save()
 
-GET		/downloadTweets/:eventId				@controllers.Application.downloadTweets(eventId: String)
+GET		/downloadTweets/:eventId				@controllers.Events.downloadTweets(eventId: String)
 
 
 # Map static resources from the /public folder to the /assets URL path

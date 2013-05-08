@@ -1,0 +1,68 @@
+@(eventsList: List[Event])
+
+@import helper._
+@import helper.twitterBootstrap._
+
+
+@main("Twitter Monitor 2.0") {
+
+	<div class="container">
+		<h1>Events</h1>
+		
+	    <div class="jetstrap-highlighted well">
+	    	<a href="@routes.Events.pageCreate()"><button class="btn btn-success">Create new Event</button></a>
+	    </div>
+	
+		<div class="row-fluid">
+			<div class="span12">
+				<table id="tableEventsList" class="table table-hover">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Event name</th>
+							<th>Keywords</th>
+							<th>Situation</th>
+							<th>Number Tweets</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						@for(event <- eventsList) {
+							<tr>
+								<td></td>
+								<td>@event.getName()</td>
+								<td>
+									
+									@for((key, value) <- event.getKeywords()) {
+										<div class="row-fluid">
+											<div class="span6">
+												@if(value.name == "TEXT") {
+													Contains:		 	
+											 	} else {
+											 		Following:
+											 	}
+										 	</div>
+											<div class="span6">
+												<b>@key</b>								
+											</div>
+										</div>
+										
+									}	
+								</td>
+								
+								<td>@event.getSituation()</td>
+								<td>@event.getNrTweets()</td>
+								<td><a href="downloadTweets/@event.getId()">Download</a></td>
+								<td><a href="http://jsonviewer.stack.hu/#http://li216-187.members.linode.com/downloadTweets/@event.getId()" target="_blank">Open in JSON Viewer</a></td>
+							</tr>
+						}		
+					</tbody> 
+					
+				</table>
+			</div>
+		</div>
+	</div>
+
+    
+}

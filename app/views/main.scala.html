@@ -36,7 +36,7 @@
 				<a class="brand" href="#">Monitor</a>
 				<div class="nav-collapse collapse">
 					<ul class="nav">
-						<li class="active"><a href="#">Home</a></li>
+						<li class="active"><a href="@routes.Application.index()">Events</a></li>
 						<li><a href="#about">About</a></li>
 					</ul>
 				</div>
@@ -45,8 +45,20 @@
 		</div>
 	</div>
 
+	@if(flash.get("success") != null) {
+		<div class="alert alert-success">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			@flash.get("success")
+		</div>
+	}
 	
-<script src="@routes.Assets.at("js/jquery-1.9.0.min.js")" type="text/javascript"></script>
+	@if(flash.get("error") != null) {
+		<div class="alert alert-error">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			@flash.get("error")
+		</div>
+	}
+	<script src="@routes.Assets.at("js/jquery-1.9.0.min.js")" type="text/javascript"></script>
 	<script src="@routes.Assets.at("js/bootstrap.min.js")" type="text/javascript"></script>
 	<script src="@routes.Assets.at("js/bootstrap-datetimepicker.min.js")" type="text/javascript"></script>
 	@content
