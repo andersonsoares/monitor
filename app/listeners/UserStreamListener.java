@@ -28,7 +28,7 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 	@Override
 	public void onStatus(Status status) {
 		try {
-			if (!status.isRetweet() && status.getUser().getLang().equals("pt")) {
+			if (!status.isRetweet()) {
 				
 				// Quebrar o tweet em tokens e verificar cada palavra com o 'Cache' para pegar o Evento associado
 				HashMap<Event, HashMap<String, TypeEnum>> keywordMap = (HashMap<Event, HashMap<String, TypeEnum>>) Cache.get("keywordMap");
@@ -49,9 +49,9 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 					}
 					
 					// And compare if the array of tokens generatate from tweets contains any of the keywords
-					
+					System.out.println(status.getUser().getScreenName()+" - ");
 					if (keywords.contains(status.getUser().getScreenName().toLowerCase())) {
-					
+						System.out.print("Added...");
 						// TODO: TENTAR MELHORAR O DESEMPENHO AQUI
 						Tweet tweet = new Tweet();
 						tweet.setEvent(new Key<Event>(Event.class, event.getId()));
@@ -84,10 +84,12 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 							Logger.info("Reseting userTweets cache");
 							
 							Cache.set("has_new_tweets_on_db", new Boolean(true));
-						}
+						} 
 						
 						
-					} 
+					} else { 
+						System.out.print("Not added");
+					}
 					
 				}
 				
