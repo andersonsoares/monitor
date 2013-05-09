@@ -1,0 +1,56 @@
+@(rootsList: List[Root])
+
+@import helper._
+
+@main("Twitter Monitor 2.0 - Roots") {
+
+
+	<div class="container">
+		<h1>Roots</h1>
+		
+	    <div class="jetstrap-highlighted well">
+	    	<a href="@routes.RootController.pageGenerate()"><button class="btn btn-success">Generate Roots Again!</button></a>
+	    </div>
+	
+		<div class="row-fluid">
+			<div class="span12">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Root Word</th>
+							<th>Count</th>
+							<th>Generators</th>
+							<th>Will cut?</th>
+						</tr>
+					</thead>
+					<tbody>
+						@for(root <- rootsList) {
+							<tr>
+								<td></td>
+								<td>@root.getRootWord()</td>
+								<td>@root.getCount()</td>
+								<td>
+									@for(generator <- root.getWordsGenerators()) {
+										@generator
+										<br/>
+									}
+								</td>
+								<td>
+									@if(root.isRemoved()) {
+										Yes
+									} else {
+										No
+									}
+								</td>
+								
+							</tr>
+						}		
+					</tbody> 
+					
+				</table>
+			</div>
+		</div>
+	</div>
+
+}

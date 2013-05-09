@@ -101,7 +101,13 @@ public class RootService {
 		int i = 0;
 		for (String rootWord : roots.keySet()) {
 		
-			rootsToSave.add(roots.get(rootWord));
+			Root root = roots.get(rootWord);
+			
+			// Verifies if the rootWord will be used
+			if (root.getCount() < cutValue) {
+				root.setRemoved(true);
+			}
+			rootsToSave.add(root);
 			
 			if (i >= 1000 || (i == (roots.size() - 1))) {
 				rootDAO.saveCollection(rootsToSave);

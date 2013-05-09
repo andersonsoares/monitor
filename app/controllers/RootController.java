@@ -3,6 +3,7 @@ package controllers;
 import java.util.List;
 
 import models.Event;
+import models.Root;
 
 import org.bson.types.ObjectId;
 
@@ -13,6 +14,7 @@ import play.mvc.Result;
 import services.RootService;
 import views.roots.forms.GenerateRootForm;
 import dao.EventDAO;
+import dao.RootDAO;
 import enums.Situation;
 
 public class RootController extends Controller {
@@ -28,6 +30,46 @@ public class RootController extends Controller {
 		return ok(views.html.roots.index.render(eventsList));
 	}
  	
+	
+	public Result list() {
+		
+RootDAO dao = new RootDAO();
+		
+		List<Root> rootsList = dao.createQuery().order("rootWord").limit(50).offset(0).asList();
+		
+		return ok(views.html.roots.list.render(rootsList));
+	}
+	
+	
+	public Result paginate(int pageNum, int pageSize, String orderType) {
+		
+		if (orderType == null || orderType.isEmpty() || pageNum < 0 || pageSize < 1) {
+			return list();
+		} 
+		
+		if (!orderType.equals("count") && !orderType.equals("rootWord")) {
+			return list();
+		}
+		
+		RootDAO dao = new RootDAO();
+		
+		String order;
+		if (orderType.equals("count")) {
+			order = "-count";
+		} else {
+			order = "rootWord";
+		}
+		
+		int offset = 0;
+		for( int i = 0; i < pageNum; i++) {
+			offset += pageSize;
+		}
+		
+		List<Root> rootsList = dao.createQuery().order(order).limit(pageSize).offset(offset).asList();
+		
+		return ok(views.html.roots.list.render(rootsList));
+	}
+	
 	
 	public Result generate() {
 		

@@ -32,6 +32,8 @@ public class Root {
 	
 	private HashSet<String> wordsGenerators;
 	
+	private boolean removed;
+	
 	
 	/*
 	 * Default Constructor
@@ -79,6 +81,14 @@ public class Root {
 
 	public void setWordsGenerators(HashSet<String> wordsGenerators) {
 		this.wordsGenerators = wordsGenerators;
+	}
+
+	public boolean isRemoved() {
+		return removed;
+	}
+
+	public void setRemoved(boolean removed) {
+		this.removed = removed;
 	}
 	
 	
