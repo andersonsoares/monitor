@@ -3,10 +3,9 @@ public class TeteString {
 
 	
 	public static void main(String[] args) {
-		String s1 = "rafinhabastos";
-		String s2 = "rafinhabastos.";
+		String s1 = "RT rafinhabastos RT blablabla RT dasda RT RTsdasd";
 		
-		System.out.println(s1.contains(s2));
-		
+		s1 = s1.replaceAll("RT", " ");
+		System.out.println(s1);
 	}
 }

@@ -1,0 +1,29 @@
+@(eventsList: List[Event])
+
+@import helper._
+
+@main("Twitter Monitor 2.0 - Roots") {
+
+	
+	<div class="container well">
+		<h1>Select the events to generate the Glossary</h1>
+		
+		@form(routes.RootController.generate()) {
+			@for(event <- eventsList) {
+				<label>
+				<input type="checkbox" id="event-@event.getId()" name="selectedEvents[]" value="@event.getId()"/>
+				@event.getName() (@event.getNrTweets())
+				</label>
+				<br/>
+			}
+			<br/>
+			<label>Type the Cut value here</label>
+			<input type="number" name="cutValue" value="50" min="1" max="10000"/>
+			
+			<br/>
+			<br/>
+			<input class="btn btn-primary" type="submit" value="Generate!">
+		}
+	</div>
+	
+}

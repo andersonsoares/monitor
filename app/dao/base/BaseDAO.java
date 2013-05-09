@@ -38,6 +38,11 @@ public class BaseDAO<T> {
         return ds.getCollection(entityClazz);
     }
 
+    public void drop() {
+    	ds.getCollection(entityClazz).drop();
+    	ds.ensureCaps();
+    	ds.ensureIndexes();
+    }
 
     public Query<T> createQuery() {
         return ds.createQuery(entityClazz);

@@ -19,7 +19,7 @@ import com.google.inject.Inject;
 import dao.EventDAO;
 import enums.TypeEnum;
 
-public class Events extends Controller {
+public class EventController extends Controller {
 
 	@Inject
 	private EventDAO dao;

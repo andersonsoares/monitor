@@ -49,9 +49,7 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 					}
 					
 					// And compare if the array of tokens generatate from tweets contains any of the keywords
-					System.out.println(status.getUser().getScreenName()+" - ");
 					if (keywords.contains(status.getUser().getScreenName().toLowerCase())) {
-						System.out.print("Added...");
 						// TODO: TENTAR MELHORAR O DESEMPENHO AQUI
 						Tweet tweet = new Tweet();
 						tweet.setEvent(new Key<Event>(Event.class, event.getId()));
@@ -87,8 +85,6 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 						} 
 						
 						
-					} else { 
-						System.out.print("Not added");
 					}
 					
 				}

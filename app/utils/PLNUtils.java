@@ -33,7 +33,7 @@ public class PLNUtils {
 	}
 	
 	public static String removePunctuation(String str) {
-		return str.replaceAll("\\p{Punct}+", "");
+		return str.replaceAll("\\p{Punct}+", " ");
 	}
 	
 	public static String tryFixRepeatedChars(String str) {
@@ -44,14 +44,34 @@ public class PLNUtils {
 		return str.replaceAll("\\s+", " ");
 	}
 	
+	public static String removeRT(String str) {
+		return str.replaceAll("RT"," ");
+	}
+	
+	public static String removeURLs(String str) {
+		return str.replaceAll("URL", " ");
+	}
+	
+	public static String removeUSERs(String str) {
+		return str.replaceAll("USER", " ");
+	}
+	
+	public static String removeDigits(String str) {
+		return str.replaceAll("[0-9]", " ");
+	}
+	
+	
 	public static List<String> getSiglas(String str) {
 		List<String> siglas = new ArrayList<String>();
 	
-		str = removeWhiteSpacesNotNecessary(str);
+		
+		str = removeRT(str);
 		str = replaceURLs(str);
 		str = replaceUSERs(str);
 		str = removeNonAsciiChars(str);
 		str = removePunctuation(str);
+		str = removeWhiteSpacesNotNecessary(str);
+		str = tryFixRepeatedChars(str);
 		
 		String[] tokens = str.split(" ");
 		for (String string : tokens) {
@@ -62,6 +82,25 @@ public class PLNUtils {
 		
 		return siglas;
 	}
+	
+	public static String normalizedTweet(String str) {
+		
+		str = str.toLowerCase();
+		str = removeRT(str);
+		str = replaceURLs(str);
+		str = removeURLs(str);
+		str = replaceUSERs(str);
+		str = removeUSERs(str);
+		str = removeDigits(str);
+		str = removeNonAsciiChars(str);
+		str = removePunctuation(str);
+		str = removeWhiteSpacesNotNecessary(str);
+		str = tryFixRepeatedChars(str);
+		
+		return str;
+	}
+	
+
 	/**
 	 * Function that checks if a word could be a 'SIGLA'
 	 * Verifies if the word if all UpperCase and then runs
@@ -81,7 +120,7 @@ public class PLNUtils {
 					if (!str.equals("USER") && !str.equals("URL")) {
 					
 						try {
-							Stemmer radicalizador = Stemmer.StemmerFactory(StemmerType.SAVOY);
+							Stemmer radicalizador = Stemmer.StemmerFactory(StemmerType.PORTER);
 							
 							String radicalStr = radicalizador.getWordStem(str);
 							
@@ -97,6 +136,16 @@ public class PLNUtils {
 			}		
 		}
 		return false;
+	}
+
+	public static String getRoot(String token) {
+		try {
+			Stemmer rooter = Stemmer.StemmerFactory(StemmerType.PORTER);
+			return rooter.getWordStem(token);
+		} catch (PTStemmerException e) {
+			Logger.error(e.getMessage()); 
+		}
+		return null;
 	}
 	
 }
