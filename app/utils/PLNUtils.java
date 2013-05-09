@@ -37,7 +37,7 @@ public class PLNUtils {
 	}
 	
 	public static String tryFixRepeatedChars(String str) {
-		return str.replaceAll("(([a-z][A-Z]+)\\2{2,})?", "$2");
+		return str.replaceAll("(([a-z|A-Z])\\2{2,})?", "$2");
 	}
 	
 	public static String removeWhiteSpacesNotNecessary(String str) {

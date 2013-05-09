@@ -72,23 +72,25 @@ public class RootService {
 					
 					for (String tokenGenerator : tokens) {
 						
-						String rootWord = PLNUtils.getRoot(tokenGenerator);
-						if (rootWord != null) {
-							// If there is no root, lets add it to the list :)
-							if (!roots.containsKey(rootWord)) {
-								Root root = new Root(rootWord, tokenGenerator);
-								root.setCount(1); // start couting
-								roots.put(rootWord, root);
-							} else {
-								// RootWord is already saved.. lets increase the count, and add
-								// generatorToken to it
-								Root root = roots.get(rootWord);
-								root.setCount(root.getCount() + 1);
-								root.getWordsGenerators().add(tokenGenerator);
+						if (tokenGenerator.length() > 2) {
+							String rootWord = PLNUtils.getRoot(tokenGenerator);
+							if (rootWord != null) {
+								// If there is no root, lets add it to the list :)
+								if (!roots.containsKey(rootWord)) {
+									Root root = new Root(rootWord, tokenGenerator);
+									root.setCount(1); // start couting
+									roots.put(rootWord, root);
+								} else {
+									// RootWord is already saved.. lets increase the count, and add
+									// generatorToken to it
+									Root root = roots.get(rootWord);
+									root.setCount(root.getCount() + 1);
+									root.getWordsGenerators().add(tokenGenerator);
+									
+									roots.put(rootWord, root);
+								}
 								
-								roots.put(rootWord, root);
 							}
-							
 						}
 					}
 				}
