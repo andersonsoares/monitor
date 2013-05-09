@@ -96,6 +96,6 @@ RootDAO dao = new RootDAO();
 			e.printStackTrace();
 			return pageGenerate();
 		}
-		return ok("This might take a while...");
+		return list();
 	}
 }
