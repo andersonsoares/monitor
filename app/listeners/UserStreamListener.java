@@ -68,10 +68,10 @@ public class UserStreamListener implements twitter4j.UserStreamListener {
 						// Verify it cache is full
 						// If is full, save to DB and clear cache
 						// else, just add to cache
+						tweets.add(tweet);
 						if (size < Constants.CACHE_MAX_USERTWEETS) {
-							tweets.add(tweet);
-							Cache.set("userTweets", tweets);	
 							
+							Cache.set("userTweets", tweets);
 							
 						} else {
 							TweetDAO dao = new TweetDAO();
