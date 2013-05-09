@@ -1,5 +1,7 @@
 package models;
 
+import java.util.Date;
+
 import org.bson.types.ObjectId;
 
 import com.google.code.morphia.Key;
@@ -34,6 +36,8 @@ public class Tweet {
 	@Indexed
 	private boolean normalized;
 	private String normalizedText;
+	
+	private Date createdAt;
 	
 	// Default Constructor
 	public Tweet() {}
@@ -118,6 +122,16 @@ public class Tweet {
 
 	public void setNormalizedText(String normalizedText) {
 		this.normalizedText = normalizedText;
+	}
+
+
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+
+
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
 	}
 	
 }

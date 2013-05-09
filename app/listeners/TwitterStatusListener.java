@@ -74,6 +74,7 @@ public class TwitterStatusListener implements StatusListener {
 						tweet.setRetweeted(status.isRetweet());
 						tweet.setRetweet_count(status.getRetweetCount());
 						tweet.setProfile_image_url(status.getUser().getOriginalProfileImageURL());
+						tweet.setCreatedAt(status.getCreatedAt());
 						
 						List<Tweet> tweets = (List<Tweet>) Cache.get("tweets");
 						int size = tweets.size();
