@@ -10,6 +10,7 @@ import models.Tweet;
 
 import org.bson.types.ObjectId;
 
+import play.Logger;
 import utils.PLNUtils;
 
 import com.google.code.morphia.Key;
@@ -110,7 +111,7 @@ public class RootService {
 			
 			i++;
 		}
-		System.out.println("Total: "+roots.size());
+		Logger.info("Found total roots: "+roots.size());
 	}
 
 }
