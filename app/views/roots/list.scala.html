@@ -1,9 +1,8 @@
-@(rootsList: List[Root])
+@(rootsList: List[Root], count: Long, page: Int, pageLength: Int, orderType: String)
 
 @import helper._
 
 @main("Twitter Monitor 2.0 - Roots") {
-
 
 	<div class="container">
 		<h1>Roots</h1>
@@ -11,6 +10,14 @@
 	    <div class="jetstrap-highlighted well">
 	    	<a href="@routes.RootController.pageGenerate()"><button class="btn btn-success">Generate Roots Again!</button></a>
 	    </div>
+	
+		@views.html.paginate(page, pageLength, count.toInt, orderType, routes.RootController.paginate(_,_,_))
+		<div class="pagination">
+			<ul>
+				
+			</ul>
+		</div>
+		
 	
 		<div class="row-fluid">
 			<div class="span12">

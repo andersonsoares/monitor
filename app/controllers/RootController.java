@@ -33,17 +33,18 @@ public class RootController extends Controller {
 	
 	public Result list() {
 		
-RootDAO dao = new RootDAO();
+		RootDAO dao = new RootDAO();
 		
-		List<Root> rootsList = dao.createQuery().order("rootWord").limit(50).offset(0).asList();
+		List<Root> rootsList = dao.createQuery().order("-count").limit(100).offset(0).asList();
+		long rootsCount = dao.createQuery().countAll();
 		
-		return ok(views.html.roots.list.render(rootsList));
+		return ok(views.html.roots.list.render(rootsList, rootsCount,1,100,"count"));
 	}
 	
 	
 	public Result paginate(int pageNum, int pageSize, String orderType) {
 		
-		if (orderType == null || orderType.isEmpty() || pageNum < 0 || pageSize < 1) {
+		if (orderType == null || orderType.isEmpty() || pageNum < 1 || pageSize < 1) {
 			return list();
 		} 
 		
@@ -60,14 +61,14 @@ RootDAO dao = new RootDAO();
 			order = "rootWord";
 		}
 		
-		int offset = 0;
-		for( int i = 0; i < pageNum; i++) {
+		int offset = pageNum - 1;
+		for( int i = 0; i < pageNum - 1; i++) {
 			offset += pageSize;
 		}
 		
 		List<Root> rootsList = dao.createQuery().order(order).limit(pageSize).offset(offset).asList();
-		
-		return ok(views.html.roots.list.render(rootsList));
+		long rootsCount = dao.createQuery().countAll();
+		return ok(views.html.roots.list.render(rootsList, rootsCount, pageNum, pageSize, orderType));
 	}
 	
 	
