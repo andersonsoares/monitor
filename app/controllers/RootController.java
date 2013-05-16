@@ -1,6 +1,8 @@
 package controllers;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import models.Event;
 import models.Root;
@@ -9,6 +11,7 @@ import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.data.Form;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import services.RootService;
@@ -20,6 +23,22 @@ import enums.Situation;
 public class RootController extends Controller {
 
 	final static Form<GenerateRootForm> generateRootForm = Form.form(GenerateRootForm.class);
+	
+	
+	public Result acceptRoot(String rootId) {
+		
+		RootDAO dao = new RootDAO();
+		
+		
+		boolean removed = dao.setRemoved(new ObjectId(rootId));
+		
+		Map<String, Object> retorno = new HashMap<String, Object>();
+		retorno.put("status", "ok");
+		retorno.put("accepted", removed);
+		
+		return ok(Json.toJson(retorno));
+	}
+	
 	
 	public Result pageGenerate() {
 		

@@ -1,4 +1,4 @@
-@(page:Int, pageLength:Int, collectionLength:Int, orderType: String, route:(Int, Int, String) => play.api.mvc.Call, bound:Int = 5)
+@(page:Int, pageLength:Int, collectionLength:Int, orderType: String, route:(Int, Int, String) => play.api.mvc.Call, bound:Int = 10)
 @lowbound() = @{
     ((page.toDouble / bound).floor * bound) toInt
 }

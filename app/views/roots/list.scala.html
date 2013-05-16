@@ -12,11 +12,6 @@
 	    </div>
 	
 		@views.html.paginate(page, pageLength, count.toInt, orderType, routes.RootController.paginate(_,_,_))
-		<div class="pagination">
-			<ul>
-				
-			</ul>
-		</div>
 		
 	
 		<div class="row-fluid">
@@ -33,7 +28,11 @@
 					</thead>
 					<tbody>
 						@for(root <- rootsList) {
-							<tr>
+							@if(root.isRemoved()) {
+							<tr id="rootwordRow-@root.getId()" class="error">
+							} else {
+							<tr id="rootwordRow-@root.getId()" class="success">
+							}
 								<td></td>
 								<td>@root.getRootWord()</td>
 								<td>@root.getCount()</td>
@@ -45,12 +44,16 @@
 								</td>
 								<td>
 									@if(root.isRemoved()) {
+										<button style="width: 140px;" id="button_accept_@root.getId()" class="btn btn-inverse" onclick="acceptRoot('@root.getId()')" onmouseover="showButtonInfo('@root.getId()')" value="true" onmouseout="closeButtonInfo('@root.getId()')">
 										Yes
+										</button>
 									} else {
+										<button style="width: 140px;" id="button_accept_@root.getId()" class="btn btn-inverse" onclick="acceptRoot('@root.getId()')" onmouseover="showButtonInfo('@root.getId()')" value="false" onmouseout="closeButtonInfo('@root.getId()')">
 										No
+										</button>
 									}
+									
 								</td>
-								
 							</tr>
 						}		
 					</tbody> 
@@ -59,5 +62,70 @@
 			</div>
 		</div>
 	</div>
+	
+	<script type="text/javascript">
+	
+		function showButtonInfo(rootId) {
+			var botao = jQuery('#button_accept_'+rootId);
+			botao.removeClass('btn-inverse')
+			if (botao.val() == 'true') {
+				botao.html('Accept anyway!')
+				botao.addClass('btn-success')	
+			} else {
+				botao.addClass('btn-danger')
+				botao.html('Reject anyway!')
+			}
+			
+		}
+		
+		function closeButtonInfo(rootId) {
+			var botao = jQuery('#button_accept_'+rootId);
+			botao.removeClass('btn-danger btn-success')
+			botao.addClass('btn-inverse')
+			if (botao.val() == 'true') {
+				botao.html('Yes')	
+			} else {
+				botao.html('No')
+			}
+			
+		}
+	
+		function acceptRoot(rootId) {
+			var botao = jQuery('#button_accept_'+rootId);
+			$.ajax({
+			    url: '/roots/acceptRoot/'+rootId,
+			    type: 'POST',
+			    success: function(response) {
+			    	if (response.status == "ok") {
+			    		if (response.accepted == true) {
+							botao.attr('value', true)
+							// o cara foi removido!
+							// colocar a 'linha' em VERMELHO
+							jQuery('#rootwordRow-'+rootId).removeClass('success')
+							jQuery('#rootwordRow-'+rootId).addClass('error')
+							
+							botao.removeClass('btn-error')
+							botao.addClass('btn-success')
+							
+							botao.html('Accept anyway!')
+						} else {
+							botao.attr('value', false)
+							
+							
+							jQuery('#rootwordRow-'+rootId).removeClass('error')
+							jQuery('#rootwordRow-'+rootId).addClass('success')
+							
+							botao.removeClass('btn-success')
+							botao.addClass('btn-error')
+							
+							botao.html('Reject anyway!')
+						}
+			    		
+					}
+			    }
+			});
+		}
+		
+	</script>
 
 }
