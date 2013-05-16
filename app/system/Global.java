@@ -130,6 +130,7 @@ public class Global extends GlobalSettings {
 		Cache.set("userTweets", new ArrayList<Tweet>());
 		
 		Cache.set("has_new_tweets_on_db", new Boolean(false));
+		Cache.set("restartStreamTime",null);
 		
 	}
 

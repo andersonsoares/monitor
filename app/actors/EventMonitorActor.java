@@ -37,48 +37,55 @@ public class EventMonitorActor extends UntypedActor {
 	@Override
 	public void onReceive(Object object) {
 		
-		
-		EventDAO dao = new EventDAO();
-		
-		//verificar se as keywords que estao no Cache sao iguais as que estao ativas no banco
-		
-		List<Event> activeEvents = dao.listBySituation(Situation.STARTED);
-		
-		HashMap<Event, HashMap<String, TypeEnum>> keywordMap = (HashMap<Event, HashMap<String, TypeEnum>>) Cache.get("keywordMap");
-		Set<Event> eventsOnCache = keywordMap.keySet();
-		
-		if (activeEvents.size() != eventsOnCache.size()) {
-			Logger.info("Syncronizing cached keywords");
-			syncCacheWith(activeEvents);
-			Logger.info("Restarting twitter streamming");
-			restartStream();
-		}
-		
-
-		
-		List<Event> events = dao.listBySituation(Situation.STARTED, Situation.NEVER_STARTED);
-		
 		Date now = new Date(System.currentTimeMillis());
+		Date restartStreamTime = (Date) Cache.get("restartStreamTime");
 		
-		for (Event event : events) {
+		if (restartStreamTime == null || now.after(restartStreamTime)) {
+		
+			Cache.set("restartStreamTime", null);
+			
+			EventDAO dao = new EventDAO();
+			
+			//verificar se as keywords que estao no Cache sao iguais as que estao ativas no banco
+			
+			List<Event> activeEvents = dao.listBySituation(Situation.STARTED);
+			
+			HashMap<Event, HashMap<String, TypeEnum>> keywordMap = (HashMap<Event, HashMap<String, TypeEnum>>) Cache.get("keywordMap");
+			Set<Event> eventsOnCache = keywordMap.keySet();
+			
+			if (activeEvents.size() != eventsOnCache.size()) {
+				Logger.info("Syncronizing cached keywords");
+				syncCacheWith(activeEvents);
+				Logger.info("Restarting twitter streamming");
+				restartStream();
+			}
+			
+	
+			
+			List<Event> events = dao.listBySituation(Situation.STARTED, Situation.NEVER_STARTED);
 			
 			
-			if (event.getSituation().equals(Situation.NEVER_STARTED)) {
-				// Event Never Started
-				if (now.after(event.getStartDate()) && now.before(event.getFinishDate())) {
-					Logger.info("Iniciando "+event.getName());
-					dao.setSituation(event.getId(), Situation.STARTED);
-					
-				}
-			} else {
-				// Event Started
-				if(now.after(event.getFinishDate())) {
-					Logger.info("Finalizando "+event.getName());
-					dao.setSituation(event.getId(), Situation.FINISHED);
-					
+			
+			for (Event event : events) {
+				
+				
+				if (event.getSituation().equals(Situation.NEVER_STARTED)) {
+					// Event Never Started
+					if (now.after(event.getStartDate()) && now.before(event.getFinishDate())) {
+						Logger.info("Iniciando "+event.getName());
+						dao.setSituation(event.getId(), Situation.STARTED);
+						
+					}
+				} else {
+					// Event Started
+					if(now.after(event.getFinishDate())) {
+						Logger.info("Finalizando "+event.getName());
+						dao.setSituation(event.getId(), Situation.FINISHED);
+						
+					}
 				}
 			}
-		}
+		} 
 		
 		
 	}
@@ -146,8 +153,8 @@ public class EventMonitorActor extends UntypedActor {
 				Singletons.twitterStream.filter(filter);
 			}
 		} catch(Exception e) {
-			Logger.error("Restarting again");
-			restartTwitterStream(keywords);
+			Logger.error("Erro: "+e.getMessage());
+			
 		}
 		
 	}
@@ -195,8 +202,16 @@ public class EventMonitorActor extends UntypedActor {
 			Singletons.userStream.user();
 		
 		} catch (TwitterException e) {
-			Logger.error("Restarting again");
-			restartUserStream(users);
+			if (e.exceededRateLimitation()) {
+				// set on cache the time to restart the stream:
+				// now + 15min ?
+				Logger.info("Userstream was blocked... restarting in 15min");
+				Cache.set("restartStreamTime", new Date( (System.currentTimeMillis() + 909000)));
+			} else {
+				Logger.error(e.getErrorMessage());
+				e.printStackTrace();
+			}
+			
 		} 
 		
 	}
