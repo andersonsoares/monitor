@@ -195,22 +195,22 @@ public class EventMonitorActor extends UntypedActor {
 		
 		
 			// depois eu vejo minha lista de amigos e comparo com a de users
-			
+			Logger.info("Shutdown userStream");
 			Singletons.userStream.shutdown();
+			Logger.info("CleanUp userStream");
 			Singletons.userStream.cleanUp();
-			
+			Logger.info("Restart userStream?");
 			Singletons.userStream.user();
 		
 		} catch (TwitterException e) {
+			Logger.error("Erro userStream: "+e.getErrorMessage());
+			e.printStackTrace();
 			if (e.exceededRateLimitation()) {
 				// set on cache the time to restart the stream:
 				// now + 15min ?
 				Logger.info("Userstream was blocked... restarting in 15min");
 				Cache.set("restartStreamTime", new Date( (System.currentTimeMillis() + 909000)));
-			} else {
-				Logger.error(e.getErrorMessage());
-				e.printStackTrace();
-			}
+			} 
 			
 		} 
 		
