@@ -164,24 +164,25 @@ public class EventMonitorActor extends UntypedActor {
 		try {
 			// primeiro crio amizade com todos os users passados como parametro
 			// caso a amizade ainda nao exista...
+			
+			long[] myFriendsIDs = Singletons.twitter.getFriendsIDs(-1).getIDs();// 0 = cursor, this application will not have 5000+ friends
+			
 			String[] usersArray = new String[users.size()];
 			usersArray = users.toArray(usersArray);
 			
-			ResponseList<User> usersToFollow = Singletons.twitter.lookupUsers(usersArray);
-		
-			List<Long> usersToFollowIDs = new ArrayList<Long>(); 
-			long[] myFriendsIDs = Singletons.twitter.getFriendsIDs(-1).getIDs();// 0 = cursor, this application will not have 5000+ friends
-			
-			for (User user : usersToFollow) {
-			
-				if (!alreadyFollowing(user.getId(),myFriendsIDs)) {
-					Logger.info("Creating relationship with: "+user.getScreenName());
-					Singletons.twitter.createFriendship(user.getScreenName());
+			List<Long> usersToFollowIDs = new ArrayList<Long>();
+			if (usersArray.length != 0) {
+				ResponseList<User> usersToFollow = Singletons.twitter.lookupUsers(usersArray);
+				for (User user : usersToFollow) {
+					
+					if (!alreadyFollowing(user.getId(),myFriendsIDs)) {
+						Logger.info("Creating relationship with: "+user.getScreenName());
+						Singletons.twitter.createFriendship(user.getScreenName());
+					}
+					usersToFollowIDs.add(user.getId());
 				}
-				usersToFollowIDs.add(user.getId());
 			}
-		
-			
+			 
 			
 			for (long l : myFriendsIDs) {
 				if (!usersToFollowIDs.contains(l)) {
@@ -190,10 +191,6 @@ public class EventMonitorActor extends UntypedActor {
 				}
 			}
 
-		
-		
-		
-		
 			// depois eu vejo minha lista de amigos e comparo com a de users
 			Logger.info("Shutdown userStream");
 			Singletons.userStream.shutdown();
