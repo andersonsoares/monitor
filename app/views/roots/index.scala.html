@@ -1,4 +1,4 @@
-@(eventsList: List[Event])
+@(eventsList: List[Event], algoritms: List[ptstemmer.Stemmer.StemmerType])
 
 @import helper._
 
@@ -17,6 +17,18 @@
 				<br/>
 			}
 			<br/>
+			
+			<label>Select the algoritm</label>
+			<select name="algoritm">
+			@for(algoritm <- algoritms) {
+				<option>@algoritm</option>
+			}
+			</select>
+			
+			<label>
+			Remove acentuation?    <input type="checkbox" name="removeAcentuation">
+			</label>
+			
 			<label>Type the Cut value here</label>
 			<input type="number" name="cutValue" value="50" min="1" max="10000"/>
 			

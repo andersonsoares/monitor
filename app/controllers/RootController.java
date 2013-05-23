@@ -1,5 +1,6 @@
 package controllers;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import play.data.Form;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import ptstemmer.Stemmer.StemmerType;
 import services.RootService;
 import views.roots.forms.GenerateRootForm;
 import dao.EventDAO;
@@ -46,7 +48,7 @@ public class RootController extends Controller {
 		
 		List<Event> eventsList = eventDAO.listBySituation(Situation.STARTED, Situation.FINISHED);
 		
-		return ok(views.html.roots.index.render(eventsList));
+		return ok(views.html.roots.index.render(eventsList, Arrays.asList(StemmerType.values())));
 	}
  	
 	
@@ -57,7 +59,9 @@ public class RootController extends Controller {
 		List<Root> rootsList = dao.createQuery().order("-count").limit(100).offset(0).asList();
 		long rootsCount = dao.createQuery().countAll();
 		
-		return ok(views.html.roots.list.render(rootsList, rootsCount,1,100,"count"));
+		long rootsCountRejected = dao.createQuery().filter("removed", true).countAll();
+		
+		return ok(views.html.roots.list.render(rootsList, rootsCountRejected, rootsCount,1,100,"count"));
 	}
 	
 	
@@ -87,7 +91,8 @@ public class RootController extends Controller {
 		
 		List<Root> rootsList = dao.createQuery().order(order).limit(pageSize).offset(offset).asList();
 		long rootsCount = dao.createQuery().countAll();
-		return ok(views.html.roots.list.render(rootsList, rootsCount, pageNum, pageSize, orderType));
+		long rootsCountRejected = dao.createQuery().filter("removed", true).countAll();
+		return ok(views.html.roots.list.render(rootsList, rootsCountRejected, rootsCount, pageNum, pageSize, orderType));
 	}
 	
 	
@@ -102,10 +107,14 @@ public class RootController extends Controller {
 			if (generateRootFormFilled != null) {
 				List<ObjectId> eventsList = generateRootFormFilled.getSelectedEvents();
 				int cutValue = generateRootFormFilled.getCutValue();
+				boolean removeAcentuation = generateRootFormFilled.isRemoveAcentuation();
+				StemmerType algoritmo = generateRootFormFilled.getAlgoritm();
+				System.out.println(algoritmo.name());
+				System.out.println(removeAcentuation);
 				if (eventsList != null) {
 				
 					RootService rootService = new RootService();
-					rootService.generate(eventsList, cutValue);
+					rootService.generate(eventsList, cutValue, algoritmo);
 					
 				}
 			}

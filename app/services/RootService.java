@@ -11,6 +11,7 @@ import models.Tweet;
 import org.bson.types.ObjectId;
 
 import play.Logger;
+import ptstemmer.Stemmer.StemmerType;
 import utils.PLNUtils;
 
 import com.google.code.morphia.Key;
@@ -27,7 +28,7 @@ public class RootService {
 	 * @param eventsList
 	 * @param cutValue
 	 */
-	public void generate(List<ObjectId> eventsList, int cutValue) {
+	public void generate(List<ObjectId> eventsList, int cutValue, StemmerType algoritm) {
 		
 		int LIMIT = 800;
 		
@@ -37,6 +38,7 @@ public class RootService {
 		// Removing all
 		rootDAO.drop();
 		
+		long startTime = System.currentTimeMillis();
 		
 		HashMap<String,Root> roots = new HashMap<String,Root>();
 		
@@ -48,21 +50,6 @@ public class RootService {
 
 				List<Tweet> list = tweetDAO.createQuery().filter("event", new Key<Event>(Event.class, eventId)).limit(LIMIT).offset(i).retrievedFields(true, "text").asList();
 				
-//				
-				
-//				for (Tweet tweet : list) {
-//					List<String> siglas = PLNUtils.getSiglas(tweet.getText());
-//					if (siglas.size() != 0) {
-//						System.out.println("From: "+tweet.getText());
-//						System.out.print("Found: ");
-//						for (String string : siglas) {
-//							System.out.print(" "+string);
-//						}
-//						System.out.println();
-//					}
-//				}
-				
-				
 				
 				for (Tweet tweet : list) {
 					// TODO: save tweet in the normalizedForm
@@ -73,7 +60,7 @@ public class RootService {
 					for (String tokenGenerator : tokens) {
 						
 						if (tokenGenerator.length() > 2) {
-							String rootWord = PLNUtils.getRoot(tokenGenerator);
+							String rootWord = PLNUtils.getRoot(tokenGenerator, algoritm);
 							if (rootWord != null) {
 								// If there is no root, lets add it to the list :)
 								if (!roots.containsKey(rootWord)) {
@@ -98,6 +85,9 @@ public class RootService {
 		}
 		
 		
+		long startTimeToSave = System.currentTimeMillis();
+		
+		Logger.info("Time to compute: "+(startTimeToSave-startTime)+" ms");
 		
 		ArrayList<Root> rootsToSave = new ArrayList<Root>();
 		int i = 0;
@@ -119,7 +109,13 @@ public class RootService {
 			
 			i++;
 		}
+		long finishTimeToSave = System.currentTimeMillis();
+		Logger.info("Time to save on DB: "+(finishTimeToSave-startTimeToSave)+" ms");
+		
 		Logger.info("Found total roots: "+roots.size());
+		
+		long finishTime = System.currentTimeMillis();
+		Logger.info("Total time to generate: "+(finishTime-startTime)+" ms");
 	}
 
 }

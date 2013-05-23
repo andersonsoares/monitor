@@ -1,6 +1,7 @@
 package utils;
 
 import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,10 @@ public class PLNUtils {
 		return str.replaceAll("@[^\\s]+", "USER");
 	}
 	
+	public static String removeAccents(String str) {
+		return Normalizer.normalize(str, Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+	}
+	
 	public static String removeNonAsciiChars(String str) {
 		str = Normalizer.normalize(str, Normalizer.Form.NFD);
 		str = str.replaceAll("[^\\p{ASCII}]", "");
@@ -38,6 +43,10 @@ public class PLNUtils {
 	
 	public static String tryFixRepeatedChars(String str) {
 		return str.replaceAll("(([a-z|A-Z])\\2{2,})?", "$2");
+	}
+	
+	public static String tryFixTwoRepeatedChars(String str) {
+		return str.replaceAll("(([a-z|A-Z][a-z|A-Z])\\2{2,})?", "$2");
 	}
 	
 	public static String removeWhiteSpacesNotNecessary(String str) {
@@ -61,7 +70,7 @@ public class PLNUtils {
 	}
 	
 	
-	public static List<String> getSiglas(String str) {
+	public static List<String> getSiglas(String str, StemmerType algoritm) {
 		List<String> siglas = new ArrayList<String>();
 	
 		
@@ -75,7 +84,7 @@ public class PLNUtils {
 		
 		String[] tokens = str.split(" ");
 		for (String string : tokens) {
-			if (isSigla(string)) {
+			if (isSigla(string, algoritm)) {
 				siglas.add(string);
 			}
 		}
@@ -87,15 +96,19 @@ public class PLNUtils {
 		
 		str = str.toLowerCase();
 		str = removeRT(str);
+		str = tryFixRepeatedChars(str);
+		str = tryFixTwoRepeatedChars(str);
 		str = replaceURLs(str);
 		str = removeURLs(str);
 		str = replaceUSERs(str);
 		str = removeUSERs(str);
 		str = removeDigits(str);
+		
+//		str = removeAccents(str);
 		str = removeNonAsciiChars(str);
+		
 		str = removePunctuation(str);
 		str = removeWhiteSpacesNotNecessary(str);
-		str = tryFixRepeatedChars(str);
 		
 		return str;
 	}
@@ -108,7 +121,7 @@ public class PLNUtils {
 	 * @param str
 	 * @return
 	 */
-	public static boolean isSigla(String str) {
+	public static boolean isSigla(String str, StemmerType algoritm) {
 		
 		if (str.length() >= 2) { 
 			if (!str.substring(0,1).matches("[0-9]")) {
@@ -120,7 +133,7 @@ public class PLNUtils {
 					if (!str.equals("USER") && !str.equals("URL")) {
 					
 						try {
-							Stemmer radicalizador = Stemmer.StemmerFactory(StemmerType.PORTER);
+							Stemmer radicalizador = Stemmer.StemmerFactory(algoritm);
 							
 							String radicalStr = radicalizador.getWordStem(str);
 							
@@ -138,9 +151,9 @@ public class PLNUtils {
 		return false;
 	}
 
-	public static String getRoot(String token) {
+	public static String getRoot(String token, StemmerType algoritm) {
 		try {
-			Stemmer rooter = Stemmer.StemmerFactory(StemmerType.PORTER);
+			Stemmer rooter = Stemmer.StemmerFactory(algoritm);
 			return rooter.getWordStem(token);
 		} catch (PTStemmerException e) {
 			Logger.error(e.getMessage()); 

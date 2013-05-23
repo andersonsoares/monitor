@@ -1,4 +1,4 @@
-@(rootsList: List[Root], count: Long, page: Int, pageLength: Int, orderType: String)
+@(rootsList: List[Root], countRejected: Long, count: Long, page: Int, pageLength: Int, orderType: String)
 
 @import helper._
 
@@ -8,6 +8,16 @@
 		<h1>Roots</h1>
 		
 	    <div class="jetstrap-highlighted well">
+	    	
+	    	<h2>Total Roots: @count</h2>
+	    	<h4>Total Accepted: @(count - countRejected)</h4>
+	    	<h4>Total Rejected: @countRejected</h4>
+	    	
+	    	@if(orderType.equals("count")) {
+	    		<h5><a href="@routes.RootController.paginate(1, 100, "rootWord")">Show Alphabetic Order</a></h5>
+	    	} else {
+	    		<h5><a href="@routes.RootController.paginate(1, 100, "count")">Show Count Order</a></h5>
+	    	}
 	    	<a href="@routes.RootController.pageGenerate()"><button class="btn btn-success">Generate Roots Again!</button></a>
 	    </div>
 	
