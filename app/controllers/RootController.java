@@ -125,7 +125,6 @@ public class RootController extends Controller {
 				
 //					RootService rootService = new RootService();
 //					rootService.generate(eventsList, cutValue, algoritmo);
-					flash("success", "The algoritm is running, refresh this page in a few minutes to see the results");
 				}
 			}
 			

@@ -19,23 +19,33 @@
 			<br/>
 			
 			<label>Select the algoritm</label>
-			<select name="algoritm">
+			<select id="selectAlgoritm" name="algoritm" class="input-medium">
 			@for(algoritm <- algoritms) {
 				<option>@algoritm</option>
 			}
 			</select>
 			
-			<label>
-			Remove acentuation?    <input type="checkbox" name="removeAcentuation">
-			</label>
-			
 			<label>Type the Cut value here</label>
-			<input type="number" name="cutValue" value="50" min="1" max="10000"/>
+			<input type="number" name="cutValue" value="50" min="1" max="10000" class="input-mini"/>
 			
 			<br/>
 			<br/>
-			<input class="btn btn-primary" type="submit" value="Generate!">
+			<div class="form-actions">
+				<input class="btn btn-primary" type="submit" value="Generate!">
+			</div>
 		}
 	</div>
 	
 }
+
+
+<script type="text/javascript">
+		
+	$(document).ready(function() {
+		var selectAlgoritm = jQuery('#selectAlgoritm')
+		
+		selectAlgoritm.tooltip({placement: 'right', title: 'ORENGO: Demorado / Eficiente<br>POTER: RÁPIDO / Ineficiente<br>SAVOY: MEIO TERMO', html: true})
+	});
+	
+	
+</script>

@@ -4,7 +4,18 @@
 
 @main("Twitter Monitor 2.0 - Roots") {
 
-	<div class="container">
+	<div id="progressContainer" class="container">
+		
+		<h3 id="statusMessage"></h3>
+	
+		<div class="progress progress-striped active">
+  			<div id="progressBar" class="bar"></div>
+		</div>
+		
+	</div>
+
+	<div id="container" class="container">
+		<h3 id="statusMessageContainer"></h3>
 		<h1>Roots</h1>
 		
 	    <div class="jetstrap-highlighted well">
@@ -18,13 +29,15 @@
 	    	} else {
 	    		<h5><a href="@routes.RootController.paginate(1, 100, "count")">Show Count Order</a></h5>
 	    	}
-	    	<a href="@routes.RootController.pageGenerate()"><button class="btn btn-success">Generate Roots Again!</button></a>
+	    	<div class="form-actions">
+	    		<a href="@routes.RootController.pageGenerate()"><button class="btn btn-success">Generate Roots Again!</button></a>
+    		</div>
 	    </div>
 	
 		@views.html.paginate(page, pageLength, count.toInt, orderType, routes.RootController.paginate(_,_,_))
 		
 	
-		<div class="row-fluid">
+		<div id="rootsContainer" class="row-fluid">
 			<div class="span12">
 				<table class="table table-hover">
 					<thead>
@@ -135,6 +148,63 @@
 			    }
 			});
 		}
+		
+		
+		$(document).ready(function() {
+			
+			var STARTED = false;
+			
+			var statusMessage = jQuery('#statusMessage');
+			var statusMessageContainer = jQuery('#statusMessageContainer');
+			
+			
+			var container = jQuery('#container');
+			container.hide()
+			
+			var progressContainer = jQuery('#progressContainer');
+			progressContainer.hide()
+			
+			var progressBar = jQuery('#progressBar');
+			var progressParent = progressBar.parent();
+ 			
+			var interv = setInterval(function(){
+				console.log(interv);
+				$.ajax({
+					url: '/roots/generate/status',
+					type: 'GET',
+					success: function(response) {
+						console.log(response)
+						if (response == 'noactivegeneration') {
+							if (STARTED == true) {
+								location.reload();
+							} else {
+								container.fadeIn();	
+								clearInterval(interv);
+							}
+						} else if (response.eventId == 'started') {
+							STARTED = true;
+							progressContainer.fadeIn();
+							container.hide()
+							statusMessage.html('Starting roots generations in few seconds...')
+						} else {
+							progressContainer.fadeIn();
+							var progressNow = response.progress
+							progressBar.width(progressNow*progressParent.width()/100);
+							container.hide()
+							statusMessage.html('Generating roots for event with id: '+response.eventId)
+						}
+					},
+					error: function() {
+						statusMessageContainer.html('Ops, something crashed!');
+						container.fadeIn();
+					}
+				});
+			}, 1000);
+			
+		});
+		
+		
+		
 		
 	</script>
 

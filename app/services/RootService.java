@@ -46,6 +46,8 @@ public class RootService implements Runnable {
 		
 		try {
 			
+			Cache.set("generateRootProgress", new StatusProgress("started", 0.0f));
+			
 			// Start total progress for computing the roots generation
 			int LIMIT = 1500;
 			
@@ -103,7 +105,7 @@ public class RootService implements Runnable {
 					Logger.info(i+" to "+(i+LIMIT)+": Fetched and computed in: "+(System.currentTimeMillis() - startToFetch));
 					float progress = (i + LIMIT) * 100 / totalTweets;
 					
-					Cache.set("generateRootProgress", new StatusProgress(eventId, progress));
+					Cache.set("generateRootProgress", new StatusProgress(eventId.toString(), progress));
 				}
 			}
 			
