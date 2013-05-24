@@ -12,6 +12,7 @@ import models.Root;
 import org.bson.types.ObjectId;
 
 import play.Logger;
+import play.cache.Cache;
 import play.data.Form;
 import play.libs.Akka;
 import play.libs.Json;
@@ -20,6 +21,7 @@ import play.mvc.Result;
 import ptstemmer.Stemmer.StemmerType;
 import scala.concurrent.duration.Duration;
 import services.RootService;
+import system.StatusProgress;
 import views.roots.forms.GenerateRootForm;
 import dao.EventDAO;
 import dao.RootDAO;
@@ -135,4 +137,29 @@ public class RootController extends Controller {
 		}
 		return list();
 	}
+	
+	/**
+	 * action that verifies if there is a generation happening
+	 * and returns the progress (complete %)
+	 * @return
+	 */
+	public Result status() {
+	
+		StatusProgress sp =  (StatusProgress) Cache.get("generateRootProgress");
+		
+		if (sp == null) {
+			return ok("noactivegeneration");
+		}
+		
+		return ok(Json.toJson(sp));
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

@@ -11,7 +11,9 @@ import models.Tweet;
 import org.bson.types.ObjectId;
 
 import play.Logger;
+import play.cache.Cache;
 import ptstemmer.Stemmer.StemmerType;
+import system.StatusProgress;
 import utils.PLNUtils;
 
 import com.google.code.morphia.Key;
@@ -43,7 +45,8 @@ public class RootService implements Runnable {
 	public void run() {
 		
 		try {
-		
+			
+			// Start total progress for computing the roots generation
 			int LIMIT = 1500;
 			
 			TweetDAO tweetDAO = new TweetDAO();
@@ -98,6 +101,9 @@ public class RootService implements Runnable {
 					}
 					
 					Logger.info(i+" to "+(i+LIMIT)+": Fetched and computed in: "+(System.currentTimeMillis() - startToFetch));
+					float progress = (i + LIMIT) * 100 / totalTweets;
+					
+					Cache.set("generateRootProgress", new StatusProgress(eventId, progress));
 				}
 			}
 			
@@ -133,6 +139,8 @@ public class RootService implements Runnable {
 			
 			long finishTime = System.currentTimeMillis();
 			Logger.info("Total time to generate: "+(finishTime-startTime)+" ms");
+			
+			Cache.remove("generateRootProgress");
 			
 		} catch(Exception e) {
 			Logger.error(e.getMessage());
