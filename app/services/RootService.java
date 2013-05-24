@@ -19,7 +19,18 @@ import com.google.code.morphia.Key;
 import dao.RootDAO;
 import dao.TweetDAO;
 
-public class RootService {
+public class RootService implements Runnable {
+
+	
+	private final List<ObjectId> eventsList;
+	private final int cutValue;
+	private final StemmerType algoritm;
+	
+	public RootService(List<ObjectId> eventsList, int cutValue,StemmerType algoritm) {
+		this.eventsList = eventsList;
+		this.cutValue = cutValue;
+		this.algoritm = algoritm;
+	}
 
 	/**
 	 * Method that will receive eventsList and cutValue
@@ -28,94 +39,107 @@ public class RootService {
 	 * @param eventsList
 	 * @param cutValue
 	 */
-	public void generate(List<ObjectId> eventsList, int cutValue, StemmerType algoritm) {
+	@Override
+	public void run() {
 		
-		int LIMIT = 800;
+		try {
 		
-		TweetDAO tweetDAO = new TweetDAO();
-		RootDAO rootDAO = new RootDAO();
-		
-		// Removing all
-		rootDAO.drop();
-		
-		long startTime = System.currentTimeMillis();
-		
-		HashMap<String,Root> roots = new HashMap<String,Root>();
-		
-		for (ObjectId eventId : eventsList) {
+			int LIMIT = 1500;
 			
-			long totalTweets = tweetDAO.createQuery().filter("event", new Key<Event>(Event.class, eventId)).countAll();
+			TweetDAO tweetDAO = new TweetDAO();
+			RootDAO rootDAO = new RootDAO();
 			
-			for (int i=0; i < totalTweets; i+=LIMIT) {
-
-				List<Tweet> list = tweetDAO.createQuery().filter("event", new Key<Event>(Event.class, eventId)).limit(LIMIT).offset(i).retrievedFields(true, "text").asList();
+			// Removing all
+			rootDAO.drop();
+			
+			long startTime = System.currentTimeMillis();
+			
+			HashMap<String,Root> roots = new HashMap<String,Root>();
+			
+			for (ObjectId eventId : eventsList) {
 				
+				long totalTweets = tweetDAO.createQuery().filter("event", new Key<Event>(Event.class, eventId)).countAll();
 				
-				for (Tweet tweet : list) {
-					// TODO: save tweet in the normalizedForm
-					String normalizedText = PLNUtils.normalizedTweet(tweet.getText());
+				for (int i=0; i < totalTweets; i+=LIMIT) {
+	
+					long startToFetch = System.currentTimeMillis();
 					
-					String[] tokens = normalizedText.split(" ");
+					List<Tweet> list = tweetDAO.createQuery().filter("event", new Key<Event>(Event.class, eventId)).limit(LIMIT).offset(i).retrievedFields(true, "text").asList();
 					
-					for (String tokenGenerator : tokens) {
+					
+					for (Tweet tweet : list) {
+						// TODO: save tweet in the normalizedForm
+						String normalizedText = PLNUtils.normalizedTweet(tweet.getText());
+						String[] tokens = normalizedText.split(" ");
 						
-						if (tokenGenerator.length() > 2) {
-							String rootWord = PLNUtils.getRoot(tokenGenerator, algoritm);
-							if (rootWord != null) {
-								// If there is no root, lets add it to the list :)
-								if (!roots.containsKey(rootWord)) {
-									Root root = new Root(rootWord, tokenGenerator);
-									root.setCount(1); // start couting
-									roots.put(rootWord, root);
-								} else {
-									// RootWord is already saved.. lets increase the count, and add
-									// generatorToken to it
-									Root root = roots.get(rootWord);
-									root.setCount(root.getCount() + 1);
-									root.getWordsGenerators().add(tokenGenerator);
+						for (String tokenGenerator : tokens) {
+							
+							if (tokenGenerator.length() > 2) {
+								String rootWord = PLNUtils.getRoot(tokenGenerator, algoritm);
+								if (rootWord != null) {
+									// If there is no root, lets add it to the list :)
+									if (!roots.containsKey(rootWord)) {
+										Root root = new Root(rootWord, tokenGenerator);
+										root.setCount(1); // start couting
+										roots.put(rootWord, root);
+									} else {
+										// RootWord is already saved.. lets increase the count, and add
+										// generatorToken to it
+										Root root = roots.get(rootWord);
+										root.setCount(root.getCount() + 1);
+										root.getWordsGenerators().add(tokenGenerator);
+										
+										roots.put(rootWord, root);
+									}
 									
-									roots.put(rootWord, root);
 								}
-								
 							}
 						}
 					}
+					
+					Logger.info(i+" to "+(i+LIMIT)+": Fetched and computed in: "+(System.currentTimeMillis() - startToFetch));
 				}
 			}
-		}
-		
-		
-		long startTimeToSave = System.currentTimeMillis();
-		
-		Logger.info("Time to compute: "+(startTimeToSave-startTime)+" ms");
-		
-		ArrayList<Root> rootsToSave = new ArrayList<Root>();
-		int i = 0;
-		for (String rootWord : roots.keySet()) {
-		
-			Root root = roots.get(rootWord);
 			
-			// Verifies if the rootWord will be used
-			if (root.getCount() < cutValue) {
-				root.setRemoved(true);
+			
+			long startTimeToSave = System.currentTimeMillis();
+			
+			Logger.info("Time to compute: "+(startTimeToSave-startTime)+" ms");
+			
+			ArrayList<Root> rootsToSave = new ArrayList<Root>();
+			int i = 0;
+			for (String rootWord : roots.keySet()) {
+			
+				Root root = roots.get(rootWord);
+				
+				// Verifies if the rootWord will be used
+				if (root.getCount() < cutValue) {
+					root.setRemoved(true);
+				}
+				rootsToSave.add(root);
+				
+				if (i >= 1000 || (i == (roots.size() - 1))) {
+					rootDAO.saveCollection(rootsToSave);
+					rootsToSave.clear();
+					i = 0;
+				}
+				
+				i++;
 			}
-			rootsToSave.add(root);
+			long finishTimeToSave = System.currentTimeMillis();
+			Logger.info("Time to save on DB: "+(finishTimeToSave-startTimeToSave)+" ms");
 			
-			if (i >= 1000 || (i == (roots.size() - 1))) {
-				rootDAO.saveCollection(rootsToSave);
-				rootsToSave.clear();
-				i = 0;
-			}
+			Logger.info("Found total roots: "+roots.size());
 			
-			i++;
+			long finishTime = System.currentTimeMillis();
+			Logger.info("Total time to generate: "+(finishTime-startTime)+" ms");
+			
+		} catch(Exception e) {
+			Logger.error(e.getMessage());
+			e.printStackTrace();
 		}
-		long finishTimeToSave = System.currentTimeMillis();
-		Logger.info("Time to save on DB: "+(finishTimeToSave-startTimeToSave)+" ms");
+
 		
-		Logger.info("Found total roots: "+roots.size());
-		
-		long finishTime = System.currentTimeMillis();
-		Logger.info("Total time to generate: "+(finishTime-startTime)+" ms");
 	}
 
 }

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import models.Event;
 import models.Root;
@@ -12,10 +13,12 @@ import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.data.Form;
+import play.libs.Akka;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import ptstemmer.Stemmer.StemmerType;
+import scala.concurrent.duration.Duration;
 import services.RootService;
 import views.roots.forms.GenerateRootForm;
 import dao.EventDAO;
@@ -112,10 +115,15 @@ public class RootController extends Controller {
 				System.out.println(algoritmo.name());
 				System.out.println(removeAcentuation);
 				if (eventsList != null) {
-				
-					RootService rootService = new RootService();
-					rootService.generate(eventsList, cutValue, algoritmo);
 					
+					Akka.system().scheduler().scheduleOnce(
+							Duration.create(0, TimeUnit.SECONDS), 
+							new RootService(eventsList, cutValue, algoritmo),
+							Akka.system().dispatcher());
+				
+//					RootService rootService = new RootService();
+//					rootService.generate(eventsList, cutValue, algoritmo);
+					flash("success", "The algoritm is running, refresh this page in a few minutes to see the results");
 				}
 			}
 			
