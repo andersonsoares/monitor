@@ -104,43 +104,53 @@ public class RootController extends Controller {
 	
 	public Result generate() {
 		
-		Form<GenerateRootForm> filledForm = generateRootForm.bindFromRequest();
-		
 		ReturnToView vo = new ReturnToView();
 		
-		try {
-			
-			GenerateRootForm generateRootFormFilled = filledForm.get();
-			
-			if (generateRootFormFilled != null) {
-				List<ObjectId> eventsList = generateRootFormFilled.getSelectedEvents();
-				int cutValue = generateRootFormFilled.getCutValue();
-				StemmerType algoritmo = generateRootFormFilled.getAlgoritm();
-				if (eventsList != null && !eventsList.isEmpty()) {
+		if (Cache.get("generateRootProgress") == null) {
+			// There is no active generation
+		
+			try {
+				
+				Form<GenerateRootForm> filledForm = generateRootForm.bindFromRequest();
+				
+				GenerateRootForm generateRootFormFilled = filledForm.get();
+				
+				if (generateRootFormFilled != null) {
+					List<ObjectId> eventsList = generateRootFormFilled.getSelectedEvents();
+					int cutValue = generateRootFormFilled.getCutValue();
+					StemmerType algoritmo = generateRootFormFilled.getAlgoritm();
+					if (eventsList != null && !eventsList.isEmpty()) {
+						
+						Akka.system().scheduler().scheduleOnce(
+								Duration.create(0, TimeUnit.SECONDS), 
+								new RootService(eventsList, cutValue, algoritmo),
+								Akka.system().dispatcher());
+						
+						vo.setMessage("Starting");
+						vo.setRedirectUrl(routes.RootController.list().toString());
+						
+					} else {
+						vo.setCode(400);
+						vo.setMessage("You must select at least ONE event!");
+					}
 					
-					Akka.system().scheduler().scheduleOnce(
-							Duration.create(0, TimeUnit.SECONDS), 
-							new RootService(eventsList, cutValue, algoritmo),
-							Akka.system().dispatcher());
-					
-					vo.setMessage("Starting");
-					vo.setRedirectUrl(routes.RootController.list().toString());
+					return ok(Json.toJson(vo));
 					
 				} else {
-					vo.setCode(400);
-					vo.setMessage("You must select at least ONE event!");
+					return badRequest();
 				}
 				
-				return ok(Json.toJson(vo));
-				
-			}
-			
-		} catch(Exception e) {
-			Logger.error(e.getMessage());
-			e.printStackTrace();
-			return status(400);
+			} catch(Exception e) {
+				Logger.error(e.getMessage());
+				e.printStackTrace();
+				return status(400);
+			} 
+		} else {
+			vo.setCode(400);
+			vo.setMessage("One generation is already running. You must wait it finish to run another");
+			return ok(Json.toJson(vo));
 		}
-		return ok();
+		
 	}
 	
 	/**
