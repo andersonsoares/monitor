@@ -4,6 +4,9 @@
 GET     /assets/img/glyphicons-halflings-white.png      controllers.Assets.at(path="/public", file="/img/glyphicons-halflings-white.png")
 GET     /assets/img/glyphicons-halflings.png            controllers.Assets.at(path="/public", file="/img/glyphicons-halflings.png")
 
+GET 	/assets/img/arrow-up.png						controllers.Assets.at(path="/public", file="/img/arrow-up.png")
+GET 	/assets/img/arrow-down.png						controllers.Assets.at(path="/public", file="/img/arrow-down.png")
+
 # Home page
 GET     /                       			    @controllers.Application.index()
 GET		/events/create							@controllers.EventController.pageCreate()
@@ -21,6 +24,7 @@ GET		/roots/:orderType/:pageNum/:pageSize	@controllers.RootController.paginate(p
 GET 	/roots/generate/status					@controllers.RootController.status()
 
 POST	/roots/acceptRoot/:rootId				@controllers.RootController.acceptRoot(rootId: String)
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

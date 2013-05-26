@@ -167,6 +167,8 @@
 			var progressBar = jQuery('#progressBar');
 			var progressParent = progressBar.parent();
  			
+			var currentMsg = ""
+			
 			var interv = setInterval(function(){
 				console.log(interv);
 				$.ajax({
@@ -174,24 +176,33 @@
 					type: 'GET',
 					success: function(response) {
 						console.log(response)
-						if (response == 'noactivegeneration') {
+						if (response.map.statusProgress == null) {
 							if (STARTED == true) {
 								location.reload();
 							} else {
 								container.fadeIn();	
 								clearInterval(interv);
 							}
-						} else if (response.eventId == 'started') {
+						} else if (response.map.statusProgress.eventId == 'started') {
 							STARTED = true;
 							progressContainer.fadeIn();
 							container.hide()
+							if (currentMsg != 'The algoritm has just started...') {
+								currentMsg = 'The algoritm has just started...';
+								alertify.success(currentMsg)
+							} 
 							statusMessage.html('Starting roots generations in few seconds...')
 						} else {
 							progressContainer.fadeIn();
-							var progressNow = response.progress
+							var progressNow = response.map.statusProgress.progress
 							progressBar.width(progressNow*progressParent.width()/100);
 							container.hide()
-							statusMessage.html('Generating roots for event with id: '+response.eventId)
+							statusMessage.html('Generating roots for event with id: '+response.map.statusProgress.eventId)
+							if (currentMsg != (progressNow+' % complete')) {
+								currentMsg = progressNow+' % complete'
+								alertify.success(currentMsgs)
+								
+							}
 						}
 					},
 					error: function() {

@@ -4,11 +4,10 @@
 
 @main("Twitter Monitor 2.0 - Roots") {
 
-	
 	<div class="container well">
 		<h1>Select the events to generate the Glossary</h1>
 		
-		@form(routes.RootController.generate()) {
+		@form(routes.RootController.generate(), args='id -> "formGenerate") {
 			@for(event <- eventsList) {
 				<label>
 				<input type="checkbox" id="event-@event.getId()" name="selectedEvents[]" value="@event.getId()"/>
@@ -31,7 +30,7 @@
 			<br/>
 			<br/>
 			<div class="form-actions">
-				<input class="btn btn-primary" type="submit" value="Generate!">
+				<input id="botaoGenerate" class="btn btn-primary button" type="submit" value="Generate!">
 			</div>
 		}
 	</div>
@@ -40,6 +39,32 @@
 
 
 <script type="text/javascript">
+
+	jQuery('#botaoGenerate').on("click", function(e) {
+		e.preventDefault();
+		
+		var formGenerate = jQuery('#formGenerate')
+		
+		$.ajax({
+			url: '/roots',
+			type: 'POST',
+			data: formGenerate.serialize(),
+			success: function(response) {
+				if (response.code == 200) {					
+					alertify.success(response.message)
+					window.location.href = ($(location).attr('origin')+response.redirectUrl)
+					
+				} else {
+					alertify.error(response.message)
+				}
+			},
+			error: function(response) {
+				console.log("erro")
+				
+			}
+		})
+		
+	});
 		
 	$(document).ready(function() {
 		var selectAlgoritm = jQuery('#selectAlgoritm')

@@ -21,6 +21,7 @@ import play.mvc.Result;
 import ptstemmer.Stemmer.StemmerType;
 import scala.concurrent.duration.Duration;
 import services.RootService;
+import system.ReturnToView;
 import system.StatusProgress;
 import views.roots.forms.GenerateRootForm;
 import dao.EventDAO;
@@ -105,6 +106,8 @@ public class RootController extends Controller {
 		
 		Form<GenerateRootForm> filledForm = generateRootForm.bindFromRequest();
 		
+		ReturnToView vo = new ReturnToView();
+		
 		try {
 			
 			GenerateRootForm generateRootFormFilled = filledForm.get();
@@ -112,29 +115,32 @@ public class RootController extends Controller {
 			if (generateRootFormFilled != null) {
 				List<ObjectId> eventsList = generateRootFormFilled.getSelectedEvents();
 				int cutValue = generateRootFormFilled.getCutValue();
-				boolean removeAcentuation = generateRootFormFilled.isRemoveAcentuation();
 				StemmerType algoritmo = generateRootFormFilled.getAlgoritm();
-				System.out.println(algoritmo.name());
-				System.out.println(removeAcentuation);
-				if (eventsList != null) {
+				if (eventsList != null && !eventsList.isEmpty()) {
 					
 					Akka.system().scheduler().scheduleOnce(
 							Duration.create(0, TimeUnit.SECONDS), 
 							new RootService(eventsList, cutValue, algoritmo),
 							Akka.system().dispatcher());
-				
-//					RootService rootService = new RootService();
-//					rootService.generate(eventsList, cutValue, algoritmo);
+					
+					vo.setMessage("Starting");
+					vo.setRedirectUrl(routes.RootController.list().toString());
+					
+				} else {
+					vo.setCode(400);
+					vo.setMessage("You must select at least ONE event!");
 				}
+				
+				return ok(Json.toJson(vo));
+				
 			}
 			
 		} catch(Exception e) {
-			flash().put("error", "You must select at least one event");
 			Logger.error(e.getMessage());
 			e.printStackTrace();
-			return pageGenerate();
+			return status(400);
 		}
-		return list();
+		return ok();
 	}
 	
 	/**
@@ -143,19 +149,14 @@ public class RootController extends Controller {
 	 * @return
 	 */
 	public Result status() {
+		
+		ReturnToView vo = new ReturnToView();
 	
 		StatusProgress sp =  (StatusProgress) Cache.get("generateRootProgress");
+		vo.getMap().put("statusProgress", sp);
 		
-		if (sp == null) {
-			return ok("noactivegeneration");
-		}
-		
-		return ok(Json.toJson(sp));
+		return ok(Json.toJson(vo));
 	}
-	
-	
-	
-	
 	
 	
 	
