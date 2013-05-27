@@ -4,6 +4,7 @@ import java.util.HashSet;
 
 import org.bson.types.ObjectId;
 
+import com.google.code.morphia.Key;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Indexed;
@@ -26,6 +27,9 @@ public class Root {
 	
 	@Indexed
 	private String rootWord;
+	
+	@Indexed
+	private Key<Glossary> glossary;
 	
 	// how many times the root was captured
 	private int count;
@@ -89,6 +93,14 @@ public class Root {
 
 	public void setRemoved(boolean removed) {
 		this.removed = removed;
+	}
+
+	public Key<Glossary> getGlossary() {
+		return glossary;
+	}
+
+	public void setGlossary(Key<Glossary> glossary) {
+		this.glossary = glossary;
 	}
 	
 	

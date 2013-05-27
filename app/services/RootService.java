@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import models.Acronym;
 import models.Event;
+import models.Glossary;
 import models.Root;
 import models.Tweet;
 
@@ -12,26 +14,22 @@ import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.cache.Cache;
-import ptstemmer.Stemmer.StemmerType;
 import system.StatusProgress;
 import utils.PLNUtils;
 
 import com.google.code.morphia.Key;
 
+import dao.AcronymDAO;
+import dao.GlossaryDAO;
 import dao.RootDAO;
 import dao.TweetDAO;
 
 public class RootService implements Runnable {
 
+	private final Glossary glossary;
 	
-	private final List<ObjectId> eventsList;
-	private final int cutValue;
-	private final StemmerType algoritm;
-	
-	public RootService(List<ObjectId> eventsList, int cutValue,StemmerType algoritm) {
-		this.eventsList = eventsList;
-		this.cutValue = cutValue;
-		this.algoritm = algoritm;
+	public RootService(Glossary glossary) {
+		this.glossary = glossary;
 	}
 
 	/**
@@ -48,20 +46,27 @@ public class RootService implements Runnable {
 			
 			Cache.set("generateRootProgress", new StatusProgress("started", 0.0f));
 			
+			GlossaryDAO glossaryDAO = new GlossaryDAO();
+			
+			Key<Glossary> glossaryKey = glossaryDAO.save(glossary);
+			
 			// Start total progress for computing the roots generation
 			int LIMIT = 1500;
 			
 			TweetDAO tweetDAO = new TweetDAO();
 			RootDAO rootDAO = new RootDAO();
+			AcronymDAO acronymDAO = new AcronymDAO();
 			
 			// Removing all
 			rootDAO.drop();
+			acronymDAO.drop();
 			
 			long startTime = System.currentTimeMillis();
 			
 			HashMap<String,Root> roots = new HashMap<String,Root>();
+			HashMap<String, Acronym> acronyms = new HashMap<String, Acronym>();
 			
-			for (ObjectId eventId : eventsList) {
+			for (ObjectId eventId : glossary.getEventsList()) {
 				
 				long totalTweets = tweetDAO.createQuery().filter("event", new Key<Event>(Event.class, eventId)).countAll();
 				
@@ -73,6 +78,22 @@ public class RootService implements Runnable {
 					
 					
 					for (Tweet tweet : list) {
+						
+						// Get Siglas / Acronyms
+						List<String> siglas = PLNUtils.getSiglas(tweet.getText(), glossary.getAlgoritm());
+						for (String acronym : siglas) {
+							if (!acronyms.containsKey(acronym)) {
+								Acronym sigla = new Acronym(glossaryKey, acronym);
+								sigla.setCount(1);
+								acronyms.put(acronym, sigla);
+							} else {
+								Acronym sigla = acronyms.get(acronym);
+								sigla.setCount(sigla.getCount() + 1);
+								acronyms.put(acronym, sigla);
+							}
+						}
+						
+						
 						// TODO: save tweet in the normalizedForm
 						String normalizedText = PLNUtils.normalizedTweet(tweet.getText());
 						String[] tokens = normalizedText.split(" ");
@@ -80,11 +101,12 @@ public class RootService implements Runnable {
 						for (String tokenGenerator : tokens) {
 							
 							if (tokenGenerator.length() > 2) {
-								String rootWord = PLNUtils.getRoot(tokenGenerator, algoritm);
+								String rootWord = PLNUtils.getRoot(tokenGenerator, glossary.getAlgoritm());
 								if (rootWord != null) {
 									// If there is no root, lets add it to the list :)
 									if (!roots.containsKey(rootWord)) {
 										Root root = new Root(rootWord, tokenGenerator);
+										root.setGlossary(glossaryKey);
 										root.setCount(1); // start couting
 										roots.put(rootWord, root);
 									} else {
@@ -121,7 +143,7 @@ public class RootService implements Runnable {
 				Root root = roots.get(rootWord);
 				
 				// Verifies if the rootWord will be used
-				if (root.getCount() < cutValue) {
+				if (root.getCount() < glossary.getCutValue()) {
 					root.setRemoved(true);
 				}
 				rootsToSave.add(root);
@@ -129,6 +151,25 @@ public class RootService implements Runnable {
 				if (i >= 1000 || (i == (roots.size() - 1))) {
 					rootDAO.saveCollection(rootsToSave);
 					rootsToSave.clear();
+					i = 0;
+				}
+				
+				i++;
+			}
+			
+
+			
+			ArrayList<Acronym> acronymsToSave = new ArrayList<Acronym>();
+			i = 0;
+			for (String acronym : acronyms.keySet()) {
+			
+				Acronym sigla = acronyms.get(acronym);
+				
+				acronymsToSave.add(sigla);
+				
+				if (i >= 1000 || (i == (acronyms.size() - 1))) {
+					acronymDAO.saveCollection(acronymsToSave);
+					acronymsToSave.clear();
 					i = 0;
 				}
 				

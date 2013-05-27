@@ -16,6 +16,8 @@ public class GenerateRootForm {
 	
 	private boolean removeAcentuation;
 	
+	private String name;
+	
 	public GenerateRootForm() {}
 
 	public List<ObjectId> getSelectedEvents() {
@@ -48,6 +50,14 @@ public class GenerateRootForm {
 
 	public void setRemoveAcentuation(boolean removeAcentuation) {
 		this.removeAcentuation = removeAcentuation;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 	

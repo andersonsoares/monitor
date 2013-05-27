@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import models.Acronym;
 import models.Event;
+import models.Glossary;
 import models.Root;
 
 import org.bson.types.ObjectId;
@@ -24,6 +26,7 @@ import services.RootService;
 import system.ReturnToView;
 import system.StatusProgress;
 import views.roots.forms.GenerateRootForm;
+import dao.AcronymDAO;
 import dao.EventDAO;
 import dao.RootDAO;
 import enums.Situation;
@@ -69,6 +72,49 @@ public class RootController extends Controller {
 		
 		return ok(views.html.roots.list.render(rootsList, rootsCountRejected, rootsCount,1,100,"count"));
 	}
+	
+	public Result listAcronym() {
+		
+		AcronymDAO dao = new AcronymDAO();
+		
+		List<Acronym> acronymsList = dao.createQuery().order("-count").limit(100).offset(0).asList();
+		long acronymsCount = dao.createQuery().countAll();
+		
+		
+		
+		return ok(views.html.roots.listAcronym.render(acronymsList, acronymsCount,1,100,"count"));
+	}
+	
+
+	public Result paginateAcronym(int pageNum, int pageSize, String orderType) {
+		
+		if (orderType == null || orderType.isEmpty() || pageNum < 1 || pageSize < 1) {
+			return list();
+		} 
+		
+		if (!orderType.equals("count") && !orderType.equals("name")) {
+			return list();
+		}
+		
+		AcronymDAO dao = new AcronymDAO();
+		
+		String order;
+		if (orderType.equals("count")) {
+			order = "-count";
+		} else {
+			order = "name";
+		}
+		
+		int offset = pageNum - 1;
+		for( int i = 0; i < pageNum - 1; i++) {
+			offset += pageSize;
+		}
+		
+		List<Acronym> acronymsList = dao.createQuery().order(order).limit(pageSize).offset(offset).asList();
+		long acronymsCount = dao.createQuery().countAll();
+		return ok(views.html.roots.listAcronym.render(acronymsList, acronymsCount, pageNum, pageSize, orderType));
+	}
+	
 	
 	
 	public Result paginate(int pageNum, int pageSize, String orderType) {
@@ -119,11 +165,15 @@ public class RootController extends Controller {
 					List<ObjectId> eventsList = generateRootFormFilled.getSelectedEvents();
 					int cutValue = generateRootFormFilled.getCutValue();
 					StemmerType algoritmo = generateRootFormFilled.getAlgoritm();
+					String name = generateRootFormFilled.getName();
+					
+					Glossary glossary = new Glossary(name, cutValue, algoritmo, eventsList);
+					
 					if (eventsList != null && !eventsList.isEmpty()) {
 						
 						Akka.system().scheduler().scheduleOnce(
 								Duration.create(0, TimeUnit.SECONDS), 
-								new RootService(eventsList, cutValue, algoritmo),
+								new RootService(glossary),
 								Akka.system().dispatcher());
 						
 						vo.setMessage("Starting");

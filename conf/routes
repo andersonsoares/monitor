@@ -18,8 +18,10 @@ GET 	/roots/generate							@controllers.RootController.pageGenerate()
 POST 	/roots									@controllers.RootController.generate()
 
 
-GET		/roots									@controllers.RootController.list()
-GET		/roots/:orderType/:pageNum/:pageSize	@controllers.RootController.paginate(pageNum: Integer, pageSize: Integer, orderType: String)
+GET		/glossary/roots									@controllers.RootController.list()
+GET		/glossary/acronyms									@controllers.RootController.listAcronym()
+GET		/glossary/roots/:orderType/:pageNum/:pageSize	@controllers.RootController.paginate(pageNum: Integer, pageSize: Integer, orderType: String)
+GET		/glossary/acronyms/:orderType/:pageNum/:pageSize	@controllers.RootController.paginateAcronym(pageNum: Integer, pageSize: Integer, orderType: String)
 
 GET 	/roots/generate/status					@controllers.RootController.status()
 
