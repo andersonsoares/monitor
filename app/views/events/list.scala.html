@@ -52,10 +52,10 @@
 								</td>
 								
 								<td id="situation_@event.getId()">
-									@if(event.getSituation() == "STARTED") {
+									@if(event.getSituation().name == "STARTED") {
 										<script type="text/javascript"> 
 											var interv_@event.getId() = setInterval(function(){
-												jQuery('#situation_@event.getId()').html("@event.getSituation(). Will finish in "+ellapsedTime(new Date(), new Date(@event.getFinishDate().getTime())));
+												jQuery('#situation_@event.getId()').html("@event.getSituation() and will finish in "+ellapsedTime(new Date(), new Date(@event.getFinishDate().getTime())));
 											},1000);
 										</script>
 									} else {
