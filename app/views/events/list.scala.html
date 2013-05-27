@@ -51,7 +51,21 @@
 									}	
 								</td>
 								
-								<td>@event.getSituation()</td>
+								<td id="situation_@event.getId()">
+									@if(event.getSituation == "STARTED") {
+										<script type="text/javascript"> 
+											var interv_@event.getId() = setInterval(function(){
+												jQuery('#situation_@event.getId()').html("@event.getSituation(). Will finish in "+ellapsedTime(new Date(), new Date(@event.getFinishDate().getTime())));
+											},1000);
+										</script>
+									} else {
+										<script type="text/javascript">
+											var interv_@event.getId() = setInterval(function(){
+												jQuery('#situation_@event.getId()').html("@event.getSituation() "+ellapsedTime(new Date(@event.getFinishDate().getTime()), new Date())+ " ago");
+											},1000);
+										</script>
+									}
+								</td>
 								<td>@event.getNrTweets()</td>
 								<td><a href="downloadTweets/@event.getId()">Download</a></td>
 								<td><a href="http://jsonviewer.stack.hu/#http://li216-187.members.linode.com/downloadTweets/@event.getId()" target="_blank">Open in JSON Viewer</a></td>
