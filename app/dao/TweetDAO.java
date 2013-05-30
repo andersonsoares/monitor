@@ -23,7 +23,7 @@ public class TweetDAO extends BaseDAO<Tweet> {
 		List<Key<Event>> eventsKeys = new ArrayList<Key<Event>>();
 		
 		for (ObjectId objectId : eventsList) {
-			eventsKeys.add(new Key<>(Event.class, objectId));
+			eventsKeys.add(new Key<Event>(Event.class, objectId));
 		}
 		
 		return count(createQuery().field("event").in(eventsKeys));
@@ -35,7 +35,7 @@ public class TweetDAO extends BaseDAO<Tweet> {
 		List<Key<Event>> eventsKeys = new ArrayList<Key<Event>>();
 		
 		for (ObjectId objectId : eventsList) {
-			eventsKeys.add(new Key<>(Event.class, objectId));
+			eventsKeys.add(new Key<Event>(Event.class, objectId));
 		}
 		
 		List<Tweet> tweetsList = createQuery().field("event").in(eventsKeys).limit(limit).offset(offset).asList();
