@@ -39,8 +39,8 @@
 				<div class="nav-collapse collapse">
 					<ul class="nav">
 						<li class="active"><a href="@routes.Application.index()">Events</a></li>
-						<li class="active"><a href="@routes.RootController.list()">Roots</a></li>
-						<li><a href="#about">About</a></li>
+						<li class="active"><a href="@routes.GlossaryController.pageListWords()">Glossary</a></li>
+						<!-- <li><a href="#about">About</a></li> -->
 					</ul>
 				</div>
 				<!--/.nav-collapse -->
@@ -66,7 +66,7 @@
 	<script src="@routes.Assets.at("js/alertify.min.js")" type="text/javascript"></script>
 	<script src="@routes.Assets.at("js/bootstrap.min.js")" type="text/javascript"></script>
 	<script src="@routes.Assets.at("js/bootstrap-datetimepicker.min.js")" type="text/javascript"></script>
-	<div class="content">
+	<div id="mainContent" class="content hide">
 		@content
 	</div>
 

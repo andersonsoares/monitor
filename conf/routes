@@ -14,6 +14,13 @@ POST    /events        			                @controllers.EventController.save()
 
 GET		/downloadTweets/:eventId				@controllers.EventController.downloadTweets(eventId: String)
 
+GET		/glossary/words									@controllers.GlossaryController.pageListWords()
+GET		/glossary/words/:orderType/:pageNum/:pageSize	@controllers.GlossaryController.pagePaginateWords(pageNum: Integer, pageSize: Integer, orderType: String)
+GET		/glossary/generateWords							@controllers.GlossaryController.pageGenerateWords()	
+POST 	/glossary										@controllers.GlossaryController.generateWords()
+GET		/glossary/generateWords/status					@controllers.GlossaryController.status()
+
+
 GET 	/roots/generate							@controllers.RootController.pageGenerate()
 POST 	/roots									@controllers.RootController.generate()
 

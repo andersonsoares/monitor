@@ -1,0 +1,69 @@
+@(wordsList: List[Word], count: Long, page: Int, pageLength: Int, orderType: String)
+
+@import helper._
+
+@main("Twitter Monitor 2.0 - Words") {
+
+	<div id="progressContainer" class="container hide">
+		
+		<h3 id="statusMessage"></h3>
+	
+		<div class="progress progress-striped active">
+  			<div id="progressBar" class="bar"></div>
+		</div>
+		
+	</div>
+
+	<div id="container" class="container">
+		<h3 id="statusMessageContainer"></h3>
+		<h1>Words</h1>
+		
+	    <div class="jetstrap-highlighted well">
+	    	
+	    	<h2>Total Words: @count</h2>
+	    	
+	    	@if(orderType.equals("count")) {
+	    		<h5><a href="@routes.GlossaryController.pagePaginateWords(1, 100, "name")">Show Alphabetic Order</a></h5>
+	    	} else {
+	    		<h5><a href="@routes.GlossaryController.pagePaginateWords(1, 100, "count")">Show Count Order</a></h5>
+	    	}
+	    	<div class="form-actions">
+	    		<a href="@routes.GlossaryController.pageGenerateWords()"><button class="btn btn-success">Generate Words Again!</button></a>
+    		</div>
+	    </div>
+	
+		@views.html.paginate(page, pageLength, count.toInt, orderType, routes.GlossaryController.pagePaginateWords(_,_,_))
+		
+	
+		<div id="WordsContainer" class="row-fluid">
+			<div class="span12">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Word</th>
+							<th>Count</th>
+						</tr>
+					</thead>
+					<tbody>
+						@for(word <- wordsList) {
+							<tr>
+								<td></td>
+								<td>@word.getName()</td>
+								<td>@word.getCount()</td>
+							</tr>
+						}		
+					</tbody> 
+					
+				</table>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+	
+	
+		
+	</script>
+
+}
