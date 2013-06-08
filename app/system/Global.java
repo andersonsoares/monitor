@@ -54,6 +54,7 @@ public class Global extends GlobalSettings {
 		
 		boolean startStream = app.configuration().getBoolean("startStream");
 		if (startStream) {
+			Logger.info("Iniciando Servico de Stream");
 			createTwitterStreams();
 		}
 		
@@ -61,6 +62,7 @@ public class Global extends GlobalSettings {
 		
 		boolean startScheduler = app.configuration().getBoolean("startScheduler");
 		if (startScheduler) {
+			Logger.info("Iniciando Jobs");
 			startSchedulers();
 		}
 	   
