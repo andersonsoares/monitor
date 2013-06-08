@@ -46,20 +46,40 @@ public class Global extends GlobalSettings {
 	@Override
 	public void onStart(Application app) {
 		
+		
+		
 		startGlobalVars(app);
 		
 		createMongoDbConnection(app);
 		
-		createTwitterStreams();
+		boolean startStream = app.configuration().getBoolean("startStream");
+		if (startStream) {
+			createTwitterStreams();
+		}
 		
 		createCache();
 		
-		startSchedulers();
+		boolean startScheduler = app.configuration().getBoolean("startScheduler");
+		if (startScheduler) {
+			startSchedulers();
+		}
 	   
 	}
 	
 	
 	private void startGlobalVars(Application app) {
+		
+		CONSUMER_KEY1 = 		app.configuration().getString("twitter.consumer_key1");
+		CONSUMER_SECRET1 = 		app.configuration().getString("twitter.consumer_secret1");
+		ACCESS_TOKEN1 = 		app.configuration().getString("twitter.access_token1");
+		ACCESS_TOKEN_SECRET1 = 	app.configuration().getString("twitter.access_token_secret1");
+		
+		CONSUMER_KEY2 = 		app.configuration().getString("twitter.consumer_key2");
+		CONSUMER_SECRET2 = 		app.configuration().getString("twitter.consumer_secret2");
+		ACCESS_TOKEN2 = 		app.configuration().getString("twitter.access_token2");
+		ACCESS_TOKEN_SECRET2 = 	app.configuration().getString("twitter.access_token_secret2");
+		
+		
 		
 		Constants.CACHE_MAX_TWEETS 		= app.configuration().getInt("cache.maxtweets");
 		Constants.CACHE_MAX_USERTWEETS 	= app.configuration().getInt("cache.maxusertweets");
@@ -223,15 +243,15 @@ public class Global extends GlobalSettings {
 			);
 	}
 	
-	private static String CONSUMER_KEY1 = "2Kvke6rMIvMwLhBACfnvjw";
-	private static final String CONSUMER_SECRET1 = "uNdKMLaHwU2QIqDcp5m0fhG8MvvSdTEb8s6OGQmDs0";
-	private static final String ACCESS_TOKEN1 = "728282665-qRaW39nLguHdVJAnHnKlbYSnrN6Hyv1iOkk99Y";
-	private static final String ACCESS_TOKEN_SECRET1 = "9fbfS9FtPkRfAFUheW7Mep5shw4fJT83OBxvsZHbs";
+	private static String CONSUMER_KEY1;
+	private static String CONSUMER_SECRET1;
+	private static String ACCESS_TOKEN1;
+	private static String ACCESS_TOKEN_SECRET1;
 
-	private static String CONSUMER_KEY2 = "1fUyBflftkkW2zsxspwDQ";
-	private static final String CONSUMER_SECRET2 = "STyruGMShCt3nAwBaITT1N3iute7bXIo3TvUTLsyxCw";
-	private static final String ACCESS_TOKEN2 = "1366473476-cbXy2moLqFComM1o2pGt1oneWMfLLfjMmgSXxPL";
-	private static final String ACCESS_TOKEN_SECRET2 = "DzpRIUPT1Rp9ovMkwaRGBGBPQOnVX53VgNjULcNy8";
+	private static String CONSUMER_KEY2;
+	private static String CONSUMER_SECRET2;
+	private static String ACCESS_TOKEN2;
+	private static String ACCESS_TOKEN_SECRET2;
 	
 	// Creating a Guice Injector for Dependency Injection
 	private static final Injector INJECTOR = createInjector(); 
