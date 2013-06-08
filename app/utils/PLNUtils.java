@@ -1,8 +1,12 @@
 package utils;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import play.Logger;
@@ -23,8 +27,24 @@ public class PLNUtils {
 		return str.replaceAll("((www\\.[\\s]+)|(https?://[^\\s]+))", "URL");
 	}
 	
+	public static String replaceAndRemoveURLs(String str) {
+		return str.replaceAll("((www\\.[\\s]+)|(https?://[^\\s]+))", "");
+	}
+	
 	public static String replaceUSERs(String str) {
 		return str.replaceAll("@[^\\s]+", "USER");
+	}
+	
+	public static String replaceAndRemoveUSERs(String str) {
+		return str.replaceAll("@[^\\s]+", "");
+	}
+	
+	public static String replaceHASHTAG(String str) {
+		return str.replaceAll("#[^\\s]+", "HASHTAG");
+	}
+	
+	public static String replaceAndRemoveHASHTAG(String str) {
+		return str.replaceAll("#[^\\s]+", "");
 	}
 	
 	public static String removeAccents(String str) {
@@ -63,6 +83,10 @@ public class PLNUtils {
 	
 	public static String removeUSERs(String str) {
 		return str.replaceAll("USER", " ");
+	}
+	
+	public static String removeHASHTAG(String str) {
+		return str.replaceAll("HASHTAG", " ");
 	}
 	
 	public static String removeDigits(String str) {
@@ -160,5 +184,80 @@ public class PLNUtils {
 		}
 		return null;
 	}
+	
+	public static HashSet<String> readDictionary(boolean removeAccents) {
+		
+		
+		long inicio = System.currentTimeMillis();
+		HashSet<String> words = new HashSet<String>();
+		
+		
+		try {
+		
+			File file = new File("dicionario.txt");
+			
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			
+			String str;
+			while((str = br.readLine()) != null) {
+				if (removeAccents) {
+					words.add(PLNUtils.removeAccents(str.toLowerCase()));
+				} else {
+					words.add(str.toLowerCase());
+				}
+				
+				
+			}
+			
+			br.close();
+			Logger.info("Dictionary loaded in "+(System.currentTimeMillis() - inicio)+" ms");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return words;
+	}
+	
+	public static float getCorrectRate(String tweet, HashSet<String> dicionario, boolean considerHashtags, boolean considerURLs, boolean considerUSERs) {
+		
+		tweet = PLNUtils.removeRT(tweet);
+		
+		if (considerHashtags) {
+			tweet = PLNUtils.replaceHASHTAG(tweet);			
+		} else {
+			tweet = PLNUtils.replaceAndRemoveHASHTAG(tweet);
+		}
+		if (considerURLs) {
+			tweet = PLNUtils.replaceURLs(tweet);			
+		} else {
+			tweet = PLNUtils.replaceAndRemoveURLs(tweet);
+		}
+		if (considerUSERs) {
+			tweet = PLNUtils.replaceUSERs(tweet);
+		} else {
+			tweet = PLNUtils.replaceAndRemoveUSERs(tweet);
+		}
+		
+		tweet = PLNUtils.removeDigits(tweet);
+		
+		tweet = PLNUtils.removePunctuation(tweet);
+		
+		tweet = PLNUtils.removeWhiteSpacesNotNecessary(tweet);
+		
+		String[] tokens = tweet.split(" ");
+		
+		int correctWordsCount = 0;
+		for (String string : tokens) {
+			if (dicionario.contains(string.toLowerCase())) {
+				correctWordsCount++;
+			}	
+		}
+		
+		float rate = (float)correctWordsCount / tokens.length;
+		
+		return rate;
+	}
+	
+	
 	
 }
