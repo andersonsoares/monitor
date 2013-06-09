@@ -67,6 +67,7 @@ public class Event {
 	 */
 	private int nrTweets;
 	
+	
 	// ---------------------------------------------------------------------
 	
 	// Constructors

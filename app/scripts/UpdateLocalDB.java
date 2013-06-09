@@ -74,8 +74,8 @@ public class UpdateLocalDB {
 		/*
 		 * LOCAL CONF
 		 */
-		String userDb = 	"aers";
-		char[] passDb = 	"aers123".toCharArray();
+		String userDb = 	"monitor";
+		char[] passDb = 	"monitor123".toCharArray();
 		String hostDb = 	"127.0.0.1";
 		int portDb =	 	27017;
 		String database = 	"monitor";

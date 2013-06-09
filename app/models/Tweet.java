@@ -37,6 +37,8 @@ public class Tweet {
 	private boolean normalized;
 	private String normalizedText;
 	
+	private float correctRate;
+	
 	private Date createdAt;
 	
 	// Default Constructor
@@ -132,6 +134,16 @@ public class Tweet {
 
 	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
+	}
+
+
+	public float getCorrectRate() {
+		return correctRate;
+	}
+
+
+	public void setCorrectRate(float correctRate) {
+		this.correctRate = correctRate;
 	}
 	
 }

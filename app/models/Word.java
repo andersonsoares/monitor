@@ -13,21 +13,17 @@ public class Word {
 	@Id
 	private ObjectId id;
 	
-	@Indexed
 	private String name;
 	
 	@Indexed
-	private Key<Glossary> glossary;
+	private Key<Dictionary> dictionary;
 
-	private int count;
-	
 	private boolean removed;
 	
 	public Word() {}
 
-	public Word(String name, Integer count) {
+	public Word(String name) {
 		this.name = name;
-		this.count = count; 	
 	}
 
 	public ObjectId getId() {
@@ -46,20 +42,12 @@ public class Word {
 		this.name = name;
 	}
 
-	public Key<Glossary> getGlossary() {
-		return glossary;
+	public Key<Dictionary> getDictionary() {
+		return dictionary;
 	}
 
-	public void setGlossary(Key<Glossary> glossary) {
-		this.glossary = glossary;
-	}
-
-	public int getCount() {
-		return count;
-	}
-
-	public void setCount(int count) {
-		this.count = count;
+	public void setDictionary(Key<Dictionary> dictionary) {
+		this.dictionary = dictionary;
 	}
 
 	public boolean isRemoved() {
