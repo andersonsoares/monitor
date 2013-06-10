@@ -5,9 +5,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import models.Dictionary;
+import models.Word;
+import models.forms.AddWordForm;
 import models.forms.DictionaryForm;
 
 import org.bson.types.ObjectId;
+
+import com.google.code.morphia.Key;
 
 import play.cache.Cache;
 import play.data.Form;
@@ -19,11 +23,14 @@ import scala.concurrent.duration.Duration;
 import services.FillDictionaryService;
 import system.ReturnToView;
 import system.ValidationError;
+import utils.PLNUtils;
 import dao.DictionaryDAO;
+import dao.WordDAO;
 
 public class DictionaryController extends Controller {
 
 	final static Form<DictionaryForm> formDictionary = Form.form(DictionaryForm.class);
+	final static Form<AddWordForm> formAddWord = Form.form(AddWordForm.class);
 	
 	public Result pageDetails(String dictionaryId) {
 		try {
@@ -33,8 +40,9 @@ public class DictionaryController extends Controller {
 			Dictionary dictionary = dao.findById(id);
 			
 			if (dictionary != null) {
-				System.out.println(dictionary.getName());
+				
 				return ok(views.html.dictionary.details.render(dictionary));
+				
 			} else {
 				return badRequest();
 			}
@@ -45,8 +53,42 @@ public class DictionaryController extends Controller {
 		}
 	}
 	
-	public Result pageCreate() {
-		return ok(views.html.dictionary.create.render());
+	public Result getWords(String dictionaryId, int limit, int pageNum) {
+		try {
+			ObjectId id = new ObjectId(dictionaryId);
+			
+			DictionaryDAO dao = new DictionaryDAO();
+			Dictionary dictionary = dao.findById(id);
+			
+			if (dictionary != null) {
+				ReturnToView vo = new ReturnToView();
+				
+				WordDAO wordDAO = new WordDAO();
+				List<Word> wordsList = wordDAO.listByDictionaryId(id, limit, (pageNum * limit));
+				
+				HashMap<String, Object> mapa = new HashMap<String, Object>();
+				
+				mapa.put("words", wordsList);
+				vo.setMap(mapa);
+				
+				return ok(Json.toJson(vo)); 
+				
+			} else {
+				return badRequest();
+			}
+			
+		} catch(IllegalArgumentException e) {
+			e.printStackTrace();
+			return badRequest();
+		}
+	}
+	
+	public Result pageList() {
+		
+		DictionaryDAO dao = new DictionaryDAO();
+		List<Dictionary> dictionaryList = dao.listAll();
+		
+		return ok(views.html.dictionary.list.render(dictionaryList));
 	}
 	
 	/**
@@ -63,8 +105,12 @@ public class DictionaryController extends Controller {
 		
 			Form<DictionaryForm> form = formDictionary.bindFromRequest();
 			DictionaryForm d = form.get();
-			
-			Dictionary dic = new Dictionary(d.getName(), d.getDescricao());
+			Dictionary dic = null;
+			if (d.getConsiderAccents() == null) {
+				dic = new Dictionary(d.getName(), d.getDescricao(), false);
+			} else {
+				dic = new Dictionary(d.getName(), d.getDescricao(), true);
+			}
 			
 			List<ValidationError> result = dic.validate();
 			
@@ -76,7 +122,6 @@ public class DictionaryController extends Controller {
 					dao.save(dic);
 					
 				} else {
-					System.out.println();
 					// start scheduler to fill dictionary with 'dictionary.txt'
 					
 					Akka.system().scheduler().scheduleOnce(
@@ -117,18 +162,66 @@ public class DictionaryController extends Controller {
 		return TODO;
 	}
 	
-	
-	public Result pageAddWord() {
-		return TODO;
-	}
-	
 	/**
 	 * Adiciona uma word ao dicionario
 	 * @param word
 	 * @return
 	 */
-	public Result addWord(String word) {
-		return TODO;
+	public Result addWord() {
+		
+		Form<AddWordForm> form = formAddWord.bindFromRequest();
+		
+		AddWordForm addWordForm = form.get();
+		String wordString = addWordForm.getWordString();
+		
+		try {
+			
+			ObjectId id = new ObjectId(addWordForm.getDictionaryId());
+			
+			DictionaryDAO dao = new DictionaryDAO();
+			Dictionary dictionary = dao.findById(id);
+			
+			if (dictionary != null) {
+				ReturnToView vo = new ReturnToView();
+				
+				Word word = new Word(wordString);
+				word.setDictionary(new Key<Dictionary>(Dictionary.class, id));
+				
+				if (dictionary.isConsiderAccents() == false) {
+					word.setName(PLNUtils.removeAccents(word.getName()));
+				}
+				
+				List<ValidationError> result = word.validate();
+				
+				if (result.isEmpty()) {
+					
+					WordDAO wordDAO = new WordDAO();
+					wordDAO.save(word);
+					
+					dictionary.setTotalWords(dictionary.getTotalWords() + 1);
+					dao.save(dictionary);
+					
+					vo.setMessage("Word added successfully to the dictionary");
+				} else {
+					// validation failed...
+					vo.setCode(400);
+					vo.setMessage("Ooops... something wrong!");
+					HashMap<String, Object> mapa = new HashMap<String, Object>();
+					mapa.put("errors", result);
+					vo.setMap(mapa);
+				}
+				
+				
+				return ok(Json.toJson(vo)); 
+				
+			} else {
+				return badRequest();
+			}
+			
+		} catch(IllegalArgumentException e) {
+			e.printStackTrace();
+			return badRequest();
+		}
 	}
 	
 	/**

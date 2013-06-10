@@ -11,6 +11,8 @@ public class DictionaryForm {
 	// preencher o dicionario com o txt ja existente
 	private Boolean fillDictionary;
 	
+	private Boolean considerAccents;
+	
 	public DictionaryForm() {}
 
 	public String getName() {
@@ -37,13 +39,23 @@ public class DictionaryForm {
 		this.fillDictionary = fillDictionary;
 	}
 	
+	public Boolean getConsiderAccents() {
+		return considerAccents;
+	}
+	
+	public void setConsiderAccents(Boolean considerAccents) {
+		this.considerAccents = considerAccents;
+	}
+
 	public Dictionary getDictionary() {
 		Dictionary d = new Dictionary();
 		d.setName(name);
 		d.setDescricao(descricao);
+		d.setConsiderAccents(considerAccents);
 		
 		return d;
 	}
+
 	
 	
 }

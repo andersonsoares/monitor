@@ -1,12 +1,17 @@
 package scripts;
 
+import java.net.UnknownHostException;
 import java.util.HashSet;
+
+import models.Event;
+import models.Root;
+import models.Tweet;
+
+import utils.PLNUtils;
 
 import com.google.code.morphia.Datastore;
 import com.google.code.morphia.Morphia;
 import com.mongodb.MongoClient;
-
-import utils.PLNUtils;
 
 public class SetCorrectRateOnTweets {
 	
@@ -19,27 +24,16 @@ public class SetCorrectRateOnTweets {
 	
 	public static void main(String[] args) {
 		
-		String str = "AC: sobrinho de governador tem regalias na prisão, dizem agentes http://t.co/f9YVrvnq60 #TerraPolícia";
 		
-		str = PLNUtils.removeRT(str);
-		str = PLNUtils.replaceURLs(str);
-		str = PLNUtils.replaceUSERs(str);
-		str = PLNUtils.replaceHASHTAG(str);
-		
-		str = PLNUtils.removeDigits(str);
-		
-		str = PLNUtils.removePunctuation(str);
-		str = PLNUtils.removeWhiteSpacesNotNecessary(str);
-		
-		System.out.println(str);
-		
-//		HashSet<String> dictionary = PLNUtils.readDictionary(false);
+		HashSet<String> dictionary = PLNUtils.readDictionary(false);
 		
 		
-//		System.out.println("Iniciando conexoes com os bancos");
+		System.out.println("Iniciando conexoes com os bancos");
 		
 		// create connection with my local db
-//		connectToLocalMongo();
+		connectToLocalMongo();
+		
+		
 		
 		
 		
@@ -47,22 +41,35 @@ public class SetCorrectRateOnTweets {
 	}
 	
 	
-	public static float getCorrectRate(String tweet) {
-		
-		String str = tweet;
-		
-		
-		str = PLNUtils.removeRT(str);
-		str = PLNUtils.replaceURLs(str);
-		str = PLNUtils.replaceUSERs(str);
-		str = PLNUtils.replaceHASHTAG(str);
-		
-		str = PLNUtils.removeDigits(str);
-		
-		str = PLNUtils.removePunctuation(str);
-		str = PLNUtils.removeWhiteSpacesNotNecessary(str);
-		
-		return 0f;
+	
+	private static void connectToLocalMongo() {
+		/*
+		 * LOCAL CONF
+		 */
+		String userDb = 	"aers";
+		char[] passDb = 	"aers123".toCharArray();
+		String hostDb = 	"127.0.0.1";
+		int portDb =	 	27017;
+		String database = 	"monitor";
+		try {
+			mongoLocal = new MongoClient(hostDb, portDb);
+			morphiaLocal = new Morphia();
+			
+			morphiaLocal.map(Event.class);
+			morphiaLocal.map(Root.class);
+			morphiaLocal.map(Tweet.class);
+			
+			datastoreLocal = morphiaLocal.createDatastore(mongoLocal, database, userDb, passDb);
+			
+			datastoreLocal.ensureIndexes();   
+			datastoreLocal.ensureCaps();
+			
+			System.out.println("Connected to LOCAL MongoDB [" + mongoLocal.debugString() + "] database [" + datastoreLocal.getDB().getName() + "]");
+			
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
 	}
+
 
 }

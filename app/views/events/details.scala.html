@@ -1,0 +1,145 @@
+@(event: models.Event, dictionariesList: List[models.Dictionary]) 
+
+@import helper._
+
+@main("Twitter Monitor") {
+
+	<div class="container">
+		<h1>@event.getName()</h1>
+		<h4>@event.getNrTweets() tweets</h4>
+		
+		<ul class="nav nav-tabs" id="tabEvents">
+		  <li class="active"><a href="#details" data-toggle="tab">Details</a></li>
+		  <li><a href="#getTweets" data-toggle="tab">Get Tweets</a></li>
+		</ul>
+		 
+		<div class="tab-content">
+		
+			<!-- TAB DETAILS -->
+			<div class="tab-pane active" id="details">oi</div>
+		  
+			<!-- TAB GET_TWEETS -->
+ 			<div class="tab-pane" id="getTweets">
+ 			
+ 				<div class="row-fluid">
+ 				
+ 			
+ 				<form action="@routes.EventController.getTweets()" class="form-horizontal" method="POST">
+ 				<div class="span6">
+					<fieldset>
+					<!-- Multiple Radios -->
+					<div class="control-group">
+					  <label class="control-label" for="recoverAll">Select Tweets</label>
+					  <div class="controls">
+					    <label class="radio" for="recoverAll-0">
+					      <input type="radio" name="recoverAll" id="recoverAll-0" value="true" checked="checked">
+					      All
+					    </label>
+					    <label class="radio" for="recoverAll-1">
+					      <input type="radio" name="recoverAll" id="recoverAll-1" value="false">
+					      Only with 'corrects' words
+					    </label>
+					  </div>
+					</div>
+					<input type="hidden" name="eventId" value="@event.getId().toString()">
+					<div id="divFilters" class="hide">
+						<!-- Select Basic -->
+						<div class="control-group">
+						  <label class="control-label" for="dictionaryId">Select the dictionary with correct words</label>
+						  <div class="controls">
+						    <select id="dictionaryId" name="dictionaryId" class="input-xlarge">
+						    	@for(dictionary <- dictionariesList) {
+						    		<option value="@dictionary.getId().toString()">@dictionary.getName()</option>
+					    		}
+						    </select>
+						  </div>
+						</div>
+						
+						<!-- Appended Input-->
+						<div class="control-group">
+						  <label class="control-label" for="correctRate">Correct Rate</label>
+						  <div class="controls">
+						    <div class="input-append">
+						      <input id="correctRate" name="correctRate" class="input-mini" value="70" type="text">
+						      <span class="add-on">%</span>
+						    </div>
+						    
+						  </div>
+						</div>
+						
+						<!-- Multiple Checkboxes -->
+						<div class="control-group">
+						  <label class="control-label" for="considerWhat">Also consider correct</label>
+						  <div class="controls">
+						    <label class="checkbox" for="considerWhat-0">
+						      <input type="checkbox" name="considerWhat[]" id="considerWhat-0" value="siglas">
+						      siglas
+						    </label>
+						    <label class="checkbox" for="considerWhat-1">
+						      <input type="checkbox" name="considerWhat[]" id="considerWhat-1" value="urls">
+						      urls
+						    </label>
+						    <label class="checkbox" for="considerWhat-2">
+						      <input type="checkbox" name="considerWhat[]" id="considerWhat-2" value="users">
+						      @@user
+						    </label>
+						    <label class="checkbox" for="considerWhat-3">
+						      <input type="checkbox" name="considerWhat[]" id="considerWhat-3" value="hashtags">
+						      #hashtags
+						    </label>
+						  </div>
+						</div>
+					</div>
+					</fieldset>
+					
+				</div>
+				
+				<div class="span6">
+					<div class="control-group">
+					  <div class="controls">
+					    <button id="singlebutton" name="singlebutton" class="btn btn-primary">Get tweets</button>
+					  </div>
+					</div>
+				</div> <!-- end span -->
+					
+				</form>
+				
+				
+				
+			</div> <!-- end row-fluid -->
+			</div>
+		  
+		  
+		  </div>
+		
+	</div>
+	
+
+
+ 
+
+	<script type="text/javascript">
+	
+		$(document).ready(function() {
+			
+			jQuery('#mainContent').fadeIn()
+			
+			
+		})
+		
+		$("input[type='radio']").change(function () {
+			var selection=$(this).val();
+			
+			if (selection == "false") {
+				jQuery('#divFilters').fadeIn()
+			} else {
+				jQuery('#divFilters').fadeOut()
+			}
+		});
+		
+		$('a[data-toggle="tab"]').on('shown', function (e) {
+		  e.target // activated tab
+		  e.relatedTarget // previous tab
+		})
+	</script>
+}

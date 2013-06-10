@@ -1,4 +1,4 @@
-
+@(dictionaryList: List[models.Dictionary])
 @import helper._
 
 @main("Twitter Monitor") {
@@ -51,12 +51,47 @@
 			  </div>
 			</div>
 			
+			<div class="control-group">
+			  <label class="control-label" for="considerAccents">Considering accents?</label>
+			  <div class="controls">
+			    <label class="checkbox" for="considerAccents-0">
+			      <input type="checkbox" name="considerAccents" id="considerAccents-0" checked="checked">
+			      Check if you want your dictionary consider words accents
+			    </label>
+			  </div>
+			</div>
+			
 			</fieldset>
-			</form>
 			<div class="form-actions">
 				<button id="sendButton" type="submit" class="btn btn-large btn-primary">Create</button>
 			</div>
 		</form>
+		
+		<table class="table table-striped">
+			
+			<thead>
+	        <tr>
+	        	<th>#</th>
+	            <th>Dictionary name</th>
+	            <th>Considering accents?</th>
+	            <th>Created At</th>
+	            <th></th>
+	        </tr>
+	    </thead>
+	    <tbody>
+	        @for(dictionary <- dictionaryList) {
+	        	<tr>
+	        		<td></td>
+	        		<td>@dictionary.getName() (@dictionary.getTotalWords words)</td>
+	        		<td>@dictionary.isConsiderAccents()</td>
+	        		<td>@dictionary.getCreatedAt().format("dd/MM/yyyy HH:mm:ss") </td>
+	        		<td><a href="@routes.DictionaryController.pageDetails(dictionary.getId().toString())">Details</td>
+	        	</tr>
+	        }
+	    </tbody>
+		
+		</table>
+		
 	</div>
 
 <script type="text/javascript">

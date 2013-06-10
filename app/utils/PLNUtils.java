@@ -185,7 +185,7 @@ public class PLNUtils {
 		return null;
 	}
 	
-	public static HashSet<String> readDictionary(boolean removeAccents) {
+	public static HashSet<String> readDictionary(boolean considerAccents) {
 		
 		
 		long inicio = System.currentTimeMillis();
@@ -200,10 +200,10 @@ public class PLNUtils {
 			
 			String str;
 			while((str = br.readLine()) != null) {
-				if (removeAccents) {
-					words.add(PLNUtils.removeAccents(str.toLowerCase()));
-				} else {
+				if (considerAccents) {
 					words.add(str.toLowerCase());
+				} else {
+					words.add(PLNUtils.removeAccents(str.toLowerCase()));
 				}
 				
 				
@@ -248,9 +248,14 @@ public class PLNUtils {
 		
 		int correctWordsCount = 0;
 		for (String string : tokens) {
-			if (dicionario.contains(string.toLowerCase())) {
+			if (string.equals("HASHTAG") || string.equals("USER") || string.equals("URL") || string.equals("SIGLAS")) {
 				correctWordsCount++;
-			}	
+			} else {
+				if (dicionario.contains(string.toLowerCase())) {
+					correctWordsCount++;
+				}	
+			}
+				
 		}
 		
 		float rate = (float)correctWordsCount / tokens.length;

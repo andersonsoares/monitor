@@ -43,4 +43,9 @@ public class TweetDAO extends BaseDAO<Tweet> {
 		return tweetsList;
 	}
 
+	public long countAll(ObjectId id) {
+		
+		return createQuery().filter("event", new Key<Event>(Event.class, id)).countAll();
+	}
+
 }

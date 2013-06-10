@@ -1,11 +1,18 @@
 package models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bson.types.ObjectId;
+
+import system.ValidationError;
 
 import com.google.code.morphia.Key;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Indexed;
+
+import dao.WordDAO;
 
 @Entity("words")
 public class Word {
@@ -56,6 +63,29 @@ public class Word {
 
 	public void setRemoved(boolean removed) {
 		this.removed = removed;
+	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
+	
+	public List<ValidationError> validate() {
+		
+		List<ValidationError> errors = new ArrayList<ValidationError>();
+		
+		if (name == null || name.isEmpty()) {
+			errors.add(new ValidationError("name", "Word name cant be empty"));
+		}
+		
+		WordDAO wordDAO = new WordDAO();
+		Word word = wordDAO.findByName(name, (ObjectId) dictionary.getId());
+		
+		if (word != null) {
+			errors.add(new ValidationError("name", "Word name already exists on this dictionary"));
+		}
+		
+		return errors;
 	}
 	
 }

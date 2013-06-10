@@ -35,7 +35,7 @@ public class FillDictionaryService implements Runnable {
 		
 		Key<Dictionary> dictionaryKey = dao.save(dicionario);
 		
-		HashSet<String> defaultDictionary = PLNUtils.readDictionary(true);
+		HashSet<String> defaultDictionary = PLNUtils.readDictionary(dicionario.isConsiderAccents());
 		
 		ArrayList<Word> wordsToSave = new ArrayList<Word>();
 		int i = 0;
@@ -57,6 +57,8 @@ public class FillDictionaryService implements Runnable {
 			totalCount++;
 		}
 		
+		dicionario.setTotalWords(defaultDictionary.size());
+		dao.save(dicionario);
 		
 		Logger.info("Created array with words... now saving");
 		Logger.info("Time elapsed: "+(System.currentTimeMillis() - initialTime)+" ms");

@@ -28,6 +28,10 @@ public class Dictionary {
 	
 	private String descricao;
 
+	private int totalWords;
+	
+	private boolean considerAccents;
+	
 	private Date createdAt;
 	
 	public Dictionary() {
@@ -45,6 +49,15 @@ public class Dictionary {
 		this.name = name;
 		this.nameLowerCase = name.toLowerCase();
 		this.descricao = descricao;
+	}
+
+	public Dictionary(String name, String descricao, Boolean considerAccents) {
+		this.createdAt = new Date(System.currentTimeMillis());
+		this.name = name;
+		this.nameLowerCase = name.toLowerCase();
+		this.descricao = descricao;
+		this.considerAccents = considerAccents;
+		
 	}
 
 	public ObjectId getId() {
@@ -94,6 +107,22 @@ public class Dictionary {
 		
 		return errors;
 		
+	}
+
+	public int getTotalWords() {
+		return totalWords;
+	}
+
+	public void setTotalWords(int totalWords) {
+		this.totalWords = totalWords;
+	}
+
+	public boolean isConsiderAccents() {
+		return considerAccents;
+	}
+
+	public void setConsiderAccents(boolean considerAccents) {
+		this.considerAccents = considerAccents;
 	}
 	
 

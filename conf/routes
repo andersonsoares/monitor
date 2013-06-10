@@ -12,27 +12,18 @@ GET     /                       			    @controllers.Application.index()
 GET		/events/create							@controllers.EventController.pageCreate()
 POST    /events        			                @controllers.EventController.save()
 
+POST	/events/getTweets						@controllers.EventController.getTweets()
+GET		/events/:eventId						@controllers.EventController.pageDetails(eventId: String)
+				
+
 GET		/downloadTweets/:eventId				@controllers.EventController.downloadTweets(eventId: String)
 
-GET		/glossary/words									@controllers.GlossaryController.pageListWords()
-GET		/glossary/words/:orderType/:pageNum/:pageSize	@controllers.GlossaryController.pagePaginateWords(pageNum: Integer, pageSize: Integer, orderType: String)
-GET		/glossary/generateWords							@controllers.GlossaryController.pageGenerateWords()	
-POST 	/glossary										@controllers.GlossaryController.generateWords()
-GET		/glossary/generateWords/status					@controllers.GlossaryController.status()
-
-
-GET 	/roots/generate							@controllers.RootController.pageGenerate()
-POST 	/roots									@controllers.RootController.generate()
-
-
-GET		/glossary/roots									@controllers.RootController.list()
-GET		/glossary/acronyms									@controllers.RootController.listAcronym()
-GET		/glossary/roots/:orderType/:pageNum/:pageSize	@controllers.RootController.paginate(pageNum: Integer, pageSize: Integer, orderType: String)
-GET		/glossary/acronyms/:orderType/:pageNum/:pageSize	@controllers.RootController.paginateAcronym(pageNum: Integer, pageSize: Integer, orderType: String)
-
-GET 	/roots/generate/status					@controllers.RootController.status()
-
-POST	/roots/acceptRoot/:rootId				@controllers.RootController.acceptRoot(rootId: String)
+GET		/dictionaries							@controllers.DictionaryController.pageList()
+POST	/dictionaries							@controllers.DictionaryController.create()
+GET		/dictionaries/statusCreate				@controllers.DictionaryController.statusCreate()
+GET		/dictionaries/:dictionaryId				@controllers.DictionaryController.pageDetails(dictionaryId: String)
+POST	/dictionaries/addWord					@controllers.DictionaryController.addWord()
+GET		/dictionaries/:dictionaryId/getWords	@controllers.DictionaryController.getWords(dictionaryId: String, limit: Integer, pageNum: Integer)
 
 
 # Map static resources from the /public folder to the /assets URL path
