@@ -2,7 +2,8 @@ package utils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.ArrayList;
@@ -196,7 +197,7 @@ public class PLNUtils {
 		
 			File file = new File("dicionario.txt");
 			
-			BufferedReader br = new BufferedReader(new FileReader(file));
+			BufferedReader br = new BufferedReader(new InputStreamReader( new FileInputStream(file), "UTF8"));
 			
 			String str;
 			while((str = br.readLine()) != null) {
