@@ -46,9 +46,12 @@ public class EventController extends Controller {
 		if (file.exists()) {
 			response().setContentType("application/x-download"); 
 			response().setHeader("Content-disposition","attachment; filename="+file.getName());
+			
+			Cache.remove("getTweetStatus");
+			
 			return ok(file);
 		} else {
-			return badRequest();
+			return notFound();
 		}
 	}
 	

@@ -169,7 +169,7 @@
 							var modal = jQuery('#modal')
 							if (!modal.is(":visible")) {
 								var url = window.location.origin
-								jQuery('#statusMessage').html('<p>'+url+'/getTweets/'+filename+'</p>')
+								jQuery('#statusMessage').html('<p><a href="'+url+'/events/getTweets/'+filename+'">'+url+'/events/getTweets/'+filename+'</a></p>')
 								modal.modal();
 							}
 							clearInterval(interv);
