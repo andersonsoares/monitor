@@ -14,6 +14,7 @@ import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.libs.Json;
+import utils.PLNUtils;
 
 import com.google.code.morphia.Key;
 
@@ -43,7 +44,7 @@ public class TweetService {
 				
 				long totalTweets = dao.createQuery().filter("event", new Key<Event>(Event.class, event.getId())).countAll();
 				
-				File file = new File(event.getName()+System.currentTimeMillis()+".json");
+				File file = new File(PLNUtils.removeWhiteSpacesNotNecessary(event.getName().toLowerCase())+System.currentTimeMillis()+".json");
 				
 				
 				BufferedWriter out = new BufferedWriter(new FileWriter(file), 32768);

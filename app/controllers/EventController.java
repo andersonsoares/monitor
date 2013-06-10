@@ -1,6 +1,7 @@
 package controllers;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -12,13 +13,17 @@ import models.forms.GetTweetsForm;
 
 import org.bson.types.ObjectId;
 
+import play.cache.Cache;
 import play.data.Form;
 import play.libs.Akka;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import scala.concurrent.duration.Duration;
 import services.GetTweetsService;
 import services.TweetService;
+import system.ReturnToView;
+import system.ValidationError;
 
 import com.google.code.morphia.Key;
 import com.google.inject.Inject;
@@ -35,15 +40,50 @@ public class EventController extends Controller {
 	final static Form<Event> eventForm = Form.form(Event.class);
 	final static Form<GetTweetsForm> getTweetsForm = Form.form(GetTweetsForm.class);
 	
+	public Result getTweetsInJson(String filename) {		
+		File file = new File(filename);
+		
+		if (file.exists()) {
+			response().setContentType("application/x-download"); 
+			response().setHeader("Content-disposition","attachment; filename="+file.getName());
+			return ok(file);
+		} else {
+			return badRequest();
+		}
+	}
+	
+	public Result getTweetStatus() {
+		ReturnToView vo = (ReturnToView) Cache.get("getTweetStatus");
+		
+		if (vo == null) {
+			vo = new ReturnToView();
+			vo.setMessage("null");
+		} 
+		return ok(Json.toJson(vo));
+	}
+	
 	public Result getTweets() {
 		
 		try {
+			ReturnToView vo = new ReturnToView();
+			
 			Form<GetTweetsForm> form = getTweetsForm.bindFromRequest();
 			GetTweetsForm getTweetsForm = form.get();
-			
 			boolean isRecoverAll = getTweetsForm.isRecoverAll();
-			List<String> considerWhat = getTweetsForm.getConsiderWhat();
 			float correctRate = getTweetsForm.getCorrectRate();
+			if ((isRecoverAll == false) && (correctRate < 0 || correctRate > 100)) {
+				vo.setCode(400);
+				HashMap<String, Object> mapa = new HashMap<String, Object>();
+				ArrayList<ValidationError> errors =  new ArrayList<ValidationError>();
+				errors.add(new ValidationError("correctRate", "Invalid correctRate"));
+				mapa.put("errors", errors);
+				vo.setMap(mapa);
+				
+				return ok(Json.toJson(vo));
+			}
+			
+			
+			List<String> considerWhat = getTweetsForm.getConsiderWhat();
 			ObjectId eventId = new ObjectId(getTweetsForm.getEventId());
 			
 			Event event = new EventDAO().findById(eventId);
@@ -59,7 +99,10 @@ public class EventController extends Controller {
 							new GetTweetsService(event, isRecoverAll, dictionary, correctRate, considerWhat),
 							Akka.system().dispatcher());
 					
-					return ok("Analisando");
+					
+					vo.setMessage("Processando");
+					
+					return ok(Json.toJson(vo));
 					
 				} else {
 					return badRequest();

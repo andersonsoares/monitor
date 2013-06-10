@@ -4,7 +4,21 @@
 
 @main("Twitter Monitor") {
 
-	<div class="container">
+	
+	<div id="modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	  <div class="modal-header">
+	    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+	    <h3 id="myModalLabel">File is ready</h3>
+	  </div>
+	  <div id="statusMessage" class="modal-body">
+	    
+	  </div>
+	  <div class="modal-footer">
+	    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+	  </div>
+	</div>
+
+	<div class="container hide" id="bodyContent">
 		<h1>@event.getName()</h1>
 		<h4>@event.getNrTweets() tweets</h4>
 		
@@ -24,7 +38,7 @@
  				<div class="row-fluid">
  				
  			
- 				<form action="@routes.EventController.getTweets()" class="form-horizontal" method="POST">
+ 				<form id="formFilter" action="@routes.EventController.getTweets()" class="form-horizontal" method="POST">
  				<div class="span6">
 					<fieldset>
 					<!-- Multiple Radios -->
@@ -97,7 +111,7 @@
 				<div class="span6">
 					<div class="control-group">
 					  <div class="controls">
-					    <button id="singlebutton" name="singlebutton" class="btn btn-primary">Get tweets</button>
+					    <button id="sendButton" name="sendButton" class="btn btn-primary">Get tweets</button>
 					  </div>
 					</div>
 				</div> <!-- end span -->
@@ -120,10 +134,95 @@
 
 	<script type="text/javascript">
 	
+		var STARTED = false;
+	
+		var intern;
+		function verifyProgress() {
+			console.log("iniciou interv")
+			$.ajax({
+				url: '@routes.EventController.getTweetStatus()',
+				type: 'GET',
+				success: function(response) {
+					console.log(response)
+					console.log(response.message == "null")
+					if (response.message == "null") {
+						jQuery('#mainContent').fadeIn()
+						jQuery('#bodyContent').fadeIn()
+						jQuery('#progressContent').fadeOut()
+						clearInterval(interv)
+						
+						if (STARTED) {
+							alertify.success("Got tweets")
+						}
+						
+						STARTED = false;
+					} else {
+						
+						STARTED = true;
+						
+						jQuery('#mainContent').fadeIn()
+						jQuery('#bodyContent').fadeOut()
+						jQuery('#progressContent').fadeIn()
+						
+						var filename = response.map.filename;
+						if (filename != "") {
+							var modal = jQuery('#modal')
+							if (!modal.is(":visible")) {
+								var url = window.location.origin
+								jQuery('#statusMessage').html('<p>'+url+'/getTweets/'+filename+'</p>')
+								modal.modal();
+							}
+							clearInterval(interv);
+						}
+						
+						
+					}
+				}
+				
+			})
+		}
+	
+		
+		jQuery('#sendButton').click(function(e) {
+			e.preventDefault();
+			
+			var data = jQuery('#formFilter').serialize();
+			
+			$.ajax({
+				url: '@routes.EventController.getTweets()',
+				type: 'POST',
+				data: data,
+				success: function(response) {
+					console.log(response)
+					var code = response.code;
+					
+					if (code == 200) {
+						// everything ok
+						alertify.success(response.message)
+						interv = setInterval(verifyProgress, 1000);
+						
+					} else {
+						if (code == 400) {
+							//validation failed
+							$.each(response.map.errors, function(index) {
+								alertify.error(response.map.errors[index].errorMsg);
+							});
+						}
+					}
+					
+				},
+				error: function(response) {
+					console.log(response)
+				}
+			});
+			
+		})
+	
+	
 		$(document).ready(function() {
 			
 			jQuery('#mainContent').fadeIn()
-			
+			interv = setInterval(verifyProgress, 1000);
 			
 		})
 		

@@ -1,6 +1,12 @@
 package services;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -9,6 +15,9 @@ import models.Event;
 import models.Tweet;
 import models.Word;
 import play.Logger;
+import play.cache.Cache;
+import play.libs.Json;
+import system.ReturnToView;
 import utils.PLNUtils;
 
 import com.google.code.morphia.Key;
@@ -38,79 +47,117 @@ public class GetTweetsService implements Runnable {
 	@Override
 	public void run() {
 		
+		ReturnToView vo = new ReturnToView();
+		HashMap<String, Object> mapa = new HashMap<String, Object>();
+		mapa.put("isRecoverAll", isRecoverAll);
+		vo.setMessage("Starting");
+		vo.setMap(mapa);
+		
+		Cache.set("getTweetStatus", vo);
+		
 		long inicio = System.currentTimeMillis();
 		
-		if (isRecoverAll) {
-			System.out.println("É para recuperar TUDO");
-		} else {
-			// é para recuperar apenas tweets corretos
-			//TODO: melhorar perfomance
+		try {
+			File file = new File(event.getName()+System.currentTimeMillis()+".json");
+			Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
 			
-			boolean considerHashtags = considerWhat.contains("hashtags");
-			boolean considerURLs = considerWhat.contains("urls");
-			boolean considerUSERs = considerWhat.contains("users");
-
-			/*
-			 *  Carregar dicionario para a memoria
-			 */
-			WordDAO wordDAO = new WordDAO();
-			List<Word> words = wordDAO.listByDictionaryId(dictionary.getId());
-			HashSet<String> dictionaryWords = new HashSet<String>();
-			for (Word word : words) {
-				dictionaryWords.add(word.getName());
-			}
-			Logger.info("Dictionary loaded in "+(System.currentTimeMillis() - inicio)+" ms");
-			
-			/*
-			 * CARREGAR TWEETS DO BANCO
-			 */
-			
-			ArrayList<String> correctTweets = new ArrayList<String>();
-
 			TweetDAO dao = new TweetDAO();
 			
 			long totalTweets = dao.countAll(event.getId());
+		
+			
+			vo = (ReturnToView) Cache.get("getTweetStatus");
+			
+			vo.setMessage("Getting tweets from db...");
+			vo.getMap().put("totalTweets", totalTweets);
+			
+			Cache.set("getTweetStatus", vo);
 			
 			int LIMIT = 3000;
-			
-			for (int i=0; i < totalTweets; i+=LIMIT) {
+		
+			if (isRecoverAll) {
+				// recuperar tudo
 				
-				List<Tweet> list = dao.createQuery().filter("event", new Key<Event>(Event.class, event.getId())).limit(LIMIT).offset(i).retrievedFields(true, "text").asList();
-				for (Tweet t : list) {
-					// para cada tweet, verificar a taxa de palavras corretas
-					float rate = PLNUtils.getCorrectRate(t.getText(), dictionaryWords, considerHashtags, considerURLs, considerUSERs);
-					if (rate*100 >= correctRate) {
-						correctTweets.add(t.getText());
+				List<String> texts = new ArrayList<String>();
+				for (int i=0; i < totalTweets; i+=LIMIT) {
+					
+					List<Tweet> list = dao.createQuery().filter("event", new Key<Event>(Event.class, event.getId())).limit(LIMIT).offset(i).retrievedFields(true, "text").asList();
+					for (Tweet t : list) {
+						texts.add(t.getText());
 					}
-				}		
+				}
+				out.write(Json.toJson(texts).toString());		
+				
+			} else {
+				// é para recuperar apenas tweets corretos
+				//TODO: melhorar perfomance
+				
+				boolean considerHashtags = considerWhat.contains("hashtags");
+				boolean considerURLs = considerWhat.contains("urls");
+				boolean considerUSERs = considerWhat.contains("users");
+	
+				/*
+				 *  Carregar dicionario para a memoria
+				 */
+				WordDAO wordDAO = new WordDAO();
+				List<Word> words = wordDAO.listByDictionaryId(dictionary.getId());
+				HashSet<String> dictionaryWords = new HashSet<String>();
+				for (Word word : words) {
+					dictionaryWords.add(word.getName());
+				}
+				Logger.info("Dictionary loaded in "+(System.currentTimeMillis() - inicio)+" ms");
+				
+				/*
+				 * CARREGAR TWEETS DO BANCO
+				 */
+				
+				ArrayList<String> correctTweets = new ArrayList<String>();
+				
+				for (int i=0; i < totalTweets; i+=LIMIT) {
+					
+					List<Tweet> list = dao.createQuery().filter("event", new Key<Event>(Event.class, event.getId())).limit(LIMIT).offset(i).retrievedFields(true, "text").asList();
+					for (Tweet t : list) {
+						// para cada tweet, verificar a taxa de palavras corretas
+						float rate = PLNUtils.getCorrectRate(t.getText(), dictionaryWords, considerHashtags, considerURLs, considerUSERs);
+						if (rate*100 >= correctRate) {
+							correctTweets.add(t.getText());		
+						}
+					}
+				}
+				out.write(Json.toJson(correctTweets).toString()+"\n");					
+				
+				Logger.info("Analysis over in "+(System.currentTimeMillis() - inicio)+" ms");
+				
+				System.out.println(correctTweets.size());
+				System.out.println(event.getNrTweets());
+				
+				float correctRateOverAll =  correctTweets.size() * 100 / event.getNrTweets();
+				
+
+				vo = (ReturnToView) Cache.get("getTweetStatus");
+				
+				vo.getMap().put("totalCorrectTweets", correctTweets.size());
+				vo.getMap().put("correctRateOverAll", correctRateOverAll);
+				
+				Cache.set("getTweetStatus", vo);
+				
 			}
 			
-			Logger.info("Analysis over in "+(System.currentTimeMillis() - inicio)+" ms");
+			out.flush();
+			out.close();
 			
-			System.out.println(correctTweets.size());
-			System.out.println(event.getNrTweets());
+			vo = (ReturnToView) Cache.get("getTweetStatus");
 			
-			float correctRateOverAll =  correctTweets.size() * 100 / event.getNrTweets();
-			System.out.println("Correct rate Over all: "+correctRateOverAll);
+			vo.setMessage("File is ready");
+			vo.getMap().put("filename", file.getName());
+			
+			Cache.set("getTweetStatus", vo);
 			
 			
 			
-			
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
-
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-
 	}
 
 }
