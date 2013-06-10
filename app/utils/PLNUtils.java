@@ -138,6 +138,17 @@ public class PLNUtils {
 		return str;
 	}
 	
+	public static String clearString(String str) {
+		str = str.toLowerCase();
+		
+		str = removeNonAsciiChars(str);
+		str = removeDigits(str);
+		str = removePunctuation(str);
+		str = removeWhiteSpacesNotNecessary(str);
+		
+		return str;
+	}
+	
 
 	/**
 	 * Function that checks if a word could be a 'SIGLA'

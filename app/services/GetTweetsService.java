@@ -58,7 +58,7 @@ public class GetTweetsService implements Runnable {
 		long inicio = System.currentTimeMillis();
 		
 		try {
-			File file = new File(PLNUtils.removeWhiteSpacesNotNecessary(event.getName().toLowerCase())+System.currentTimeMillis()+".json");
+			File file = new File(PLNUtils.clearString(event.getName())+System.currentTimeMillis()+".json");
 			Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
 			
 			TweetDAO dao = new TweetDAO();
