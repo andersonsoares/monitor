@@ -13,6 +13,8 @@ GET		/events/create							@controllers.EventController.pageCreate()
 POST    /events        			                @controllers.EventController.save()
 
 POST	/events/getTweets						@controllers.EventController.getTweets()
+GET		/events/getTweets/:filename				@controllers.EventController.getTweetsInJson(filename: String)
+GET		/events/getTweetStatus					@controllers.EventController.getTweetStatus()
 GET		/events/:eventId						@controllers.EventController.pageDetails(eventId: String)
 				
 
