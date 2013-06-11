@@ -6,14 +6,16 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import models.Abbreviation;
 import play.Logger;
 import ptstemmer.Stemmer;
 import ptstemmer.Stemmer.StemmerType;
 import ptstemmer.exceptions.PTStemmerException;
+
+import com.google.common.base.CharMatcher;
 
 
 /**
@@ -95,27 +97,27 @@ public class PLNUtils {
 	}
 	
 	
-	public static List<String> getSiglas(String str, StemmerType algoritm) {
-		List<String> siglas = new ArrayList<String>();
-	
-		
-		str = removeRT(str);
-		str = replaceURLs(str);
-		str = replaceUSERs(str);
-		str = removeNonAsciiChars(str);
-		str = removePunctuation(str);
-		str = removeWhiteSpacesNotNecessary(str);
-		str = tryFixRepeatedChars(str);
-		
-		String[] tokens = str.split(" ");
-		for (String string : tokens) {
-			if (isSigla(string, algoritm)) {
-				siglas.add(string);
-			}
-		}
-		
-		return siglas;
-	}
+//	public static List<String> getSiglas(String str, StemmerType algoritm) {
+//		List<String> siglas = new ArrayList<String>();
+//	
+//		
+//		str = removeRT(str);
+//		str = replaceURLs(str);
+//		str = replaceUSERs(str);
+//		str = removeNonAsciiChars(str);
+//		str = removePunctuation(str);
+//		str = removeWhiteSpacesNotNecessary(str);
+//		str = tryFixRepeatedChars(str);
+//		
+//		String[] tokens = str.split(" ");
+//		for (String string : tokens) {
+//			if (isSigla(string, algoritm)) {
+//				siglas.add(string);
+//			}
+//		}
+//		
+//		return siglas;
+//	}
 	
 	public static String normalizedTweet(String str) {
 		
@@ -148,6 +150,43 @@ public class PLNUtils {
 		str = str.replace(" ", "_");
 		
 		return str;
+	}
+	
+	/**
+	 * Metodo que verifica todas as palavras MAIUSCULAS
+	 * do tweet, e verifica se elas existem no dicionario
+	 * se nao existir, ela é uma possível sigla
+	 * @param tweet
+	 * @return
+	 */
+	public static HashSet<Abbreviation> getAbreviacoes(String texto, HashSet<String> dicionario) {
+		HashSet<Abbreviation> abreviacoes = new HashSet<Abbreviation>();
+		
+		texto = PLNUtils.replaceAndRemoveHASHTAG(texto);
+		texto = PLNUtils.replaceAndRemoveURLs(texto);
+		texto = PLNUtils.replaceAndRemoveUSERs(texto);
+		texto = PLNUtils.removeDigits(texto);
+		texto = PLNUtils.removePunctuation(texto);
+		texto = PLNUtils.removeWhiteSpacesNotNecessary(texto);
+		
+		String[] tokens = texto.split(" ");
+		for (String string : tokens) {
+			if (string.length() > 1 && CharMatcher.JAVA_UPPER_CASE.matchesAllOf(string) && CharMatcher.ASCII.matchesAllOf(string)) {
+				if (!dicionario.contains(string.toLowerCase())) {
+					abreviacoes.add(new Abbreviation(string));
+				}
+			}
+		}
+		
+		
+		return abreviacoes;
+	}
+	
+	public static boolean isSigla(String str) {
+		if (str.length() > 1 && CharMatcher.JAVA_UPPER_CASE.matchesAllOf(str) && CharMatcher.ASCII.matchesAllOf(str)) {
+			return true;
+		}
+		return false;
 	}
 	
 
@@ -231,7 +270,7 @@ public class PLNUtils {
 		return words;
 	}
 	
-	public static float getCorrectRate(String tweet, HashSet<String> dicionario, boolean considerHashtags, boolean considerURLs, boolean considerUSERs) {
+	public static float getCorrectRate(String tweet, HashSet<String> dicionario, List<Abbreviation> abbreviations, boolean considerHashtags, boolean considerURLs, boolean considerUSERs, boolean considerSIGLAs) {
 		
 		tweet = PLNUtils.removeRT(tweet);
 		
@@ -261,7 +300,14 @@ public class PLNUtils {
 		
 		int correctWordsCount = 0;
 		for (String string : tokens) {
-			if (string.equals("HASHTAG") || string.equals("USER") || string.equals("URL") || string.equals("SIGLAS")) {
+			
+			if (considerSIGLAs) {
+				if (isSigla(string) && abbreviations.contains(new Abbreviation(string))) {
+					correctWordsCount++;
+					continue;
+				}
+			}
+			if (string.equals("HASHTAG") || string.equals("USER") || string.equals("URL")) {
 				correctWordsCount++;
 			} else {
 				if (dicionario.contains(string.toLowerCase())) {

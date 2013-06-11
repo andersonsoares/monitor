@@ -16,9 +16,6 @@ POST	/events/getTweets						@controllers.EventController.getTweets()
 GET		/events/getTweets/:filename				@controllers.EventController.getTweetsInJson(filename: String)
 GET		/events/getTweetStatus					@controllers.EventController.getTweetStatus()
 GET		/events/:eventId						@controllers.EventController.pageDetails(eventId: String)
-				
-
-GET		/downloadTweets/:eventId				@controllers.EventController.downloadTweets(eventId: String)
 
 GET		/dictionaries							@controllers.DictionaryController.pageList()
 POST	/dictionaries							@controllers.DictionaryController.create()

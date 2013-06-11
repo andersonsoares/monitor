@@ -1,26 +1,25 @@
 package scripts;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
+import models.Abbreviation;
 import models.Event;
 import models.Root;
 import models.Tweet;
-
 import utils.PLNUtils;
 
 import com.google.code.morphia.Datastore;
 import com.google.code.morphia.Morphia;
 import com.mongodb.MongoClient;
 
-public class SetCorrectRateOnTweets {
+public class CreateAbbreviationsFromTweets {
 	
-	private static MongoClient mongoLinode;
-	private static Morphia morphiaLinode;
 	private static Morphia morphiaLocal;
 	private static MongoClient mongoLocal;
 	private static Datastore datastoreLocal;
-	private static Datastore datastoreLinode;
 	
 	public static void main(String[] args) {
 		
@@ -34,6 +33,41 @@ public class SetCorrectRateOnTweets {
 		connectToLocalMongo();
 		
 		
+		// iterar sobre todos os tweets! :/
+		
+//		TweetDAO dao = new TweetDAO();
+		long totalTweets = datastoreLocal.getCount(Tweet.class);
+		
+		int LIMIT = 3000;
+		ArrayList<String> tweets = new ArrayList<String>();
+		for (int i=0; i < totalTweets; i+=LIMIT) {
+			
+			List<Tweet> list = datastoreLocal.createQuery(Tweet.class).limit(LIMIT).offset(i).retrievedFields(true, "text").asList();
+			for (Tweet t : list) {
+				tweets.add(t.getText());
+			}
+		}
+		
+		System.out.println(tweets.size());
+		
+		HashSet<Abbreviation> abreviacoes = new HashSet<Abbreviation>();
+		
+		for (String tweet : tweets) {
+			HashSet<Abbreviation> siglas = PLNUtils.getAbreviacoes(tweet, dictionary);
+			for (Abbreviation sigla : siglas) {
+				if (!abreviacoes.contains(sigla)) {
+					abreviacoes.add(sigla);
+				}
+			}
+		}
+		
+		
+		for (Abbreviation abbreviation : abreviacoes) {
+			System.out.println(abbreviation.toString());
+		}
+		
+		datastoreLocal.save(abreviacoes);
+		System.out.println("Siglas foram salvas");
 		
 		
 		
@@ -46,9 +80,9 @@ public class SetCorrectRateOnTweets {
 		/*
 		 * LOCAL CONF
 		 */
-		String userDb = 	"aers";
-		char[] passDb = 	"aers123".toCharArray();
-		String hostDb = 	"127.0.0.1";
+		String userDb = 	"monitor";
+		char[] passDb = 	"monitor123".toCharArray();
+		String hostDb = 	"li216-187.members.linode.com";
 		int portDb =	 	27017;
 		String database = 	"monitor";
 		try {

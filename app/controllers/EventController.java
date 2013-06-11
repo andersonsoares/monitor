@@ -21,7 +21,6 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import scala.concurrent.duration.Duration;
 import services.GetTweetsService;
-import services.TweetService;
 import system.ReturnToView;
 import system.ValidationError;
 
@@ -188,18 +187,6 @@ public class EventController extends Controller {
 		
 		flash("success", "Event was successfully added: "+key.getId());
 		return  redirect(controllers.routes.Application.index());
-	}
-	
-	public Result downloadTweets(String eventId) {
-		
-		TweetService service = new TweetService();
-		
-		File file = service.createFileWithTweetsFrom(new ObjectId(eventId));
-		
-		response().setContentType("application/x-download"); 
-		response().setHeader("Content-disposition","attachment; filename="+file.getName());
-		
-		return ok(file);
 	}
 	
 }

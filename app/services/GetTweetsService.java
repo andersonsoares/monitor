@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import models.Abbreviation;
 import models.Dictionary;
 import models.Event;
 import models.Tweet;
@@ -22,6 +23,7 @@ import utils.PLNUtils;
 
 import com.google.code.morphia.Key;
 
+import dao.AbbreviationDAO;
 import dao.TweetDAO;
 import dao.WordDAO;
 
@@ -95,7 +97,15 @@ public class GetTweetsService implements Runnable {
 				boolean considerHashtags = considerWhat.contains("hashtags");
 				boolean considerURLs = considerWhat.contains("urls");
 				boolean considerUSERs = considerWhat.contains("users");
+				boolean considerSIGLAs = considerWhat.contains("siglas");
 	
+				/*
+				 * Carregar a lista de 'siglas'
+				 */
+				AbbreviationDAO abbreviationDAO = new AbbreviationDAO();
+				List<Abbreviation> abbreviations = abbreviationDAO.listAll();
+				
+				
 				/*
 				 *  Carregar dicionario para a memoria
 				 */
@@ -118,7 +128,7 @@ public class GetTweetsService implements Runnable {
 					List<Tweet> list = dao.createQuery().filter("event", new Key<Event>(Event.class, event.getId())).limit(LIMIT).offset(i).retrievedFields(true, "text").asList();
 					for (Tweet t : list) {
 						// para cada tweet, verificar a taxa de palavras corretas
-						float rate = PLNUtils.getCorrectRate(t.getText(), dictionaryWords, considerHashtags, considerURLs, considerUSERs);
+						float rate = PLNUtils.getCorrectRate(t.getText(), dictionaryWords, abbreviations, considerHashtags, considerURLs, considerUSERs, considerSIGLAs);
 						if (rate*100 >= correctRate) {
 							correctTweets.add(t.getText());		
 						}
