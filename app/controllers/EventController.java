@@ -74,17 +74,23 @@ public class EventController extends Controller {
 			GetTweetsForm getTweetsForm = form.get();
 			boolean isRecoverAll = getTweetsForm.isRecoverAll();
 			float correctRate = getTweetsForm.getCorrectRate();
+			ArrayList<ValidationError> errors =  new ArrayList<ValidationError>();
 			if ((isRecoverAll == false) && (correctRate < 0 || correctRate > 100)) {
-				vo.setCode(400);
-				HashMap<String, Object> mapa = new HashMap<String, Object>();
-				ArrayList<ValidationError> errors =  new ArrayList<ValidationError>();
-				errors.add(new ValidationError("correctRate", "Invalid correctRate"));
-				mapa.put("errors", errors);
-				vo.setMap(mapa);
-				
-				return ok(Json.toJson(vo));
+				errors.add(new ValidationError("correctRate", "Invalid correctRate"));				
 			}
 			
+			if (Cache.get("getTweetStatus") != null) {
+				errors.add(new ValidationError("none", "Get tweets already running..."));
+			}
+			
+			if (errors.size() > 0) {
+				vo.setCode(400);
+				HashMap<String, Object> mapa = new HashMap<String, Object>();
+				
+				mapa.put("errors", errors);
+				vo.setMap(mapa);
+				return ok(Json.toJson(vo));
+			}
 			
 			List<String> considerWhat = getTweetsForm.getConsiderWhat();
 			ObjectId eventId = new ObjectId(getTweetsForm.getEventId());

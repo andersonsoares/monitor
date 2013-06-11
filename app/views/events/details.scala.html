@@ -11,7 +11,9 @@
 	    <h3 id="myModalLabel">File is ready</h3>
 	  </div>
 	  <div id="statusMessage" class="modal-body">
-	    
+	  	<dl class="dl-horizontal" id="dl-info">
+	  	</dl>
+	  	<a id="linkDownload" href="#"><button class="btn btn-xlarge">Download Json File</button></a><a id="linkJsonViewer" href="#"><button class="btn btn-xlarge">Open in Json Viewer</button></a>
 	  </div>
 	  <div class="modal-footer">
 	    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
@@ -143,8 +145,6 @@
 				url: '@routes.EventController.getTweetStatus()',
 				type: 'GET',
 				success: function(response) {
-					console.log(response)
-					console.log(response.message == "null")
 					if (response.message == "null") {
 						jQuery('#mainContent').fadeIn()
 						jQuery('#bodyContent').fadeIn()
@@ -160,19 +160,34 @@
 						
 						STARTED = true;
 						
-						jQuery('#mainContent').fadeIn()
+						/* jQuery('#mainContent').fadeIn()
 						jQuery('#bodyContent').fadeOut()
-						jQuery('#progressContent').fadeIn()
+						jQuery('#progressContent').fadeIn() */
 						
 						var filename = response.map.filename;
-						if (filename != "") {
+						if (typeof filename != 'undefined') {
 							var modal = jQuery('#modal')
 							if (!modal.is(":visible")) {
 								var url = window.location.origin
-								jQuery('#statusMessage').html('<p><a href="'+url+'/events/getTweets/'+filename+'">'+url+'/events/getTweets/'+filename+'</a></p>')
+								var totalTweets = response.map.totalTweets
+								var totalCorrectTweets = response.map.totalCorrectTweets
+								var correctRateOverAll = response.map.correctRateOverAll
+								var isRecoverAll = response.map.isRecoverAll
+								/* jQuery('#statusMessage').html('<p><a href="'+url+'/events/getTweets/'+filename+'">'+url+'/events/getTweets/'+filename+'</a></p>') */
+								
+								jQuery('#dl-info').html('<dt>Total tweets</dt><dd>'+totalTweets+'</dd>')
+								jQuery('#linkDownload').attr('href', url+'/events/getTweets/'+filename)
+								jQuery('#linkJsonViewer').attr('href', 'http://jsonviewer.stack.hu/#'+url+'/events/getTweets/'+filename)
+								
+								if (!isRecoverAll) {
+									jQuery('#dl-info').append('<dt>Total correct tweets</dt><dd>'+totalCorrectTweets+' ('+correctRateOverAll+' %)</dd>')
+								}
+								
 								modal.modal();
+								clearInterval(interv);
 							}
-							clearInterval(interv);
+						} else {
+							alertify.log('processando...');
 						}
 						
 						
@@ -199,7 +214,7 @@
 					if (code == 200) {
 						// everything ok
 						alertify.success(response.message)
-						interv = setInterval(verifyProgress, 1000);
+						interv = setInterval(verifyProgress, 5000);
 						
 					} else {
 						if (code == 400) {
@@ -222,7 +237,7 @@
 		$(document).ready(function() {
 			
 			jQuery('#mainContent').fadeIn()
-			interv = setInterval(verifyProgress, 1000);
+			interv = setInterval(verifyProgress, 5000);
 			
 		})
 		

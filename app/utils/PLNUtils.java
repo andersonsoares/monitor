@@ -145,6 +145,7 @@ public class PLNUtils {
 		str = removeDigits(str);
 		str = removePunctuation(str);
 		str = removeWhiteSpacesNotNecessary(str);
+		str = str.replace(" ", "_");
 		
 		return str;
 	}
