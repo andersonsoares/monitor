@@ -1,11 +1,10 @@
 package listeners;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-
-import com.google.code.morphia.Key;
 
 import models.Event;
 import models.Tweet;
@@ -17,6 +16,9 @@ import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
 import utils.Utils;
+
+import com.google.code.morphia.Key;
+
 import dao.TweetDAO;
 import enums.TypeEnum;
 
@@ -74,7 +76,7 @@ public class TwitterStatusListener implements StatusListener {
 						tweet.setRetweeted(status.isRetweet());
 						tweet.setRetweet_count(status.getRetweetCount());
 						tweet.setProfile_image_url(status.getUser().getOriginalProfileImageURL());
-						tweet.setCreatedAt(status.getCreatedAt());
+						tweet.setCreatedAt(new Date(System.currentTimeMillis()));
 						
 						List<Tweet> tweets = (List<Tweet>) Cache.get("tweets");
 						int size = tweets.size();
