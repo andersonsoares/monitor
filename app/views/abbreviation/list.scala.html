@@ -1,0 +1,61 @@
+@(abbreviationList: List[models.Abbreviation], page: Int, pageLength: Int, count: Long)
+
+@main("Twitter Monitor", "abbreviations") {
+
+
+	@views.html.paginate(page, pageLength, count.toInt, routes.AbbreviationController.pageList(_,_))
+
+	
+	
+		<div class="row-fluid">
+			<div class="span3"></div>
+			<div class="span3">
+				<table class="table table-condensed table-hover">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+				@for(abbreviation <- abbreviationList) {
+					<tr id="row-@abbreviation.getId().toString()">
+						<td>@abbreviation.toString()</td>
+						<td><a onclick="removeAbbreviation(event, '@abbreviation.getId().toString()')"><button class="button btn-mini btn-danger">remove</button></a></td>
+					</tr>
+				}
+				</tbody>
+			</table>
+			</div>
+			<div class="span3"></div>
+		</div>
+
+	@views.html.paginate(page, pageLength, count.toInt, routes.AbbreviationController.pageList(_,_))
+	
+	<script type="text/javascript">
+
+		$(document).ready(function() {
+			jQuery('#mainContent').fadeIn();
+		});
+		
+		function removeAbbreviation(e, id) {
+			e.preventDefault()
+			
+			alertify.confirm("Are your sure?", function (e, str) {
+				if (e) {
+					$.ajax({
+						url: '/abbreviations?abbreviationId='+id,
+						type: 'DELETE',
+						success: function(response) {
+							jQuery('#row-'+id).fadeOut();
+							alertify.success('Removed!')
+						}
+					})					
+				}
+			});
+			
+		}
+		
+		
+	</script>
+}

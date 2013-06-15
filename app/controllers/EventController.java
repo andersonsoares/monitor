@@ -2,6 +2,7 @@ package controllers;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -23,12 +24,14 @@ import scala.concurrent.duration.Duration;
 import services.GetTweetsService;
 import system.ReturnToView;
 import system.ValidationError;
+import utils.DateUtils;
 
 import com.google.code.morphia.Key;
 import com.google.inject.Inject;
 
 import dao.DictionaryDAO;
 import dao.EventDAO;
+import dao.TweetDAO;
 import enums.TypeEnum;
 
 public class EventController extends Controller {
@@ -188,5 +191,42 @@ public class EventController extends Controller {
 		flash("success", "Event was successfully added: "+key.getId());
 		return  redirect(controllers.routes.Application.index());
 	}
+	
+	
+	public Result getTweetsCountPerDay(String eventId) {
+		
+		long init = System.currentTimeMillis();
+		try {
+			ObjectId _eventId = new ObjectId(eventId);
+			EventDAO eventDAO = new EventDAO();
+			Event event = eventDAO.findById(_eventId);
+			
+			TweetDAO tweetDAO = new TweetDAO();
+			
+			Date aux = event.getStartDate();
+			ArrayList<Long> counts = new ArrayList<Long>();
+			
+			counts.add(tweetDAO.countInInterval(_eventId, event.getStartDate(), DateUtils.getFinalOfTheDay(event.getStartDate())));
+			
+			while(true) {
+				aux = DateUtils.getInitNextDay(aux);
+				Date finalDia = DateUtils.getFinalOfTheDay(aux);
+				if (finalDia.after(event.getFinishDate())) {
+					counts.add(tweetDAO.countInInterval(_eventId, aux, event.getFinishDate()));
+					break;
+				}
+				counts.add(tweetDAO.countInInterval(_eventId, aux, finalDia));
+			}
+			
+			System.out.println("Elapsed time: "+(System.currentTimeMillis() - init));
+			return ok(Json.toJson(counts));
+			
+		} catch(IllegalArgumentException e) {
+			e.printStackTrace();
+			return notFound();
+		}
+	}
+	
+	
 	
 }

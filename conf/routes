@@ -16,13 +16,17 @@ POST	/events/getTweets						@controllers.EventController.getTweets()
 GET		/events/getTweets/:filename				@controllers.EventController.getTweetsInJson(filename: String)
 GET		/events/getTweetStatus					@controllers.EventController.getTweetStatus()
 GET		/events/:eventId						@controllers.EventController.pageDetails(eventId: String)
+GET		/events/:eventId/getTweetsCountPerDay 	@controllers.EventController.getTweetsCountPerDay(eventId: String)
 
 GET		/dictionaries							@controllers.DictionaryController.pageList()
 POST	/dictionaries							@controllers.DictionaryController.create()
 GET		/dictionaries/statusCreate				@controllers.DictionaryController.statusCreate()
 GET		/dictionaries/:dictionaryId				@controllers.DictionaryController.pageDetails(dictionaryId: String)
 POST	/dictionaries/addWord					@controllers.DictionaryController.addWord()
-GET		/dictionaries/:dictionaryId/getWords	@controllers.DictionaryController.getWords(dictionaryId: String, limit: Integer, pageNum: Integer)
+GET		/dictionaries/:dictionaryId/getWords	@controllers.DictionaryController.getWords(dictionaryId: String, limit: Int, pageNum: Int)
+
+GET		/abbreviations							@controllers.AbbreviationController.pageList(page: Integer ?= 1, pageLength: Integer ?= 100)
+DELETE	/abbreviations							@controllers.AbbreviationController.remove(abbreviationId: String)
 
 
 # Map static resources from the /public folder to the /assets URL path

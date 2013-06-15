@@ -8,6 +8,8 @@ import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import models.Abbreviation;
 import play.Logger;
@@ -62,6 +64,34 @@ public class PLNUtils {
 	
 	public static String removePunctuation(String str) {
 		return str.replaceAll("\\p{Punct}+", " ");
+	}
+	
+	public static boolean containsRepeatedSequencesUpper(String str) {
+		Pattern pattern = Pattern.compile("([A-Z])\\1{2}");
+		Matcher matcher = pattern.matcher(str);
+		if (matcher.find()) {
+			return true;
+		} else {
+			pattern = Pattern.compile("([A-Z][A-Z])\\1{1}");
+			matcher = pattern.matcher(str);
+			if (matcher.find()) {
+				return true;
+			} else {
+				pattern = Pattern.compile("([A-Z][A-Z][A-Z])\\1{1}");
+				matcher = pattern.matcher(str);
+				if (matcher.find()) {
+					return true;
+				} else {
+					pattern = Pattern.compile("([A-Z][A-Z][A-Z][A-Z])\\1{1}");
+					matcher = pattern.matcher(str);
+					if (matcher.find()) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+			}
+		}
 	}
 	
 	public static String tryFixRepeatedChars(String str) {
@@ -171,7 +201,7 @@ public class PLNUtils {
 		
 		String[] tokens = texto.split(" ");
 		for (String string : tokens) {
-			if (string.length() > 1 && CharMatcher.JAVA_UPPER_CASE.matchesAllOf(string) && CharMatcher.ASCII.matchesAllOf(string)) {
+			if (isSigla(string)) {
 				if (!dicionario.contains(string.toLowerCase())) {
 					abreviacoes.add(new Abbreviation(string));
 				}
@@ -183,7 +213,7 @@ public class PLNUtils {
 	}
 	
 	public static boolean isSigla(String str) {
-		if (str.length() > 1 && CharMatcher.JAVA_UPPER_CASE.matchesAllOf(str) && CharMatcher.ASCII.matchesAllOf(str)) {
+		if (str.length() > 1 && str.length() < 6 && CharMatcher.JAVA_UPPER_CASE.matchesAllOf(str) && !containsRepeatedSequencesUpper(str.toUpperCase()) && CharMatcher.ASCII.matchesAllOf(str)) {
 			return true;
 		}
 		return false;

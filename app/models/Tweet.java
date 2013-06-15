@@ -33,12 +33,13 @@ public class Tweet {
 	private long twitterUserId;
 	private String profile_image_url;
 	
-	@Indexed
+		
 	private boolean normalized;
 	private String normalizedText;
 	
 	private float correctRate;
 	
+	@Indexed
 	private Date createdAt;
 	
 	// Default Constructor

@@ -1,4 +1,4 @@
-@(title: String)(content: Html)
+@(title: String, activeLink: String)(content: Html)
 
 <!DOCTYPE html>
 
@@ -39,8 +39,9 @@
 				<a class="brand" href="#">Monitor</a>
 				<div class="nav-collapse collapse">
 					<ul class="nav">
-						<li class="active"><a href="@routes.Application.index()">Events</a></li>
-						<li class="active"><a href="@routes.DictionaryController.pageList()">Dictionaries</a></li>
+						<li @if(activeLink.equals("events")){ class="active" }><a href="@routes.Application.index()">Events</a></li>
+						<li @if(activeLink.equals("dictionaries")) { class="active" }><a href="@routes.DictionaryController.pageList()">Dictionaries</a></li>
+						<li @if(activeLink.equals("abbreviations")) { class="active" }><a href="@routes.AbbreviationController.pageList()">Abbreviations</a></li>
 						<!-- <li><a href="#about">About</a></li> -->
 					</ul>
 				</div>

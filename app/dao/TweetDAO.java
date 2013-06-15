@@ -1,12 +1,15 @@
 package dao;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import models.Event;
 import models.Tweet;
 
 import org.bson.types.ObjectId;
+
+import play.Logger;
 
 import com.google.code.morphia.Key;
 
@@ -46,6 +49,18 @@ public class TweetDAO extends BaseDAO<Tweet> {
 	public long countAll(ObjectId id) {
 		
 		return createQuery().filter("event", new Key<Event>(Event.class, id)).countAll();
+	}
+
+	public long countInInterval(ObjectId _eventId, Date startDate,
+			Date finishDate) {
+		Logger.info("Getting tweets: "+startDate+" - "+finishDate);
+		Key<Event> eventKey = new Key<Event>(Event.class, _eventId);
+		
+		return createQuery()
+				.filter("event", eventKey)
+				.field("createdAt").greaterThanOrEq(startDate)
+				.field("createdAt").lessThanOrEq(finishDate)
+				.countAll();
 	}
 
 }
