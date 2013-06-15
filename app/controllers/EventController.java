@@ -22,6 +22,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import scala.concurrent.duration.Duration;
 import services.GetTweetsService;
+import system.ChartParam;
 import system.ReturnToView;
 import system.ValidationError;
 import utils.DateUtils;
@@ -203,23 +204,39 @@ public class EventController extends Controller {
 			
 			TweetDAO tweetDAO = new TweetDAO();
 			
-			Date aux = event.getStartDate();
-			ArrayList<Long> counts = new ArrayList<Long>();
+			ReturnToView vo = new ReturnToView();
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			List<ChartParam> chartParams = new ArrayList<ChartParam>();
 			
-			counts.add(tweetDAO.countInInterval(_eventId, event.getStartDate(), DateUtils.getFinalOfTheDay(event.getStartDate())));
+			
+			Date aux = event.getStartDate();
+			Date finishDate = event.getFinishDate();
+			Date now = new Date(System.currentTimeMillis());
+			if (now.before(finishDate)) {
+				System.out.println("antes");
+				finishDate = now;
+			}
+			
+			chartParams.add(new ChartParam(aux.getTime(), tweetDAO.countInInterval(_eventId, event.getStartDate(), DateUtils.getFinalOfTheDay(event.getStartDate()))));
+			
+			
+			
+			
 			
 			while(true) {
 				aux = DateUtils.getInitNextDay(aux);
 				Date finalDia = DateUtils.getFinalOfTheDay(aux);
-				if (finalDia.after(event.getFinishDate())) {
-					counts.add(tweetDAO.countInInterval(_eventId, aux, event.getFinishDate()));
+				if (finalDia.after(finishDate)) {
+					chartParams.add(new ChartParam(aux.getTime(), tweetDAO.countInInterval(_eventId, aux, finishDate)));
 					break;
 				}
-				counts.add(tweetDAO.countInInterval(_eventId, aux, finalDia));
+				chartParams.add(new ChartParam(aux.getTime(), tweetDAO.countInInterval(_eventId, aux, finalDia)));
 			}
 			
 			System.out.println("Elapsed time: "+(System.currentTimeMillis() - init));
-			return ok(Json.toJson(counts));
+			map.put("countPerDay", chartParams);
+			vo.setMap(map);
+			return ok(Json.toJson(vo));
 			
 		} catch(IllegalArgumentException e) {
 			e.printStackTrace();

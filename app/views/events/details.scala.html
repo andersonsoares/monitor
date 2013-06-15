@@ -32,7 +32,11 @@
 		<div class="tab-content">
 		
 			<!-- TAB DETAILS -->
-			<div class="tab-pane active" id="details">oi</div>
+			<div class="tab-pane active" id="details">
+			
+				<figure style="width: 800px; height: 300px;" id="chart"></figure>
+			
+			</div>
 		  
 			<!-- TAB GET_TWEETS -->
  			<div class="tab-pane" id="getTweets">
@@ -129,9 +133,6 @@
 		  </div>
 		
 	</div>
-	
-
-
  
 
 	<script type="text/javascript">
@@ -234,13 +235,6 @@
 		})
 	
 	
-		$(document).ready(function() {
-			
-			jQuery('#mainContent').fadeIn()
-			interv = setInterval(verifyProgress, 1000);
-			
-		})
-		
 		$("input[type='radio']").change(function () {
 			var selection=$(this).val();
 			
@@ -255,5 +249,115 @@
 		  e.target // activated tab
 		  e.relatedTarget // previous tab
 		})
+		
+		
+		
+		
+		
+		
+		
+		
+		// CHARTS ====================================================================================================
+		
+		// The tooltip shown over the chart
+	    var tt = $('<div class="ex-tooltip">').appendTo('body'), topOffset = -32;
+	
+	    var data = {
+	        "xScale" : "time",
+	        "yScale" : "linear",
+	        "main" : [{
+	            className : ".stats",
+	            "data" : []
+	        }]
+	    };
+	
+	    var opts = {
+	        paddingLeft : 50,
+	        paddingTop : 20,
+	        paddingRight : 10,
+	        axisPaddingLeft : 25,
+	        tickHintX: 9, // How many ticks to show horizontally
+	
+	        dataFormatX : function(x) {
+	
+	            // This turns converts the timestamps coming from
+	            // ajax.php into a proper JavaScript Date object
+	
+	            /* return Date.create(x); */
+	            return  Date.create(x);
+	        },
+	
+	        tickFormatX : function(x) {
+	
+	            // Provide formatting for the x-axis tick labels.
+	            // This uses sugar's format method of the date object. 
+	
+	            return x.format('{dd}/{MM}');
+	        },
+	
+	        "mouseover": function (d, i) {
+	            var pos = $(this).offset();
+	
+	            tt.text(d.x.format('{Month} {ord}') + ': ' + d.y).css({
+	
+	                top: topOffset + pos.top,
+	                left: pos.left
+	
+	            }).show();
+	        },
+	
+	        "mouseout": function (x) {
+	            tt.hide();
+	        }
+	    };
+	
+	    // Create a new xChart instance, passing the type
+	    // of chart a data set and the options object
+	
+	    var chart = new xChart('line-dotted', data, '#chart' , opts);
+		
+		
+		// Function for loading data via AJAX and showing it on the chart
+	    
+			function ajaxLoadChart() {
+
+	    
+	        $.ajax({
+	        	url: '@routes.EventController.getTweetsCountPerDay(event.getId().toString())',
+	        	type: 'GET',
+	        	success: function(response) {
+	        		console.log(response)
+	        		var set = [];
+	        		$.each(response.map.countPerDay, function() {
+		                set.push({
+		                    x : this.label,
+		                    y : parseInt(this.value, 10)
+		                });
+		            });
+	        		
+	        		chart.setData({
+		                "xScale" : "time",
+		                "yScale" : "linear",
+		                "main" : [{
+		                    className : ".stats",
+		                    data : set
+		                }]
+		            });
+	        	}
+	        });
+	    }
+		
+		
+		
+		// DOCUMENT READY
+		
+		$(document).ready(function() {
+			
+			jQuery('#mainContent').fadeIn()
+			interv = setInterval(verifyProgress, 1000);
+			ajaxLoadChart();
+			
+		})
+		
 	</script>
 }

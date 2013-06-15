@@ -9,8 +9,6 @@ import models.Tweet;
 
 import org.bson.types.ObjectId;
 
-import play.Logger;
-
 import com.google.code.morphia.Key;
 
 import dao.base.BaseDAO;
@@ -53,7 +51,6 @@ public class TweetDAO extends BaseDAO<Tweet> {
 
 	public long countInInterval(ObjectId _eventId, Date startDate,
 			Date finishDate) {
-		Logger.info("Getting tweets: "+startDate+" - "+finishDate);
 		Key<Event> eventKey = new Key<Event>(Event.class, _eventId);
 		
 		return createQuery()
