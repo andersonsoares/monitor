@@ -80,7 +80,6 @@ public class EventController extends Controller {
 			Date startDate = getTweetsForm.getStartDate();
 			Date finishDate = getTweetsForm.getFinishDate();
 			
-			
 			ArrayList<ValidationError> errors =  new ArrayList<ValidationError>();
 			if ((isRecoverAll == false) && (correctRate < 0 || correctRate > 100)) {
 				errors.add(new ValidationError("correctRate", "Invalid correctRate"));				
@@ -97,10 +96,6 @@ public class EventController extends Controller {
 				mapa.put("errors", errors);
 				vo.setMap(mapa);
 				return ok(Json.toJson(vo));
-			}
-			
-			if(form.hasErrors()) {
-				return badRequest();
 			}
 			
 			List<String> considerWhat = getTweetsForm.getConsiderWhat();

@@ -21,9 +21,9 @@ public class GetTweetsForm {
 	
 	private String eventId;
 	
-	@DateTime(pattern="dd/MM/yyyy hh:mm:ss")
+	@DateTime(pattern="dd/MM/yyyy HH:mm:ss")
 	private Date startDate;
-	@DateTime(pattern="dd/MM/yyyy hh:mm:ss")
+	@DateTime(pattern="dd/MM/yyyy HH:mm:ss")
 	private Date finishDate;
 
 	/*

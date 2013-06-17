@@ -43,7 +43,9 @@ public class Tweet {
 	private Date createdAt;
 	
 	// Default Constructor
-	public Tweet() {}
+	public Tweet() {
+		this.createdAt = new Date(System.currentTimeMillis());
+	}
 	
 
 	// Getters e Setters

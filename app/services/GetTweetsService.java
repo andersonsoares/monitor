@@ -89,7 +89,6 @@ public class GetTweetsService implements Runnable {
 					
 					List<Tweet> list = dao.getTweetsFromInterval(event.getId(), startDate, finishDate, LIMIT, offset);
 					for (Tweet t : list) {
-						System.out.println(t.getCreatedAt());
 						texts.add(t.getText());
 					}
 				}
@@ -128,9 +127,9 @@ public class GetTweetsService implements Runnable {
 				
 				ArrayList<String> correctTweets = new ArrayList<String>();
 				
-				for (int i=0; i < totalTweets; i+=LIMIT) {
+				for (int offset=0; offset < totalTweets; offset+=LIMIT) {
 					
-					List<Tweet> list = dao.createQuery().filter("event", new Key<Event>(Event.class, event.getId())).limit(LIMIT).offset(i).retrievedFields(true, "text").asList();
+					List<Tweet> list = dao.getTweetsFromInterval(event.getId(), startDate, finishDate, LIMIT, offset);
 					for (Tweet t : list) {
 						// para cada tweet, verificar a taxa de palavras corretas
 						float rate = PLNUtils.getCorrectRate(t.getText(), dictionaryWords, abbreviations, considerHashtags, considerURLs, considerUSERs, considerSIGLAs);
