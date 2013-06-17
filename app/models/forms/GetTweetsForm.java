@@ -1,7 +1,10 @@
 package models.forms;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import play.data.format.Formats.DateTime;
 
 public class GetTweetsForm {
 
@@ -18,6 +21,11 @@ public class GetTweetsForm {
 	
 	private String eventId;
 	
+	@DateTime(pattern="dd/MM/yyyy hh:mm:ss")
+	private Date startDate;
+	@DateTime(pattern="dd/MM/yyyy hh:mm:ss")
+	private Date finishDate;
+
 	/*
 	 * acceptable correct rate
 	 */
@@ -25,8 +33,15 @@ public class GetTweetsForm {
 	
 	private List<String> considerWhat = new ArrayList<String>();
 	
+	/**
+	 * Constructor
+	 */
 	public GetTweetsForm() {}
 
+	/**
+	 * Getters and setters
+	 * @return
+	 */
 	public boolean isRecoverAll() {
 		return recoverAll;
 	}
@@ -67,7 +82,20 @@ public class GetTweetsForm {
 		this.eventId = eventId;
 	}
 	
+	public Date getStartDate() {
+		return startDate;
+	}
 	
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
 	
+	public Date getFinishDate() {
+		return finishDate;
+	}
+	
+	public void setFinishDate(Date finishDate) {
+		this.finishDate = finishDate;
+	}
 	
 }

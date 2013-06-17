@@ -41,13 +41,33 @@
 			<!-- TAB GET_TWEETS -->
  			<div class="tab-pane" id="getTweets">
  			
+ 				<form id="formFilter" action="@routes.EventController.getTweets()" class="form-horizontal" method="POST">
  				<div class="row-fluid">
  				
  			
- 				<form id="formFilter" action="@routes.EventController.getTweets()" class="form-horizontal" method="POST">
- 				<div class="span6">
-					<fieldset>
+ 				<div class="span8">
+ 					<fieldset>
 					<!-- Multiple Radios -->
+					
+					<div class="control-group">
+						  <label class="control-label" for="textinput">Select date interval</label>
+						  <div class="controls">
+						    <div id="startDate" class="input-append date">
+								<input name="startDate" id="startDate" value="@event.getStartDate().format("dd/MM/yyyy HH:mm:ss")" data-format="dd/MM/yyyy hh:mm:ss" type="text" placeholder="start date..." class="input-medium"></input> <span
+									class="add-on"> <i data-time-icon="icon-time"
+									data-date-icon="icon-calendar"> </i>
+								</span>
+							</div>
+							<div id="finishDate" class="input-append date">
+								<input name="finishDate" id="finishDate" value="@event.getFinishDate().format("dd/MM/yyyy HH:mm:ss")" data-format="dd/MM/yyyy hh:mm:ss" type="text" placeholder="finish date..." class="input-medium"></input> <span
+									class="add-on"> <i data-time-icon="icon-time"
+									data-date-icon="icon-calendar"> </i>
+								</span>
+							</div>
+						  </div>
+						</div>
+					
+					
 					<div class="control-group">
 					  <label class="control-label" for="recoverAll">Select Tweets</label>
 					  <div class="controls">
@@ -114,19 +134,12 @@
 					
 				</div>
 				
-				<div class="span6">
-					<div class="control-group">
-					  <div class="controls">
+					<div class="span4">
 					    <button id="sendButton" name="sendButton" class="btn btn-primary">Get tweets</button>
-					  </div>
-					</div>
-				</div> <!-- end span -->
-					
-				</form>
-				
-				
-				
+					    
+					</div> <!-- end span -->
 			</div> <!-- end row-fluid -->
+				</form>
 			</div>
 		  
 		  
@@ -185,6 +198,7 @@
 								}
 								
 								modal.modal();
+								downloadURL(url+'/events/getTweets/'+filename)
 								clearInterval(interv);
 							}
 						} else {
@@ -197,12 +211,25 @@
 				
 			})
 		}
+		
+		var downloadURL = function downloadURL(url) {
+		    var hiddenIFrameID = 'hiddenDownloader',
+		        iframe = document.getElementById(hiddenIFrameID);
+		    if (iframe === null) {
+		        iframe = document.createElement('iframe');
+		        iframe.id = hiddenIFrameID;
+		        iframe.style.display = 'none';
+		        document.body.appendChild(iframe);
+		    }
+		    iframe.src = url;
+		};
 	
 		
 		jQuery('#sendButton').click(function(e) {
 			e.preventDefault();
 			
 			var data = jQuery('#formFilter').serialize();
+			console.log(data)
 			
 			$.ajax({
 				url: '@routes.EventController.getTweets()',
@@ -356,6 +383,15 @@
 			jQuery('#mainContent').fadeIn()
 			interv = setInterval(verifyProgress, 1000);
 			ajaxLoadChart();
+			
+			$('#startDate').datetimepicker({
+				language : 'pt-BR'
+			});
+			$('#finishDate').datetimepicker({
+				language : 'pt-BR'
+			});
+			
+			
 			
 		})
 		

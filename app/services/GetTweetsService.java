@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,8 +35,10 @@ public class GetTweetsService implements Runnable {
 	private Dictionary dictionary;
 	private boolean isRecoverAll;
 	private Event event;
+	private Date startDate;
+	private Date finishDate;
 
-	public GetTweetsService(Event event, boolean isRecoverAll,
+	public GetTweetsService(Event event, Date startDate, Date finishDate, boolean isRecoverAll,
 			Dictionary dictionary, float correctRate,List<String> considerWhat) {
 		
 		this.event = event;
@@ -43,7 +46,8 @@ public class GetTweetsService implements Runnable {
 		this.dictionary = dictionary;
 		this.correctRate = correctRate;
 		this.considerWhat = considerWhat;
-		
+		this.startDate = startDate;
+		this.finishDate = finishDate;
 	}
 
 	@Override
@@ -65,7 +69,7 @@ public class GetTweetsService implements Runnable {
 			
 			TweetDAO dao = new TweetDAO();
 			
-			long totalTweets = dao.countAll(event.getId());
+			long totalTweets = dao.countAllInInterval(event.getId(), startDate, finishDate);
 		
 			
 			vo = (ReturnToView) Cache.get("getTweetStatus");
@@ -81,10 +85,11 @@ public class GetTweetsService implements Runnable {
 				// recuperar tudo
 				
 				List<String> texts = new ArrayList<String>();
-				for (int i=0; i < totalTweets; i+=LIMIT) {
+				for (int offset=0; offset < totalTweets; offset+=LIMIT) {
 					
-					List<Tweet> list = dao.createQuery().filter("event", new Key<Event>(Event.class, event.getId())).limit(LIMIT).offset(i).retrievedFields(true, "text").asList();
+					List<Tweet> list = dao.getTweetsFromInterval(event.getId(), startDate, finishDate, LIMIT, offset);
 					for (Tweet t : list) {
+						System.out.println(t.getCreatedAt());
 						texts.add(t.getText());
 					}
 				}

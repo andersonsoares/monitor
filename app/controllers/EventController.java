@@ -77,6 +77,10 @@ public class EventController extends Controller {
 			GetTweetsForm getTweetsForm = form.get();
 			boolean isRecoverAll = getTweetsForm.isRecoverAll();
 			float correctRate = getTweetsForm.getCorrectRate();
+			Date startDate = getTweetsForm.getStartDate();
+			Date finishDate = getTweetsForm.getFinishDate();
+			
+			
 			ArrayList<ValidationError> errors =  new ArrayList<ValidationError>();
 			if ((isRecoverAll == false) && (correctRate < 0 || correctRate > 100)) {
 				errors.add(new ValidationError("correctRate", "Invalid correctRate"));				
@@ -95,6 +99,10 @@ public class EventController extends Controller {
 				return ok(Json.toJson(vo));
 			}
 			
+			if(form.hasErrors()) {
+				return badRequest();
+			}
+			
 			List<String> considerWhat = getTweetsForm.getConsiderWhat();
 			ObjectId eventId = new ObjectId(getTweetsForm.getEventId());
 			
@@ -108,7 +116,7 @@ public class EventController extends Controller {
 					
 					Akka.system().scheduler().scheduleOnce(
 							Duration.create(0, TimeUnit.SECONDS), 
-							new GetTweetsService(event, isRecoverAll, dictionary, correctRate, considerWhat),
+							new GetTweetsService(event, startDate, finishDate, isRecoverAll, dictionary, correctRate, considerWhat),
 							Akka.system().dispatcher());
 					
 					
@@ -213,7 +221,6 @@ public class EventController extends Controller {
 			Date finishDate = event.getFinishDate();
 			Date now = new Date(System.currentTimeMillis());
 			if (now.before(finishDate)) {
-				System.out.println("antes");
 				finishDate = now;
 			}
 			
