@@ -21,9 +21,6 @@ import play.cache.Cache;
 import play.libs.Json;
 import system.ReturnToView;
 import utils.PLNUtils;
-
-import com.google.code.morphia.Key;
-
 import dao.AbbreviationDAO;
 import dao.TweetDAO;
 import dao.WordDAO;
@@ -138,7 +135,7 @@ public class GetTweetsService implements Runnable {
 						}
 					}
 				}
-				out.write(Json.toJson(correctTweets).toString()+"\n");					
+				out.write(Json.toJson(correctTweets).toString());					
 				
 				Logger.info("Analysis over in "+(System.currentTimeMillis() - inicio)+" ms");
 				

@@ -42,7 +42,7 @@ public class CreateAbbreviationsFromTweets {
 		ArrayList<String> tweets = new ArrayList<String>();
 		for (int i=0; i < totalTweets; i+=LIMIT) {
 			
-			List<Tweet> list = datastoreLocal.createQuery(Tweet.class).limit(LIMIT).offset(i).retrievedFields(true, "text").asList();
+			List<Tweet> list = datastoreLocal.createQuery(Tweet.class).limit(LIMIT).offset(i-1).retrievedFields(true, "text").asList();
 			for (Tweet t : list) {
 				tweets.add(t.getText());
 			}
@@ -83,6 +83,7 @@ public class CreateAbbreviationsFromTweets {
 		String userDb = 	"monitor";
 		char[] passDb = 	"monitor123".toCharArray();
 		String hostDb = 	"li216-187.members.linode.com";
+//		String hostDb = 	"127.0.0.1";
 		int portDb =	 	27017;
 		String database = 	"monitor";
 		try {

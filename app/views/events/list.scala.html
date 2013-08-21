@@ -55,7 +55,7 @@
 						@for(event <- eventsList) {
 							<tr>
 								<td></td>
-								<td><a id="@event.getId()-name" href="#">@event.getName()</a></td>
+								<td><a id="@event.getId()-name" href="@routes.EventController.pageDetails(event.getId().toString())">@event.getName()</a></td>
 								
 								<td id="situation_@event.getId()">
 									@if(event.getSituation().name == "STARTED") {
