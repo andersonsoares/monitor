@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -293,6 +294,29 @@ public class PLNUtils {
 			
 			br.close();
 			Logger.info("Dictionary loaded in "+(System.currentTimeMillis() - inicio)+" ms");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return words;
+	}
+	
+	public static List<String> readFile(String fileName) {
+		
+		List<String> words = new ArrayList<String>();
+		
+		try {
+		
+			File file = new File(fileName);
+			
+			BufferedReader br = new BufferedReader(new InputStreamReader( new FileInputStream(file), "UTF8"));
+			
+			String str;
+			while((str = br.readLine()) != null) {
+				words.add(str.toLowerCase());
+			}
+			
+			br.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

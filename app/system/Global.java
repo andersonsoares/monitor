@@ -10,6 +10,10 @@ import listeners.TwitterStatusListener;
 import listeners.UserStreamListener;
 import models.Event;
 import models.Tweet;
+
+import org.joda.time.DateTime;
+import org.joda.time.Seconds;
+
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
@@ -19,6 +23,7 @@ import scala.concurrent.duration.Duration;
 import twitter4j.TwitterFactory;
 import twitter4j.TwitterStreamFactory;
 import twitter4j.auth.AccessToken;
+import utils.PLNUtils;
 import actors.EventMonitorActor;
 import actors.UpdateTweetCountOnEventsActor;
 import akka.actor.ActorRef;
@@ -45,8 +50,6 @@ public class Global extends GlobalSettings {
 	
 	@Override
 	public void onStart(Application app) {
-		
-		
 		
 		startGlobalVars(app);
 		
@@ -81,7 +84,8 @@ public class Global extends GlobalSettings {
 		ACCESS_TOKEN2 = 		app.configuration().getString("twitter.access_token2");
 		ACCESS_TOKEN_SECRET2 = 	app.configuration().getString("twitter.access_token_secret2");
 		
-		
+		Singletons.positiveWords =	PLNUtils.readFile("positivas.txt");
+		Singletons.negativeWords =	PLNUtils.readFile("negativas.txt");
 		
 		Constants.CACHE_MAX_TWEETS 		= app.configuration().getInt("cache.maxtweets");
 		Constants.CACHE_MAX_USERTWEETS 	= app.configuration().getInt("cache.maxusertweets");
@@ -243,7 +247,44 @@ public class Global extends GlobalSettings {
 				"null",
 				Akka.system().dispatcher()
 			);
+		
+		// Scheduler everyday
+		Akka.system().scheduler()
+			.schedule(
+                Duration.create(nextExecutionInSeconds(0, 1), TimeUnit.SECONDS),
+                Duration.create(24, TimeUnit.MINUTES),
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        Logger.info("EVERY DAY AT 00:01 ---    " + System.currentTimeMillis());
+                    }
+                },
+                Akka.system().dispatcher()
+        );
 	}
+	
+	
+	/*
+	 *  Auxiliar functions to schedule tasks everyday
+	 */
+	public static int nextExecutionInSeconds(int hour, int minute){
+        return Seconds.secondsBetween(
+                new DateTime(),
+                nextExecution(hour, minute)
+        ).getSeconds();
+    }
+
+    public static DateTime nextExecution(int hour, int minute){
+        DateTime next = new DateTime()
+                .withHourOfDay(hour)
+                .withMinuteOfHour(minute)
+                .withSecondOfMinute(0)
+                .withMillisOfSecond(0);
+
+        return (next.isBeforeNow())
+                ? next.plusHours(24)
+                : next;
+    }
 	
 	private static String CONSUMER_KEY1;
 	private static String CONSUMER_SECRET1;
@@ -254,6 +295,7 @@ public class Global extends GlobalSettings {
 	private static String CONSUMER_SECRET2;
 	private static String ACCESS_TOKEN2;
 	private static String ACCESS_TOKEN_SECRET2;
+	
 	
 	// Creating a Guice Injector for Dependency Injection
 	private static final Injector INJECTOR = createInjector(); 

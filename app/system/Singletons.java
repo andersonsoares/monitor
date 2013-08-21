@@ -1,5 +1,7 @@
 package system;
 
+import java.util.List;
+
 import listeners.UserStreamListener;
 import twitter4j.StatusListener;
 import twitter4j.Twitter;
@@ -25,4 +27,7 @@ public class Singletons {
 	static public TwitterStream userStream;
 	public static StatusListener twitterStatusListener;
 	public static UserStreamListener userListener;
+	
+	public static List<String> positiveWords;
+	public static List<String> negativeWords;
 }
