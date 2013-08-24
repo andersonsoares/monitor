@@ -44,8 +44,8 @@ public class TweetDAO extends BaseDAO<Tweet> {
 		return tweetsList;
 	}
 
-	public long countAll(ObjectId id) {
-		return createQuery().filter("event", new Key<Event>(Event.class, id)).countAll();
+	public long countAll(ObjectId eventId) {
+		return createQuery().filter("event", new Key<Event>(Event.class, eventId)).countAll();
 	}
 	
 	public long countAllInInterval(ObjectId id, Date startDate, Date finishDate) {
@@ -76,6 +76,14 @@ public class TweetDAO extends BaseDAO<Tweet> {
 				.limit(limit)
 				.offset(offset)
 				.retrievedFields(true, "text")
+				.asList();
+	}
+
+	public List<Tweet> getTweets(ObjectId eventId, int limit, int offset) {
+		return createQuery()
+				.filter("event", new Key<Event>(Event.class, eventId))
+				.limit(limit)
+				.offset(offset)
 				.asList();
 	}
 

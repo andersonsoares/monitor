@@ -19,6 +19,8 @@ import play.GlobalSettings;
 import play.Logger;
 import play.cache.Cache;
 import play.libs.Akka;
+import ptstemmer.exceptions.PTStemmerException;
+import ptstemmer.implementations.OrengoStemmer;
 import scala.concurrent.duration.Duration;
 import twitter4j.TwitterFactory;
 import twitter4j.TwitterStreamFactory;
@@ -51,7 +53,12 @@ public class Global extends GlobalSettings {
 	@Override
 	public void onStart(Application app) {
 		
-		startGlobalVars(app);
+		try {
+			startGlobalVars(app);
+		} catch (PTStemmerException e) {
+			Logger.error("Orengo stemmer caused an error");
+			e.printStackTrace();
+		}
 		
 		createMongoDbConnection(app);
 		
@@ -72,7 +79,7 @@ public class Global extends GlobalSettings {
 	}
 	
 	
-	private void startGlobalVars(Application app) {
+	private void startGlobalVars(Application app) throws PTStemmerException {
 		
 		CONSUMER_KEY1 = 		app.configuration().getString("twitter.consumer_key1");
 		CONSUMER_SECRET1 = 		app.configuration().getString("twitter.consumer_secret1");
@@ -84,8 +91,11 @@ public class Global extends GlobalSettings {
 		ACCESS_TOKEN2 = 		app.configuration().getString("twitter.access_token2");
 		ACCESS_TOKEN_SECRET2 = 	app.configuration().getString("twitter.access_token_secret2");
 		
-		Singletons.positiveWords =	PLNUtils.readFile("positivas.txt");
-		Singletons.negativeWords =	PLNUtils.readFile("negativas.txt");
+		Singletons.positiveWords =	PLNUtils.readFile("radical_positivo.txt");
+		Singletons.negativeWords =	PLNUtils.readFile("radical_negativo.txt");
+		
+		Singletons.orengoStemmer = new OrengoStemmer();
+		Singletons.orengoStemmer.enableCaching(1000);
 		
 		Constants.CACHE_MAX_TWEETS 		= app.configuration().getInt("cache.maxtweets");
 		Constants.CACHE_MAX_USERTWEETS 	= app.configuration().getInt("cache.maxusertweets");

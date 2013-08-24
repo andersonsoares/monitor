@@ -8,6 +8,6 @@ package enums;
  */
 public enum SentimentEnum {
 	
-	POSITIVE, NEGATIVE, NEUTRAL
+	POSITIVE, NEGATIVE, NEUTRAL, INCORRECT
 
 }

@@ -20,3 +20,5 @@ mald
 mal
 mau
 fei
+chat
+aff

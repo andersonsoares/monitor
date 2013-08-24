@@ -17,8 +17,11 @@ import play.Logger;
 import ptstemmer.Stemmer;
 import ptstemmer.Stemmer.StemmerType;
 import ptstemmer.exceptions.PTStemmerException;
+import system.Singletons;
 
 import com.google.common.base.CharMatcher;
+
+import enums.SentimentEnum;
 
 
 /**
@@ -326,29 +329,8 @@ public class PLNUtils {
 	
 	public static float getCorrectRate(String tweet, HashSet<String> dicionario, List<Abbreviation> abbreviations, boolean considerHashtags, boolean considerURLs, boolean considerUSERs, boolean considerSIGLAs) {
 		
-		tweet = PLNUtils.removeRT(tweet);
-		
-		if (considerHashtags) {
-			tweet = PLNUtils.replaceHASHTAG(tweet);			
-		} else {
-			tweet = PLNUtils.replaceAndRemoveHASHTAG(tweet);
-		}
-		if (considerURLs) {
-			tweet = PLNUtils.replaceURLs(tweet);			
-		} else {
-			tweet = PLNUtils.replaceAndRemoveURLs(tweet);
-		}
-		if (considerUSERs) {
-			tweet = PLNUtils.replaceUSERs(tweet);
-		} else {
-			tweet = PLNUtils.replaceAndRemoveUSERs(tweet);
-		}
-		
-		tweet = PLNUtils.removeDigits(tweet);
-		
-		tweet = PLNUtils.removePunctuation(tweet);
-		
-		tweet = PLNUtils.removeWhiteSpacesNotNecessary(tweet);
+		tweet = normalizeText(tweet, considerHashtags, considerURLs,
+				considerUSERs);
 		
 		String[] tokens = tweet.split(" ");
 		
@@ -376,6 +358,171 @@ public class PLNUtils {
 		return rate;
 	}
 	
+
+
+	/**
+	 * Method that verifies if the tweet is 'correct' according with dictionary
+	 * Analysing hashtags, urls, users and abbreviations(siglas)
+	 * and correctRate*
+	 * 
+	 * After consider it correct or not, if its correct, then it verifies 
+	 * if the tweet have sentiment negative/positive/neutral
+	 * 
+	 * @param text
+	 * @param dictionaryWords
+	 * @param abbreviations
+	 * @param correctRate
+	 * @param considerHashtag
+	 * @param considerUser
+	 * @param considerUrl
+	 * @param considerSigla
+	 * @return
+	 */
+	public static SentimentEnum analyseTweet(String text,
+			HashSet<String> dictionaryWords, List<Abbreviation> abbreviations,
+			float correctRate, boolean considerHashtag, boolean considerUser,
+			boolean considerUrl, boolean considerSigla) {
+		
+		// normalize the text
+		String normalizedTweet = normalizeText(text, considerHashtag, considerUrl, considerUser);
+		
+		float similarityRate = getSimilarityRate(normalizedTweet, dictionaryWords, abbreviations, considerSigla);
+		// verify it similary rate is acceptable comparing with 'correctRate' passed as param
+		if ((similarityRate*100) < correctRate) {
+			return SentimentEnum.INCORRECT;
+		} else {			
+			return getSentimentAnalysis(normalizedTweet);
+		}
+	}
 	
+	/**
+	 * Method that analyse the tweet tokens and verify if each
+	 * token stemmed with Orengo Algorithm is in the
+	 * positive or negative list of stemmed postivive and negative 
+	 * words.
+	 * Each time one appear, it is counted. In the end, if the 
+	 * totalpositive == totalnegative OR totalnegative and totalpositive
+	 * == 0, then it consider that it is a neutral tweet.
+	 * @param tweet
+	 * @return
+	 */
+	public static SentimentEnum getSentimentAnalysis(String tweet) {
+		int totalPositiveStemmes = 0;
+		int totalNegativeStemmes = 0;
+		
+		String[] tokens = tweet.split(" ");
+		
+		String tokenStemmed;
+		for (String token : tokens) {
+			
+			tokenStemmed = Singletons.orengoStemmer.getWordStem(token);
+			
+			if (Singletons.positiveWords.contains(tokenStemmed)) {
+				totalPositiveStemmes++;
+			} else {
+				if (Singletons.negativeWords.contains(tokenStemmed)) {
+					totalNegativeStemmes++;
+				}
+			}
+		}
+		
+		if (totalPositiveStemmes == totalNegativeStemmes || (totalPositiveStemmes == 0 && totalNegativeStemmes == 0)) {
+			return SentimentEnum.NEUTRAL;
+		} else {
+			if (totalPositiveStemmes > totalNegativeStemmes) {
+				return SentimentEnum.POSITIVE;
+			} else {
+				return SentimentEnum.NEGATIVE;
+			}
+		}
+	}
+	
+	/**
+	 * Method that verifies how correct is the 'normalized' text/tweet
+	 * Its a simple arithmetic calc that counts the number of correct words
+	 * based on dictionary passed as param, over the total words in the normalized text..
+	 * considerSiglas will be used to count or not siglas as a word...
+	 * 
+	 * @param normalizedTweet
+	 * @param dicionario
+	 * @param abbreviations
+	 * @param considerSIGLAs
+	 * @return
+	 */
+	public static float getSimilarityRate(String normalizedTweet, HashSet<String> dicionario,
+			List<Abbreviation> abbreviations, boolean considerSIGLAs) {
+		
+		String[] tokens = normalizedTweet.split(" ");
+		
+		int correctWordsCount = 0;
+		for (String string : tokens) {
+			
+			if (considerSIGLAs) {
+				if (isSigla(string) && abbreviations.contains(new Abbreviation(string))) {
+					correctWordsCount++;
+					continue;
+				}
+			}
+			if (string.equals("HASHTAG") || string.equals("USER") || string.equals("URL")) {
+				correctWordsCount++;
+			} else {
+				if (dicionario.contains(string.toLowerCase())) {
+					correctWordsCount++;
+				}	
+			}
+				
+		}
+		
+		float rate = (float)correctWordsCount / tokens.length;
+		
+		return rate;
+	}
+	
+	/**
+	 * Method that normalize a Tweet
+	 * Remove 'RT' word
+	 * Try fix some words like boooooom -> bom, oooootimo -> otimo
+	 * If considerHashtag, replace all '#something' with 'HASHTAG', else replace with ''
+	 * If considerUrls, replace all 'http:// | https:// | www.something...' with 'URL', else replace with ''
+	 * If considerUser, replace all '@someone' with 'USER', else replace with ''
+	 * Remove digits (0..9)*
+	 * Remove punctuations -> .,!>?<{} .... not accentuation!
+	 * Remove unnacessarie white spaces ;)
+	 * 
+	 * @param tweet
+	 * @param considerHashtags
+	 * @param considerURLs
+	 * @param considerUSERs
+	 * @return
+	 */
+	public static String normalizeText(String tweet, boolean considerHashtags,
+			boolean considerURLs, boolean considerUSERs) {
+		tweet = PLNUtils.removeRT(tweet);
+		
+		tweet = PLNUtils.tryFixRepeatedChars(tweet);
+		
+		if (considerHashtags) {
+			tweet = PLNUtils.replaceHASHTAG(tweet);			
+		} else {
+			tweet = PLNUtils.replaceAndRemoveHASHTAG(tweet);
+		}
+		if (considerURLs) {
+			tweet = PLNUtils.replaceURLs(tweet);			
+		} else {
+			tweet = PLNUtils.replaceAndRemoveURLs(tweet);
+		}
+		if (considerUSERs) {
+			tweet = PLNUtils.replaceUSERs(tweet);
+		} else {
+			tweet = PLNUtils.replaceAndRemoveUSERs(tweet);
+		}
+		
+		tweet = PLNUtils.removeDigits(tweet);
+		
+		tweet = PLNUtils.removePunctuation(tweet);
+		
+		tweet = PLNUtils.removeWhiteSpacesNotNecessary(tweet);
+		return tweet;
+	}
 	
 }

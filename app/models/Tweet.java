@@ -1,6 +1,7 @@
 package models;
 
 import java.util.Date;
+import java.util.HashMap;
 
 import org.bson.types.ObjectId;
 
@@ -8,6 +9,8 @@ import com.google.code.morphia.Key;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Indexed;
+
+import enums.SentimentEnum;
 
 @Entity("tweets")
 public class Tweet {
@@ -18,6 +21,10 @@ public class Tweet {
 	@Indexed
 	private Key<Event> event;
 	
+	/*
+	 * HashMap key is the EventAnalysis id on DB!!
+	 */
+	private HashMap<ObjectId, SentimentEnum> eventAnalysis; 
 	
 	// Tweets default attributes by Twitter
 //	@Indexed
@@ -45,6 +52,7 @@ public class Tweet {
 	// Default Constructor
 	public Tweet() {
 		this.createdAt = new Date(System.currentTimeMillis());
+		eventAnalysis = new HashMap<ObjectId,SentimentEnum>();
 	}
 	
 
@@ -147,6 +155,16 @@ public class Tweet {
 
 	public void setCorrectRate(float correctRate) {
 		this.correctRate = correctRate;
+	}
+
+
+	public HashMap<ObjectId, SentimentEnum> getEventAnalysis() {
+		return eventAnalysis;
+	}
+
+
+	public void setEventAnalysis(HashMap<ObjectId, SentimentEnum> eventAnalysis) {
+		this.eventAnalysis = eventAnalysis;
 	}
 	
 }

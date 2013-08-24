@@ -2,6 +2,8 @@ package system;
 
 import java.util.List;
 
+import ptstemmer.Stemmer;
+
 import listeners.UserStreamListener;
 import twitter4j.StatusListener;
 import twitter4j.Twitter;
@@ -30,4 +32,6 @@ public class Singletons {
 	
 	public static List<String> positiveWords;
 	public static List<String> negativeWords;
+	
+	public static Stemmer orengoStemmer;
 }

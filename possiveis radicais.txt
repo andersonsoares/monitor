@@ -1,0 +1,52 @@
+Stemmes encontrados das palavras da 2nd coluna utilizando o algoritmo de Orengo..
+
+stemmes positivas
+=================================
+feliz -> feliz, felizmente
+felic -> felicidade
+bom -> bom, bons
+bond -> bondoso
+bondad -> bondoso 
+alegr -> alegria, alegremente, alegre, alegres, alegrando, alegro
+melhor -> melhor, melhorado, melhorando..
+empolg -> empolgação, empolgando, empolgada
+animad -> animadamente, 
+anim -> animado, animando,
+bem -> bem, bens
+bel -> belo, bela, beleza
+bonit -> bonito, bonita
+lind -> linda, lindo, lindeza
+perfeit -> perfeito, perfeita, perfeitamente
+perfe -> perfeição
+cheir -> cheiroso, cheirosa
+legal -> legal
+
+
+stemmes negativas 
+=================================
+ruim -> ruim, ruins
+pessim -> pessimista, pessimamente
+péssim -> péssimo, péssima
+horrí -> horrível
+horripil -> horripilante
+horror -> horroroso
+horr -> horror
+infeliz -> infeliz, infelizmente
+infelic -> infelicidade
+infelicit -> infelicitado
+desacredit -> desacreditado, desacreditando
+desempolg -> desempolgado, desempolgando, desempolgação
+trist -> triste, tristeza, tristemente
+entristec -> entristecer, entristece, entristecendo
+desanim -> desanimado, desanimando, desanimação
+desânim -> desânimo
+malvad -> malvadeza
+malv -> malvado
+mald -> maldoso
+mal -> mal
+mau -> mau
+fei -> feio, feiosa, feia, feioso
+aff -> aff
+chat -> chato chata chatisse
+
+
