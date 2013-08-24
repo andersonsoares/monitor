@@ -20,6 +20,12 @@ perfeit -> perfeito, perfeita, perfeitamente
 perfe -> perfeição
 cheir -> cheiroso, cheirosa
 legal -> legal
+amo -> amor
+am -> amo ama
+oba -> oba
+delíc -> delícia
+delic -> delicia
+delici -> delicioso deliciosa
 
 
 stemmes negativas 

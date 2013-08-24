@@ -1,5 +1,7 @@
 package services;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -9,6 +11,9 @@ import models.Event;
 import models.EventAnalysis;
 import models.Tweet;
 import models.Word;
+
+import org.bson.types.ObjectId;
+
 import play.Logger;
 import utils.PLNUtils;
 
@@ -101,6 +106,7 @@ public class AnalyseEventService implements Runnable {
 				int totalNeutral = 0;
 				int totalIncorrect = 0;
 				
+				List<Tweet> tweetsToBeUpdated = new ArrayList<Tweet>();
 				
 				for (int offset=0; offset < totalTweets; offset+=LIMIT) {
 					
@@ -124,17 +130,20 @@ public class AnalyseEventService implements Runnable {
 						}
 						
 						if (t.getEventAnalysis() == null) {
-							Logger.info("Null");
+							HashMap<ObjectId,SentimentEnum> mapAnalysis = new HashMap<ObjectId, SentimentEnum>();
+							mapAnalysis.put(eventAnalysis.getId(), analysisResult);
+							t.setEventAnalysis(mapAnalysis);
 						} else {
 							t.getEventAnalysis().put(eventAnalysis.getId(),analysisResult);
 						}
 						
-						//TODO: save each tweet or save in batch?
-						tweetDAO.save(t);
+						tweetsToBeUpdated.add(t);
 						
 					} // fim for interno
 					
 				} // fim for externo
+				Logger.info("Atualizando "+tweetsToBeUpdated.size()+" tweets");
+				tweetDAO.saveCollection(tweetsToBeUpdated);
 				
 				long ellapsedTime = System.currentTimeMillis() - initialTime;
 				

@@ -111,7 +111,7 @@ public class PLNUtils {
 	}
 	
 	public static String removeRT(String str) {
-		return str.replaceAll("RT"," ");
+		return str.replaceAll("RT","");
 	}
 	
 	public static String removeURLs(String str) {
@@ -522,6 +522,8 @@ public class PLNUtils {
 		tweet = PLNUtils.removePunctuation(tweet);
 		
 		tweet = PLNUtils.removeWhiteSpacesNotNecessary(tweet);
+		if (tweet.startsWith(" "))
+			tweet = tweet.substring(1);
 		return tweet;
 	}
 	

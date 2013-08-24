@@ -12,9 +12,12 @@ GET     /                       			    @controllers.Application.index()
 GET		/events/create							@controllers.EventController.pageCreate()
 POST    /events        			                @controllers.EventController.save()
 
+POST	/events/analyse							@controllers.EventController.analyse()
+
 POST	/events/getTweets						@controllers.EventController.getTweets()
 GET		/events/getTweets/:filename				@controllers.EventController.getTweetsInJson(filename: String)
 GET		/events/getTweetStatus					@controllers.EventController.getTweetStatus()
+GET		/events/:eventId/teste					@controllers.EventController.pageTeste(eventId: String)
 GET		/events/:eventId						@controllers.EventController.pageDetails(eventId: String)
 GET		/events/:eventId/getTweetsCountPerDay 	@controllers.EventController.getTweetsCountPerDay(eventId: String)
 

@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import models.Dictionary;
 import models.Event;
+import models.forms.AnalyseForm;
 import models.forms.GetTweetsForm;
 
 import org.bson.types.ObjectId;
@@ -21,6 +22,7 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import scala.concurrent.duration.Duration;
+import services.AnalyseEventService;
 import services.GetTweetsService;
 import system.ChartParam;
 import system.ReturnToView;
@@ -42,6 +44,7 @@ public class EventController extends Controller {
 	
 	final static Form<Event> eventForm = Form.form(Event.class);
 	final static Form<GetTweetsForm> getTweetsForm = Form.form(GetTweetsForm.class);
+	final static Form<AnalyseForm> analyseForm = Form.form(AnalyseForm.class);
 	
 	public Result getTweetsInJson(String filename) {		
 		File file = new File(filename);
@@ -66,6 +69,43 @@ public class EventController extends Controller {
 			vo.setMessage("null");
 		} 
 		return ok(Json.toJson(vo));
+	}
+	
+	/*
+	 * Method that receive the form params to analyse the event tweets
+	 * And call the AnalyseEventService to do the job done! :)
+	 */
+	public Result analyse() {
+		
+		Form<AnalyseForm> form = analyseForm.bindFromRequest();
+		AnalyseForm analyseForm = form.get();
+		
+		float correctRate = analyseForm.getCorrectRate();
+		if (correctRate < 0 || correctRate > 100) {
+			return badRequest();
+		}
+		
+		List<String> considerWhat = analyseForm.getConsiderWhat();
+		ObjectId eventId = new ObjectId(analyseForm.getEventId());
+		
+		Event event = new EventDAO().findById(eventId);
+		
+		if (event != null) {
+			ObjectId dictionaryId = new ObjectId(analyseForm.getDictionaryId());
+			Dictionary dictionary = new DictionaryDAO().findById(dictionaryId);
+			
+			if (dictionary != null) {
+				
+				Akka.system().scheduler().scheduleOnce(
+						Duration.create(0, TimeUnit.SECONDS), 
+						new AnalyseEventService(event, dictionary, correctRate, considerWhat),
+						Akka.system().dispatcher());
+				
+				return ok("Analisando");
+				
+			} 
+		} 
+		return badRequest();
 	}
 	
 	public Result getTweets() {
@@ -147,6 +187,35 @@ public class EventController extends Controller {
 				List<Dictionary> dictionariesList = dictionaryDAO.listAll();
 				
 				return ok(views.html.events.details.render(event, dictionariesList));
+				
+				
+			} else {
+				// event doesnt exist
+				return badRequest();
+			}
+			
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+			return badRequest();
+		}
+		
+	}
+	
+public Result pageTeste(String eventId) {
+		
+		try {
+			ObjectId id = new ObjectId(eventId);
+			
+			EventDAO eventDAO = new EventDAO();
+			Event event = eventDAO.findById(id);
+			
+			if (event != null) {
+				
+				DictionaryDAO dictionaryDAO = new DictionaryDAO();
+				
+				List<Dictionary> dictionariesList = dictionaryDAO.listAll();
+				
+				return ok(views.html.events.teste.render(event, dictionariesList));
 				
 				
 			} else {
