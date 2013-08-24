@@ -142,14 +142,14 @@ public class AnalyseEventService implements Runnable {
 						if (offset < totalTweets) {
 							if (tweetsToBeUpdated.size() == LIMIT) {
 								if (offset % 10000 == 0 && offset != 0) {
-									Logger.info("More 10000 tweets updated");
+									Logger.info(offset+" tweets from '"+event.getName()+"' updated until now");
 								}
 								tweetDAO.saveCollection(tweetsToBeUpdated);
 								tweetsToBeUpdated.clear();
 							}
 						} else {
 							if (tweetsToBeUpdated.size() == list.size()) {
-								Logger.info("Updating the last "+list.size()+" tweets");
+								Logger.info("Updating the last "+list.size()+" tweets from '"+event.getName()+"'");
 								tweetDAO.saveCollection(tweetsToBeUpdated);
 								tweetsToBeUpdated.clear();
 							}
