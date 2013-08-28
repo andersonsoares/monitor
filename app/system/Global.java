@@ -262,7 +262,7 @@ public class Global extends GlobalSettings {
 		Akka.system().scheduler()
 			.schedule(
                 Duration.create(nextExecutionInSeconds(0, 1), TimeUnit.SECONDS),
-                Duration.create(24, TimeUnit.MINUTES),
+                Duration.create(24, TimeUnit.HOURS),
                 new Runnable() {
                     @Override
                     public void run() {
