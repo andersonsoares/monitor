@@ -16,6 +16,7 @@ import org.bson.types.ObjectId;
 
 import play.Logger;
 import utils.PLNUtils;
+import utils.SendMail;
 
 import com.google.code.morphia.Key;
 
@@ -31,6 +32,7 @@ public class AnalyseEventService implements Runnable {
 	private float correctRate;
 	private Dictionary dictionary;
 	private Event event;
+	private String email;
 	
 
 	public AnalyseEventService(Event event, 
@@ -41,6 +43,16 @@ public class AnalyseEventService implements Runnable {
 		this.correctRate = correctRate;
 		this.considerWhat = considerWhat;
 		
+	}
+
+	public AnalyseEventService(Event event, Dictionary dictionary,
+			float correctRate, List<String> considerWhat, String email) {
+		
+		this.event = event;
+		this.dictionary = dictionary;
+		this.correctRate = correctRate;
+		this.considerWhat = considerWhat;
+		this.email = email;
 	}
 
 	@Override
@@ -60,9 +72,9 @@ public class AnalyseEventService implements Runnable {
 		EventAnalysisDAO analysisDAO = new EventAnalysisDAO();
 		
 		// Verificar se ja existe uma analise com os mesmos parametros
-		
-		if (!analysisDAO.isThisEventAlreadyBeenAnalysedWithThisParams(event.getId(), dictionary.getId(),
-				totalTweets, correctRate, considerHashtag, considerUser, considerUrl, considerSigla)) {
+		EventAnalysis existentAnalysis = analysisDAO.isThisEventAlreadyBeenAnalysedWithThisParams(event.getId(), dictionary.getId(),
+				totalTweets, correctRate, considerHashtag, considerUser, considerUrl, considerSigla);
+		if (existentAnalysis == null) {
 			
 			Logger.info("Não existe analise.. vamos fazer!");
 			
@@ -87,6 +99,7 @@ public class AnalyseEventService implements Runnable {
 			EventAnalysis eventAnalysis = new EventAnalysis(
 					new Key<Event>(Event.class, event.getId()),
 					new Key<Dictionary>(Dictionary.class, dictionary.getId()),
+					dictionary.getName(),
 					(int)totalTweets,
 					correctRate,
 					considerSigla,
@@ -165,13 +178,18 @@ public class AnalyseEventService implements Runnable {
 				
 				// atualizar eventAnalysis com o total de tweets positivos/negativos/neutros/incorretos
 				eventAnalysis.setTotalIncorrect(totalIncorrect);
-				eventAnalysis.setTotalnegatives(totalNegatives);
+				eventAnalysis.setTotalNegatives(totalNegatives);
 				eventAnalysis.setTotalNeutral(totalNeutral);
 				eventAnalysis.setTotalPositives(totalPositives);
 				eventAnalysis.setEllapsedTime(ellapsedTime);
 				
 				analysisDAO.save(eventAnalysis);
 				Logger.info("Analysis finished in "+ellapsedTime+" ms");
+				
+				// Send email to notify user
+				if (!email.isEmpty()) {
+					SendMail.sendNotifyEventFinishedTo(email.toLowerCase(), eventAnalysis);
+				}
 				
 			} catch(Exception e) {
 				Logger.info("Algum erro ocorreu");
@@ -182,58 +200,12 @@ public class AnalyseEventService implements Runnable {
 			
 			
 		} else {
-			Logger.info("Analise ja foi feita!");
-		}
-		
-		
-//		
-//		
-//				
-//				boolean considerHashtags = considerWhat.contains("hashtags");
-//				boolean considerURLs = considerWhat.contains("urls");
-//				boolean considerUSERs = considerWhat.contains("users");
-//				boolean considerSIGLAs = considerWhat.contains("siglas");
-//	
-//				/*
-//				 * Carregar a lista de 'siglas'
-//				 */
-//				AbbreviationDAO abbreviationDAO = new AbbreviationDAO();
-//				List<Abbreviation> abbreviations = abbreviationDAO.listAll();
-//				
-//				
-//				/*
-//				 *  Carregar dicionario para a memoria
-//				 */
-//				WordDAO wordDAO = new WordDAO();
-//				List<Word> words = wordDAO.listByDictionaryId(dictionary.getId());
-//				HashSet<String> dictionaryWords = new HashSet<String>();
-//				for (Word word : words) {
-//					dictionaryWords.add(word.getName());
-//				}
-//				
-//				/*
-//				 * CARREGAR TWEETS DO BANCO
-//				 */
-//				
-//				ArrayList<String> correctTweets = new ArrayList<String>();
-//				
-//				for (int offset=0; offset < totalTweets; offset+=LIMIT) {
-//					
-//					List<Tweet> list = dao.getTweetsFromInterval(event.getId(), startDate, finishDate, LIMIT, offset);
-//					for (Tweet t : list) {
-//						// para cada tweet, verificar a taxa de palavras corretas
-//						float rate = PLNUtils.getCorrectRate(t.getText(), dictionaryWords, abbreviations, considerHashtags, considerURLs, considerUSERs, considerSIGLAs);
-//						if (rate*100 >= correctRate) {
-//							correctTweets.add(t.getText());		
-//						}
-//					}
-//				}
-//				
-//
-//				
-//				
-//			}
 			
+			if (!email.isEmpty()) {
+				SendMail.sendNotifyEventFinishedTo(email.toLowerCase(), existentAnalysis);
+			}
+			Logger.info("Analise ja foi feita!");
+		}	
 			
 	}
 

@@ -1,0 +1,268 @@
+@(event: models.Event, eventAnalysis: EventAnalysis, tweetsList: List[Tweet], kind: String, page: Int, pageLength: Int, total: Int) 
+
+@import helper._
+
+@pageTitle = {
+	@views.html.partials.page_title_top(event.getName()+" ("+event.getSituation()+")", event.getStartDate()+" - "+event.getFinishDate(), "icon-comments", "Total Tweets", event.getNrTweets(), "", 0, "", 0)
+}
+
+@scripts = {
+	<script src="@routes.Assets.at("javascripts/especifics/events/analysis/details.js")" type="text/javascript"></script>
+}
+
+@main("Twitter Monitor", "events", scripts, pageTitle) {
+
+<div class="container-fluid padded">
+    <div class="row-fluid">
+
+      <!-- Breadcrumb line -->
+
+      <div id="breadcrumbs">
+        <div class="breadcrumb-button blue">
+          <span class="breadcrumb-label"><i class="icon-comments"></i> Events</span>
+          <span class="breadcrumb-arrow"><span></span></span>
+        </div>
+
+        <div class="breadcrumb-button">
+          <span class="breadcrumb-label">
+            <i class="icon-comment"></i> <a href="@routes.EventController.pageDetails(event.getId().toString())">@event.getName()</a>
+          </span>
+          <span class="breadcrumb-arrow"><span></span></span>
+        </div>
+        
+        <div class="breadcrumb-button">
+          <span class="breadcrumb-label">
+            <i class="icon-list-ol"></i> <a href="@routes.EventController.pageAnalysis(event.getId().toString())">Analysis</a>
+          </span>
+          <span class="breadcrumb-arrow"><span></span></span>
+        </div>
+        
+        <div class="breadcrumb-button">
+          <span class="breadcrumb-label">
+            <i class="icon-bar-chart"></i>Analysis Details
+          </span>
+          <span class="breadcrumb-arrow"><span></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="row-fluid">
+	<div class="span6">
+		<div class="row-fluid">
+			
+			<div class="span6">
+				<h3><strong>@eventAnalysis.getDictionaryName()</strong></h3>
+			</div>
+			
+			<div class="span6">
+				<div class="well relative">
+					@if(!eventAnalysis.isConsiderHashtag() && !eventAnalysis.isConsiderUrl() && !eventAnalysis.isConsiderUser() && !eventAnalysis.isConsiderSigla()) {
+					Considering correct: ---
+					} else {
+					@if(eventAnalysis.isConsiderHashtag()) { 
+					<span class="badge badge-blue">#hashtags</span>
+					} 
+					@if(eventAnalysis.isConsiderUser()) { 
+	                <span class="badge badge-green">@@users</span> 
+	                } 
+	                @if(eventAnalysis.isConsiderUrl()) { 
+	                <span class="badge badge-red">http://urls</span>
+	                } 
+	                @if(eventAnalysis.isConsiderSigla()) { 
+	                <span class="badge badge-black">abbreviations</span>
+	                } 
+	                }
+				</div>
+			</div>
+			
+		</div>
+		<div class="row-fluid">
+			<div class="span6">
+			
+				<div class="dashboard-stats">
+	              <ul class="inline">
+	                <li class="glyph"><i class="icon-comment icon-2x"></i></li>
+	                <li class="count">@eventAnalysis.getTotalTweetsAnalysed()</li>
+	              </ul>
+	              <div class="progress progress-blue"><div class="bar tip" title="100%" data-percent="100"></div></div>
+	              <div class="stats-label">Total Tweets Analysed</div>
+	            </div>
+				
+			</div>
+			<div class="span6">
+				<div class="dashboard-stats">
+	              <ul class="inline">
+	                <li class="glyph"><i class="icon-ok icon-2x"></i></li>
+	                <li class="count">@eventAnalysis.getCorrectRate() %</li>
+	              </ul>
+	              <div class="progress progress-blue"><div class="bar tip" title="100%" data-percent="100"></div></div>
+	              <div class="stats-label">Correct Rate</div>
+	            </div>
+			</div>
+		</div>
+	</div>
+	<div class="span6">
+		<div class="row-fluid">
+			<div class="span8">
+				<div class="box">
+					<div class="box-content">
+					<table class="table table-normal">
+						<tr>
+							<td><i class="icon-thumbs-up status-success"></i> <strong>Positives</strong></td>
+							<td style="text-align: center;width: 90px;">@eventAnalysis.getTotalPositives()</td>
+							<td style="text-align: center;width: 150px;">@(eventAnalysis.getTotalPositives() * 100 / eventAnalysis.getTotalTweetsAnalysed().toFloat) %</td>
+						</tr>
+						<tr>
+							<td><i class="icon-thumbs-down status-error"></i> Negatives</td>
+							<td style="text-align: center;width: 90px;">@eventAnalysis.getTotalNegatives()</td>
+							<td style="text-align: center;width: 150px;">@(eventAnalysis.getTotalNegatives() * 100 / eventAnalysis.getTotalTweetsAnalysed().toFloat) %</td>
+						</tr>
+						<tr>
+							<td><i class="icon-exchange"></i> Neutral</td>
+							<td style="text-align: center;width: 90px;">@eventAnalysis.getTotalNeutral()</td>
+							<td style="text-align: center;width: 150px;">@(eventAnalysis.getTotalNeutral() * 100 / eventAnalysis.getTotalTweetsAnalysed().toFloat) %</td>
+						</tr>
+						<tr>
+							<td><i class="icon-remove-sign status-warning"></i> Incorrect</td>
+							<td style="text-align: center;width: 90px;">@eventAnalysis.getTotalIncorrect()</td>
+							<td style="text-align: center;width: 150px;">@(eventAnalysis.getTotalIncorrect() * 100 / eventAnalysis.getTotalTweetsAnalysed().toFloat) %</td>
+						</tr>
+						
+					</table>				
+					</div>
+				</div>
+			</div>
+			<div class="span4">
+				<div id="pieChartTweetsWithoutIncorrects"></div>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+	<div class="row-fluid">
+		
+		
+		<div class="span12">
+			<div class="box">
+		      <div class="box-header">
+		        <ul class="nav nav-tabs nav-tabs-left">
+		          <li @if(kind.equals("all")) {class="active"}><a href="@routes.EventController.pageAnalysisDetails(event.getId().toString(), eventAnalysis.getId().toString(),"all", 1,5)"><i class="icon-home status-info"></i><span>All (@eventAnalysis.getTotalTweetsAnalysed())</span></a></li>
+		          <li @if(kind.equals("positives")) {class="active"}><a href="@routes.EventController.pageAnalysisDetails(event.getId().toString(), eventAnalysis.getId().toString(),"positives", 1,5)"><i class="icon-thumbs-up status-success"></i> <span>Positives (@eventAnalysis.getTotalPositives())</span></a></li>
+		          <li @if(kind.equals("negatives")) {class="active"}><a href="@routes.EventController.pageAnalysisDetails(event.getId().toString(), eventAnalysis.getId().toString(),"negatives", 1,5)"><i class="icon-thumbs-down status-error"></i> <span>Negatives (@eventAnalysis.getTotalNegatives())</span></a></li>
+		          <li @if(kind.equals("neutral")) {class="active"}><a href="@routes.EventController.pageAnalysisDetails(event.getId().toString(), eventAnalysis.getId().toString(),"neutral", 1,5)"><i class="icon-exchange"></i> <span>Neutral (@eventAnalysis.getTotalNeutral())</span></a></li>
+		          <li @if(kind.equals("incorrect")) {class="active"}><a href="@routes.EventController.pageAnalysisDetails(event.getId().toString(), eventAnalysis.getId().toString(),"incorrect", 1,5)"><i class="icon-remove-sign status-warning"></i> <span>Incorrects (@eventAnalysis.getTotalIncorrect())</span></a></li>
+		        </ul>
+		
+		        <div class="title">Tweets <i class="icon-twitter"></i></div>
+		      </div>
+		
+		      <div class="box-content padded">
+		        <div class="tab-content">
+		          <div >
+		          	<ul class="chat-box timeline">
+		          	
+		          	@for(tweet <- tweetsList) {
+		          	
+		          		<li class="arrow-box-left gray">
+						    <div class="avatar"><img src="@tweet.getProfile_image_url()" class="avatar-small"></div>
+						    <div class="info">
+						      <span class="name">
+						      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.POSITIVE)) {
+						      <span class="label label-success">positive</span> @tweet.getText()
+						      } 
+						      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.NEGATIVE)) {
+						      <span class="label label-red">negative</span> @tweet.getText()
+						      }
+						      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.NEUTRAL)) {
+						      <span class="label">neutral</span> @tweet.getText()
+						      }
+						      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.INCORRECT)) {
+						      <span class="label label-warning">incorrect</span> @tweet.getText()
+						      } 
+						      </span>
+						      <span class="time"><i class="icon-time"></i> @tweet.getCreatedAt()</span>
+						    </div>
+						</li>
+						
+					}
+		          	</ul>
+		          </div>
+		          
+		          <hr>
+		          @views.html.paginateTweets(page,pageLength,total, event.getId().toString(), eventAnalysis.getId().toString(), kind, routes.EventController.pageAnalysisDetails(_,_,_,_,_)) 
+		        </div>
+		      </div>
+		    </div>
+	    </div>
+    </div>
+  
+
+
+
+
+	<div id="pieChartValues" class="hidden">@eventAnalysis.getTotalPositives(),@eventAnalysis.getTotalNegatives(),@eventAnalysis.getTotalNeutral(),@eventAnalysis.getTotalIncorrect()</div>
+	<div id="pieChartTweets"></div>
+	
+	<div id="pieChartValuesWithoutIncorrects" class="hidden">@eventAnalysis.getTotalPositives(),@eventAnalysis.getTotalNegatives(),@eventAnalysis.getTotalNeutral()</div>
+	
+	
+	
+	
+	<script type="text/javascript">
+
+	$(document).ready(function() {
+		
+		
+		var data = jQuery('#pieChartValues').text()
+		var arrayFromData = data.split(",");
+		
+		$('#pieChartTweets').sparkline(arrayFromData, {
+	        type: 'pie',
+	        width: '200px',
+	        height: '200px',
+	        sliceColors: ["#FFFF00", "#FF0040", "#00FF00", "#0080FF"],
+	        borderWidth: 7,
+	        borderColor: '#f5f5f5',
+	        tooltipFormat: '<span style="color: {{color}}">&#9679;</span> {{offset:names}} - {{value}} ({{percent.1}}%)',
+	        tooltipValueLookups: {
+	            names: {
+	                0: 'Positives',
+	                1: 'Negatives',
+	                2: 'Neutral',
+	                3: 'Incorrects'
+	            }
+	        }
+	    });
+		
+		data = jQuery('#pieChartValuesWithoutIncorrects').text()
+		arrayFromData = data.split(",");
+		
+		var colors = $.map(Theme.colors, function (e) {
+			return e;
+		})
+		
+	    $('#pieChartTweetsWithoutIncorrects').sparkline([@eventAnalysis.getTotalPositives(),@eventAnalysis.getTotalNegatives()], {
+	        type: 'pie',
+	        width: '150px',
+	        height: '150px',
+	        sliceColors: ["#FFFF00", "#FF0040", "#00FF00", "#0080FF"],
+	        borderWidth: 7,
+	        borderColor: '#f5f5f5',
+	        tooltipFormat: '<span style="color: {{color}}">&#9679;</span> {{offset:names}} - {{value}} ({{percent.1}}%)',
+	        tooltipValueLookups: {
+	            names: {
+	                0: 'Positives',
+	                1: 'Negatives'
+	            }
+	        }
+	    });
+
+		
+		
+	 
+	});
+	
+	</script>
+}

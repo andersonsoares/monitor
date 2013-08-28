@@ -10,11 +10,14 @@ import java.util.concurrent.TimeUnit;
 
 import models.Dictionary;
 import models.Event;
+import models.EventAnalysis;
+import models.Tweet;
 import models.forms.AnalyseForm;
 import models.forms.GetTweetsForm;
 
 import org.bson.types.ObjectId;
 
+import play.Logger;
 import play.cache.Cache;
 import play.data.Form;
 import play.libs.Akka;
@@ -33,8 +36,10 @@ import com.google.code.morphia.Key;
 import com.google.inject.Inject;
 
 import dao.DictionaryDAO;
+import dao.EventAnalysisDAO;
 import dao.EventDAO;
 import dao.TweetDAO;
+import enums.SentimentEnum;
 import enums.TypeEnum;
 
 public class EventController extends Controller {
@@ -76,16 +81,20 @@ public class EventController extends Controller {
 	 * And call the AnalyseEventService to do the job done! :)
 	 */
 	public Result analyse() {
-		
 		Form<AnalyseForm> form = analyseForm.bindFromRequest();
 		AnalyseForm analyseForm = form.get();
 		
+		ReturnToView vo = new ReturnToView();
 		float correctRate = analyseForm.getCorrectRate();
 		if (correctRate < 0 || correctRate > 100) {
-			return badRequest();
+			
+			vo.setCode(400);
+			vo.setMessage("Correct Rate must be > 0 and < 100");
+			return ok(Json.toJson(vo));
 		}
 		
 		List<String> considerWhat = analyseForm.getConsiderWhat();
+		String email = analyseForm.getEmail();
 		ObjectId eventId = new ObjectId(analyseForm.getEventId());
 		
 		Event event = new EventDAO().findById(eventId);
@@ -96,12 +105,19 @@ public class EventController extends Controller {
 			
 			if (dictionary != null) {
 				
+				Logger.info("Request analyse to '"+event.getName()+"' from: "+request().remoteAddress());
+				
 				Akka.system().scheduler().scheduleOnce(
 						Duration.create(0, TimeUnit.SECONDS), 
-						new AnalyseEventService(event, dictionary, correctRate, considerWhat),
+						new AnalyseEventService(event, dictionary, correctRate, considerWhat, email),
 						Akka.system().dispatcher());
 				
-				return ok("Analisando");
+				if (email.isEmpty()) {
+					vo.setMessage("Analysis is running. This might take a while. Come back in a few minutes.");
+				} else {
+					vo.setMessage("Analysis is running. You will be notified when it finish at '"+email.toLowerCase());
+				}
+				return ok(Json.toJson(vo));
 				
 			} 
 		} 
@@ -182,16 +198,16 @@ public class EventController extends Controller {
 			
 			if (event != null) {
 				
-				DictionaryDAO dictionaryDAO = new DictionaryDAO();
+				EventAnalysisDAO analysisDAO = new EventAnalysisDAO();
 				
-				List<Dictionary> dictionariesList = dictionaryDAO.listAll();
+				List<EventAnalysis> eventAnalysis = analysisDAO.getLast(id, 5);
 				
-				return ok(views.html.events.details.render(event, dictionariesList));
+				return ok(views.html.events.details.render(event, eventAnalysis));
 				
 				
 			} else {
 				// event doesnt exist
-				return badRequest();
+				return notFound();
 			}
 			
 		} catch (IllegalArgumentException e) {
@@ -199,6 +215,100 @@ public class EventController extends Controller {
 			return badRequest();
 		}
 		
+	}
+	
+	public Result pageAnalysis(String eventId, String orderBy, String order) {
+		
+		ObjectId id = new ObjectId(eventId);
+		EventDAO eventDAO = new EventDAO();
+		Event event = eventDAO.findById(id);
+		
+		if (event != null) {
+			DictionaryDAO dictionaryDAO = new DictionaryDAO();
+			List<Dictionary> dictionaryList = dictionaryDAO.listAll();
+			
+			EventAnalysisDAO analysisDAO = new EventAnalysisDAO();
+			List<EventAnalysis> analysisList;
+			if (!orderBy.equals("createdAt") && !orderBy.equals("totalTweetsAnalysed") && !orderBy.equals("correctRate")) {
+				analysisList = analysisDAO.listAllFromEvent(id);
+			} else {
+				if (!order.equals("asc") && !order.equals("desc"))
+					analysisList = analysisDAO.listAllFromEvent(id,orderBy);
+				else {
+					if (order.equals("asc")) { 
+						analysisList = analysisDAO.listAllFromEvent(id,orderBy);						
+					} else {
+						analysisList = analysisDAO.listAllFromEvent(id,"-"+orderBy);
+					}
+				}
+			}
+			int average = 0;
+			for (EventAnalysis eventAnalysis : analysisList) {
+				average+= eventAnalysis.getEllapsedTime();
+			}
+			if (analysisList.size() != 0) {
+				average = average/analysisList.size();
+			}
+			
+			return ok(views.html.events.analysis.list.render(event, analysisList, average, dictionaryList));
+		}
+		
+		return notFound();
+	}
+
+	
+	public Result pageAnalysisDetails(String eventId, String eventAnalysisId, String kind, int page, int pageLength) {
+		
+		ObjectId id = new ObjectId(eventId);
+		EventDAO eventDAO = new EventDAO();
+		Event event = eventDAO.findById(id);
+		
+		if (event != null) {
+			EventAnalysisDAO analysisDAO = new EventAnalysisDAO();
+			
+			ObjectId _eventAnalysisId = new ObjectId(eventAnalysisId);
+			EventAnalysis eventAnalysis = analysisDAO.findById(_eventAnalysisId);
+			
+			if (eventAnalysis != null) {
+				
+				TweetDAO tweetDAO = new TweetDAO();
+				
+				int total = 0;
+				List<Tweet> tweetsList;
+				
+				
+				if (kind.equals("all") || (!kind.equals("positives") && !kind.equals("negatives") && !kind.equals("neutral") && !kind.equals("incorrect") && !kind.equals("all"))) {
+					total = eventAnalysis.getTotalTweetsAnalysed();
+					
+					tweetsList = tweetDAO.getTweetsAfterAnalysedBy(event.getId(), eventAnalysis.getId(), page-1, pageLength);
+					return ok(views.html.events.analysis.details.render(event, eventAnalysis, tweetsList, "all",page,pageLength,eventAnalysis.getTotalTweetsAnalysed()));
+					
+				} else {
+					SentimentEnum sentiment = null;
+					if (kind.equals("positives")) {
+						sentiment = SentimentEnum.POSITIVE;
+						total = eventAnalysis.getTotalPositives();
+					} else if(kind.equals("negatives")) {
+						sentiment = SentimentEnum.NEGATIVE;
+						total = eventAnalysis.getTotalNegatives();
+					} else if(kind.equals("neutral")) {
+						sentiment = SentimentEnum.NEUTRAL;
+						total = eventAnalysis.getTotalNeutral();
+					} else if(kind.equals("incorrect")) {
+						sentiment = SentimentEnum.INCORRECT;
+						total = eventAnalysis.getTotalIncorrect();
+					}
+					
+					tweetsList = tweetDAO.getTweetsAfterAnalysedByWithSentiment(event.getId(), eventAnalysis.getId(), sentiment, page-1, pageLength);
+					
+					return ok(views.html.events.analysis.details.render(event, eventAnalysis, tweetsList, kind,page,pageLength,total));
+				}
+				
+			}
+			
+		}
+		
+		return notFound();
 	}
 	
 public Result pageTeste(String eventId) {
@@ -265,6 +375,19 @@ public Result pageTeste(String eventId) {
 		return  redirect(controllers.routes.Application.index());
 	}
 	
+	public Result getTotalDiffUsers(String eventId) {
+		ObjectId _eventId = new ObjectId(eventId);
+		EventDAO eventDAO = new EventDAO();
+		Event event = eventDAO.findById(_eventId);
+		
+		if (event != null) {
+			TweetDAO tweetDAO = new TweetDAO();
+			
+			long total = tweetDAO.countTotalDiffUsers(_eventId);
+			return ok(Json.toJson(total));
+		}
+		return notFound();
+	}
 	
 	public Result getTweetsCountPerDay(String eventId) {
 		

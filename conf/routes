@@ -19,6 +19,9 @@ GET		/events/getTweets/:filename				@controllers.EventController.getTweetsInJson
 GET		/events/getTweetStatus					@controllers.EventController.getTweetStatus()
 GET		/events/:eventId/teste					@controllers.EventController.pageTeste(eventId: String)
 GET		/events/:eventId						@controllers.EventController.pageDetails(eventId: String)
+GET		/events/:eventId/analysis/:eventAnalysisId	@controllers.EventController.pageAnalysisDetails(eventId: String, eventAnalysisId: String, kind: String ?= "all", page: Integer ?= 1, pageLength: Integer ?= 5)
+GET		/events/:eventId/analysis				@controllers.EventController.pageAnalysis(eventId: String, orderBy: String ?= "", order: String ?= "desc")
+GET		/events/:eventId/getTotalDiffUsers		@controllers.EventController.getTotalDiffUsers(eventId: String)
 GET		/events/:eventId/getTweetsCountPerDay 	@controllers.EventController.getTweetsCountPerDay(eventId: String)
 
 GET		/dictionaries							@controllers.DictionaryController.pageList()

@@ -1,5 +1,7 @@
 package dao;
 
+import java.util.List;
+
 import models.Dictionary;
 import models.Event;
 import models.EventAnalysis;
@@ -26,7 +28,7 @@ public class EventAnalysisDAO extends BaseDAO<EventAnalysis> {
 	 * Method that verifies if there is one analysis of event with this SAME 
 	 * params
 	 */
-	public boolean isThisEventAlreadyBeenAnalysedWithThisParams(ObjectId eventId,
+	public EventAnalysis isThisEventAlreadyBeenAnalysedWithThisParams(ObjectId eventId,
 			ObjectId dictionaryId, long totalTweets, float correctRate, boolean considerHashtag,
 			boolean considerUser, boolean considerUrl, boolean considerSigla) {
 		
@@ -41,11 +43,55 @@ public class EventAnalysisDAO extends BaseDAO<EventAnalysis> {
 		.filter("considerSigla", 		considerSigla)
 		.get();
 		
-		if (eventAnalysis != null) 
-			return true;
-		return false;
+		return eventAnalysis;
 	}
 
+	/**
+	 * Method to retrive last 5 analisis from the event
+	 * @param eventId
+	 * @param size
+	 * @return
+	 */
+	public List<EventAnalysis> getLast(ObjectId eventId, int size) {
+		
+		List<EventAnalysis> list = createQuery()
+		.filter("event", new Key<Event>(Event.class, eventId))
+		.order("totalTweetsAnalysed")
+		.order("correctRate")
+		.limit(size)
+		.asList();
+		
+		
+		return list;
+	}
+
+	/**
+	 * Method that recover all eventAnalysis from an specific event
+	 * @param eventId
+	 * @return
+	 */
+	public List<EventAnalysis> listAllFromEvent(ObjectId eventId) {
+		
+		List<EventAnalysis> list = createQuery()
+				.filter("event", new Key<Event>(Event.class, eventId))
+				.order("-createdAt")
+				.asList();
+		return list;
+	}
+
+	/**
+	 * Method that recover all eventAnalysis from an specific event
+	 * @param eventId
+	 * @return
+	 */
+	public List<EventAnalysis> listAllFromEvent(ObjectId eventId, String orderBy) {
+		
+		List<EventAnalysis> list = createQuery()
+				.filter("event", new Key<Event>(Event.class, eventId))
+				.order(orderBy)
+				.asList();
+		return list;
+	}
 	
 	
 }

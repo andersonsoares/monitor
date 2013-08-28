@@ -17,6 +17,8 @@ public class AnalyseForm {
 	 */
 	private float correctRate;
 	
+	private String email;
+	
 	private List<String> considerWhat = new ArrayList<String>();
 	
 	/**
@@ -60,6 +62,14 @@ public class AnalyseForm {
 
 	public void setEventId(String eventId) {
 		this.eventId = eventId;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 	
 }

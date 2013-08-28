@@ -33,6 +33,7 @@ public class EventAnalysis {
 	private float correctRate;
 	@Indexed
 	private Key<Dictionary> dictionary;
+	private String dictionaryName;
 	@Indexed
 	private boolean considerSigla;
 	@Indexed
@@ -48,7 +49,7 @@ public class EventAnalysis {
 	
 	private int totalPositives;
 	
-	private int totalnegatives;
+	private int totalNegatives;
 	
 	private int totalNeutral;
 	
@@ -58,7 +59,7 @@ public class EventAnalysis {
 	public EventAnalysis() {
 	}
 
-	public EventAnalysis(Key<Event> event, Key<Dictionary> dictionary,
+	public EventAnalysis(Key<Event> event, Key<Dictionary> dictionary, String dictionaryName,
 			int totalTweetsAnalysed, float correctRate, boolean considerSigla,
 			boolean considerHashtag, boolean considerUser, boolean considerUrl,
 			int totalPositives, int totalNegatives,
@@ -68,13 +69,14 @@ public class EventAnalysis {
 		this.totalTweetsAnalysed 	= totalTweetsAnalysed;
 		this.correctRate 			= correctRate;
 		this.dictionary 			= dictionary;
+		this.dictionaryName 		= dictionaryName;
 		this.considerSigla 			= considerSigla;
 		this.considerHashtag 		= considerHashtag;
 		this.considerUser 			= considerUser;
 		this.considerUrl 			= considerUrl;
 		this.createdAt 				= new Date();
 		this.totalPositives 		= totalPositives;
-		this.totalnegatives 		= totalNegatives;
+		this.totalNegatives 		= totalNegatives;
 		this.totalNeutral 			= totalNeutral;
 		this.totalIncorrect 		= totalIncorrect;
 		this.ellapsedTime 			= ellapsedTime;
@@ -82,7 +84,7 @@ public class EventAnalysis {
 
 	// getters & setters;;
 	
-	public EventAnalysis(Key<Event> event, Key<Dictionary> dictionary, int totalTweetsAnalysed,
+	public EventAnalysis(Key<Event> event, Key<Dictionary> dictionary, String dictionaryName, int totalTweetsAnalysed,
 			float correctRate, boolean considerSigla,
 			boolean considerHashtag, boolean considerUser,
 			boolean considerUrl) {
@@ -90,6 +92,7 @@ public class EventAnalysis {
 		this.totalTweetsAnalysed 	= totalTweetsAnalysed;
 		this.correctRate 			= correctRate;
 		this.dictionary 			= dictionary;
+		this.dictionaryName			= dictionaryName;
 		this.considerSigla 			= considerSigla;
 		this.considerHashtag 		= considerHashtag;
 		this.considerUser 			= considerUser;
@@ -185,12 +188,12 @@ public class EventAnalysis {
 		this.totalPositives = totalPositives;
 	}
 
-	public int getTotalnegatives() {
-		return totalnegatives;
+	public int getTotalNegatives() {
+		return totalNegatives;
 	}
 
-	public void setTotalnegatives(int totalnegatives) {
-		this.totalnegatives = totalnegatives;
+	public void setTotalNegatives(int totalnegatives) {
+		this.totalNegatives = totalnegatives;
 	}
 
 	public int getTotalNeutral() {
@@ -215,6 +218,14 @@ public class EventAnalysis {
 
 	public void setEllapsedTime(long ellapsedTime) {
 		this.ellapsedTime = ellapsedTime;
+	}
+
+	public String getDictionaryName() {
+		return dictionaryName;
+	}
+
+	public void setDictionaryName(String dictionaryName) {
+		this.dictionaryName = dictionaryName;
 	}
 	
 	

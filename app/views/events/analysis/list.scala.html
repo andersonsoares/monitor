@@ -1,0 +1,104 @@
+@(event: models.Event, analysisList: List[EventAnalysis], averageEllapsedTime: Int, dictionaryList: List[models.Dictionary]) 
+
+@import helper._
+
+@pageTitle = {
+	@views.html.partials.page_title_top(event.getName()+" ("+event.getSituation()+")", event.getStartDate()+" - "+event.getFinishDate(), "icon-comments", "Total Tweets", event.getNrTweets(), "", 0, "", 0)
+}
+
+@scripts = {
+	<script src="@routes.Assets.at("javascripts/especifics/events/analysis/list.js")" type="text/javascript"></script>	
+}
+
+@main("Twitter Monitor", "events", scripts, pageTitle) {
+
+@views.html.events.analysis.newForm(averageEllapsedTime, dictionaryList, event)
+
+<div id="urlRunAnalysis" class="hidden">@routes.EventController.analyse()</div>
+
+<div class="container-fluid padded">
+	<div class="action-nav-normal">
+		<div class="span12">
+		<div class="span2 action-nav-button" style="margin: 0 auto;float: none;">
+		  <a data-toggle="modal" href="#modal-newForm" title="Run New Analysis">
+		    <i class="icon-bar-chart"></i>
+		    <span>Run New Analysis</span>
+		  </a>
+		  <span class="triangle-button green"><i class="icon-plus"></i></span>
+		</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="box">
+<div class="box-header">
+    <div class="title">Analysis</div>
+        <ul class="box-toolbar">
+      <li class="toolbar-link">
+        <a href="#" data-toggle="dropdown"><i class="icon-cog"></i></a>
+        <ul class="dropdown-menu">
+          <li><a href="@routes.EventController.pageAnalysis(event.getId().toString(),"totalTweetsAnalysed", "desc")"><i class="icon-list-ol"></i> Sort by Total Tweets</a></li>
+          <li><a href="@routes.EventController.pageAnalysis(event.getId().toString(),"correctRate", "desc")"><i class="icon-check"></i> Sort by Correct Rate</a></li>
+          <li><a href="@routes.EventController.pageAnalysis(event.getId().toString(),"createdAt", "desc")"><i class="icon-time"></i> Sort By Created At</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+<div class="box-content">
+<table class="table table-normal">
+	<thead>
+		<tr>
+			<td></td>
+			<td class="sorting">Total Tweets Analysed</td>
+			<td>Correct Rate (%)</td>
+			<td>Also considering</td>
+			<td>Dictionary used</td>
+			<td>Duration</td>
+			<td>Created At</td>
+			<td></td>
+		</tr>
+	</thead>
+	<tbody>
+	
+	@for((analysis, index) <- analysisList.zipWithIndex) {
+		<tr>
+			@if(index % 2 == 0) {
+				<td style="width: 60px;"><div class="sparkline"><!--5,10,15,20,18,16,14,20,15,16,12,10--></div></td>
+			} else {
+		        <td style="width: 60px;"><div class="sparkline" data-color="green"><!--5,6,8,14,18,10,12,16,15,16,12,15--></div></td>
+			}
+			<td style="text-align: center;width: 130px;">@analysis.getTotalTweetsAnalysed()</td>
+			<td style="text-align: center;width: 80px;">@analysis.getCorrectRate() %</td>
+			<td style="text-align: center;">
+				@if(!analysis.isConsiderHashtag() && !analysis.isConsiderUrl() && !analysis.isConsiderUser() && !analysis.isConsiderSigla()) {
+				---
+				} else {
+				@if(analysis.isConsiderHashtag()) { 
+				<span class="badge badge-blue">#hashtags</span>
+				} 
+				@if(analysis.isConsiderUser()) { 
+                <span class="badge badge-green">@@users</span> 
+                } 
+                @if(analysis.isConsiderUrl()) { 
+                <span class="badge badge-red">http://urls</span>
+                } 
+                @if(analysis.isConsiderSigla()) { 
+                <span class="badge badge-black">abbreviations</span>
+                } 
+                }
+                
+			</td>
+	        <td style="text-align: center;">@analysis.getDictionaryName()</td>
+			<td id="ellapsedTime" style="text-align: center;width: 60px;">@analysis.getEllapsedTime() ms</td>
+			<td style="text-align: center;width: 200px;">@analysis.getCreatedAt()</td>
+			<td style="text-align: center;width: 90px;"><button class="btn btn-mini"><a href="@routes.EventController.pageAnalysisDetails(event.getId().toString(), analysis.getId().toString())">See details</a></button></td>
+		</tr>	
+	}
+	</tbody>
+</table>
+</div>
+</div>
+
+
+}

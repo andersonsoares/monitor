@@ -10,8 +10,12 @@ import models.Tweet;
 import org.bson.types.ObjectId;
 
 import com.google.code.morphia.Key;
+import com.mongodb.AggregationOutput;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 
 import dao.base.BaseDAO;
+import enums.SentimentEnum;
 
 public class TweetDAO extends BaseDAO<Tweet> {
 
@@ -85,6 +89,83 @@ public class TweetDAO extends BaseDAO<Tweet> {
 				.limit(limit)
 				.offset(offset)
 				.asList();
+	}
+
+	/**
+	 * Method that count how many different users has tweeted to the respective event
+	 * @param _eventId
+	 * @return
+	 */
+	public long countTotalDiffUsers(ObjectId _eventId) {
+		
+		DBObject match = new BasicDBObject("$match", new BasicDBObject("event.$id",  _eventId ) );
+		
+		DBObject groupFieldUserId = new BasicDBObject( "_id" , "$twitterUserId");
+		DBObject groupUserId = new BasicDBObject("$group", groupFieldUserId);
+		
+		DBObject groupFieldCount = new BasicDBObject( "_id" , 1);
+		groupFieldCount.put("count", new BasicDBObject( "$sum", 1));
+		
+		DBObject groupCount = new BasicDBObject("$group", groupFieldCount);
+		
+		
+		AggregationOutput output = getCollection().aggregate(match, groupUserId, groupCount);
+		for (DBObject res : output.results()) {
+			return Long.parseLong(res.get("count").toString());
+		}
+		
+		return 0;
+	}
+
+	/**
+	 * Method to recover tweets by event and eventAnalysis
+	 * sort by createdAt
+	 * and recives page and pageLength to paginate
+	 * @param eventId
+	 * @param eventAnalysisId
+	 * @param page
+	 * @param pageLength
+	 * @return
+	 */
+	public List<Tweet> getTweetsAfterAnalysedBy(ObjectId eventId, ObjectId eventAnalysisId,
+			int page, int pageLength) {
+		
+		List<Tweet> tweetsList = createQuery()
+			.filter("event", new Key<Event>(Event.class, eventId))
+			.field("eventAnalysis."+eventAnalysisId.toString()).exists()
+			.limit(pageLength)
+			.offset(page*pageLength)
+			.order("-createdAt")
+			.asList();
+		
+		
+		return tweetsList;
+	}
+
+	/**
+	 * Method that recover tweets by event and eventAnalysis that matches with
+	 * SentimentEnum passed as param
+	 * order by createdAt
+	 * and receives page and pageLength to paginate the result
+	 * @param eventId
+	 * @param eventAnalysisId
+	 * @param sentiment
+	 * @param page
+	 * @param pageLength
+	 * @return
+	 */
+	public List<Tweet> getTweetsAfterAnalysedByWithSentiment(ObjectId eventId,
+			ObjectId eventAnalysisId, SentimentEnum sentiment, int page, int pageLength) {
+		
+		List<Tweet> tweetsList = createQuery()
+			.filter("event", new Key<Event>(Event.class, eventId))
+			.filter("eventAnalysis."+eventAnalysisId.toString(), sentiment)
+			.limit(pageLength)
+			.offset(page*pageLength)
+			.order("-createdAt")
+			.asList();
+		
+		return tweetsList;
 	}
 
 }

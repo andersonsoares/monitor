@@ -1,6 +1,11 @@
 @(abbreviationList: List[models.Abbreviation], page: Int, pageLength: Int, count: Long)
 
-@main("Twitter Monitor", "abbreviations") {
+@scripts = {}
+@pageTitle = {
+	@views.html.partials.page_title_top("Abbreviations", "Abbreviations / Acronyms", "icon-font", "",0, "",0, "",0)
+}
+
+@main("Twitter Monitor", "abbreviations", scripts, pageTitle) {
 
 
 	@views.html.paginate(page, pageLength, count.toInt, routes.AbbreviationController.pageList(_,_))

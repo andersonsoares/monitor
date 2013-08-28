@@ -22,7 +22,10 @@ object ApplicationBuild extends Build {
     "com.google.code.morphia" % "morphia-validation" % "0.99",
 
   // Guice Dependence Injection
-    "com.google.inject" % "guice" % "3.0"
+    "com.google.inject" % "guice" % "3.0",
+
+  // mail plugin - https://github.com/typesafehub/play-plugins/tree/master/mailer
+	"com.typesafe" %% "play-plugins-mailer" % "2.1-RC2"
 
 
     //javaJdbc,
