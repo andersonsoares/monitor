@@ -200,9 +200,9 @@ public class EventController extends Controller {
 				
 				EventAnalysisDAO analysisDAO = new EventAnalysisDAO();
 				
-				List<EventAnalysis> eventAnalysis = analysisDAO.getLast(id, 5);
+				int count = (int) analysisDAO.getCountByEvent(id);
 				
-				return ok(views.html.events.details.render(event, eventAnalysis));
+				return ok(views.html.events.details.render(event, count));
 				
 				
 			} else {

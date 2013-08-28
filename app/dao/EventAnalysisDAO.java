@@ -92,6 +92,18 @@ public class EventAnalysisDAO extends BaseDAO<EventAnalysis> {
 				.asList();
 		return list;
 	}
+
+	/**
+	 * Method that counts how many analysis a event have
+	 * @param id
+	 * @return
+	 */
+	public long getCountByEvent(ObjectId eventId) {
+
+		return createQuery()
+		.filter("event", new Key<Event>(Event.class, eventId))
+		.countAll();
+	}
 	
 	
 }

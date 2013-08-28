@@ -1,4 +1,4 @@
-@(event: models.Event, analysisList: List[EventAnalysis]) 
+@(event: models.Event, totalAnalysis: Int) 
 
 @import helper._
 
@@ -88,11 +88,11 @@
           <div class="span6">
             <div class="dashboard-stats small">
               <ul class="inline">
-                <li class="glyph"><i class="icon-eye-open"></i></li>
-                <li class="count">25668</li>
+                <li class="glyph"><i class="icon-cogs"></i></li>
+                <li class="count">@totalAnalysis</li>
               </ul>
               <div class="progress progress-blue"><div class="bar tip" title="100%" data-percent="100"></div></div>
-              <div class="stats-label">Page Views</div>
+              <div class="stats-label">Total Analysis</div>
             </div>
           </div>
         </div>

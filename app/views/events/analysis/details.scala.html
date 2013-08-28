@@ -191,7 +191,10 @@
 		          </div>
 		          
 		          <hr>
-		          @views.html.paginateTweets(page,pageLength,total, event.getId().toString(), eventAnalysis.getId().toString(), kind, routes.EventController.pageAnalysisDetails(_,_,_,_,_)) 
+		          @views.html.paginateTweets(page,pageLength,total, event.getId().toString(), eventAnalysis.getId().toString(), kind, routes.EventController.pageAnalysisDetails(_,_,_,_,_))
+		          <div>
+		          <a href="#"><button class="btn btn-default" rel="tooltip" data-placement="top" data-original-title="Download"><i class="icon-download-alt"></i></button></a>
+		          </div> 
 		        </div>
 		      </div>
 		    </div>
@@ -203,7 +206,6 @@
 
 
 	<div id="pieChartValues" class="hidden">@eventAnalysis.getTotalPositives(),@eventAnalysis.getTotalNegatives(),@eventAnalysis.getTotalNeutral(),@eventAnalysis.getTotalIncorrect()</div>
-	<div id="pieChartTweets"></div>
 	
 	<div id="pieChartValuesWithoutIncorrects" class="hidden">@eventAnalysis.getTotalPositives(),@eventAnalysis.getTotalNegatives(),@eventAnalysis.getTotalNeutral()</div>
 	
@@ -214,40 +216,18 @@
 
 	$(document).ready(function() {
 		
-		
-		var data = jQuery('#pieChartValues').text()
-		var arrayFromData = data.split(",");
-		
-		$('#pieChartTweets').sparkline(arrayFromData, {
-	        type: 'pie',
-	        width: '200px',
-	        height: '200px',
-	        sliceColors: ["#FFFF00", "#FF0040", "#00FF00", "#0080FF"],
-	        borderWidth: 7,
-	        borderColor: '#f5f5f5',
-	        tooltipFormat: '<span style="color: {{color}}">&#9679;</span> {{offset:names}} - {{value}} ({{percent.1}}%)',
-	        tooltipValueLookups: {
-	            names: {
-	                0: 'Positives',
-	                1: 'Negatives',
-	                2: 'Neutral',
-	                3: 'Incorrects'
-	            }
-	        }
-	    });
-		
 		data = jQuery('#pieChartValuesWithoutIncorrects').text()
 		arrayFromData = data.split(",");
 		
 		var colors = $.map(Theme.colors, function (e) {
 			return e;
 		})
-		
+		// amarelo, - , verde
 	    $('#pieChartTweetsWithoutIncorrects').sparkline([@eventAnalysis.getTotalPositives(),@eventAnalysis.getTotalNegatives()], {
 	        type: 'pie',
 	        width: '150px',
 	        height: '150px',
-	        sliceColors: ["#FFFF00", "#FF0040", "#00FF00", "#0080FF"],
+	        sliceColors: ["#6495ED","#FFFF00"],
 	        borderWidth: 7,
 	        borderColor: '#f5f5f5',
 	        tooltipFormat: '<span style="color: {{color}}">&#9679;</span> {{offset:names}} - {{value}} ({{percent.1}}%)',
