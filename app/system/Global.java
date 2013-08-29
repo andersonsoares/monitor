@@ -88,7 +88,7 @@ public class Global extends GlobalSettings {
 	}
 	
 	
-	private void loadDictionariesAndAbbreviations() {
+	public static void loadDictionariesAndAbbreviations() {
 		
 		long init = System.currentTimeMillis();
 		

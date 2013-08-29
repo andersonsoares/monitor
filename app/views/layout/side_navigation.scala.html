@@ -1,3 +1,5 @@
+@(activeLink: String = "")
+
 <div class="sidebar-background">
   <div class="primary-sidebar-background"></div>
 </div>
@@ -11,7 +13,7 @@
 
         
 
-            <li class="active">
+            <li @if(activeLink.equals("events")) {class="active"}>
               <span class="glow"></span>
               <a href="@routes.Application.index()">
                   <i class="icon-comments icon-2x"></i>
@@ -20,13 +22,10 @@
             </li>
 
         
-            <li class="dark-nav ">
-
+            <li @if(activeLink.equals("dictionaries")) {class="active"}>
               <span class="glow"></span>
 
-              
-
-              <a class="accordion-toggle collapsed " data-toggle="collapse" href="#zwz2Ux5SfP">
+              <a href="#">
                   <i class="icon-book icon-2x"></i>
                     <span>
                       Dictionaries
@@ -43,7 +42,7 @@
 
         
 
-            <li class="">
+            <li @if(activeLink.equals("abbreviations")) {class="active"}>
               <span class="glow"></span>
               <!-- <a href="@routes.AbbreviationController.pageList()"> -->
               <a href="#">

@@ -1,6 +1,14 @@
 @(dictionary: models.Dictionary)
 
-@main("Twitter Monitor", "dictionaries") {
+@pageTitle = {
+	@views.html.partials.page_title_top("Dictionaries","","icon-book")
+}
+
+@scripts = {
+	<script src="@routes.Assets.at("javascripts/especifics/events/analysis/details.js")" type="text/javascript"></script>
+}
+
+@main("Twitter Monitor", "dictionaries", scripts, pageTitle) {
 
 	<div class="container">
 	
@@ -64,13 +72,19 @@
 					
 					if (code == 200) {
 						// everything ok
-						alertify.success(response.message)
+						Growl.success({
+				                title: "Word added!",
+				            })
 						
 					} else {
 						if (code == 400) {
 							//validation failed
 							$.each(response.map.errors, function(index) {
-								alertify.error(response.map.errors[index].errorMsg);
+								//alertify.error(response.map.errors[index].errorMsg);
+								Growl.error({
+					                title: "Error!",
+					                text: response.map.errors[index].errorMsg
+					            })
 							});
 						}
 					}

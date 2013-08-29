@@ -273,7 +273,7 @@ public class PLNUtils {
 	}
 	
 	public static HashSet<String> readDictionary(boolean considerAccents) {
-		
+		 
 		
 		long inicio = System.currentTimeMillis();
 		HashSet<String> words = new HashSet<String>();
@@ -288,9 +288,14 @@ public class PLNUtils {
 			String str;
 			while((str = br.readLine()) != null) {
 				if (considerAccents) {
-					words.add(str.toLowerCase());
+					if (!words.contains(str.toLowerCase())) {
+						words.add(str.toLowerCase());
+					}
 				} else {
-					words.add(PLNUtils.removeAccents(str.toLowerCase()));
+					String strWithoutAccents = PLNUtils.removeAccents(str.toLowerCase());
+					if (!words.contains(strWithoutAccents)) {
+						words.add(strWithoutAccents);
+					}
 				}
 				
 				

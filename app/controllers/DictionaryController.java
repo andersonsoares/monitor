@@ -21,6 +21,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import scala.concurrent.duration.Duration;
 import services.FillDictionaryService;
+import system.Global;
 import system.ReturnToView;
 import system.ValidationError;
 import utils.PLNUtils;
@@ -200,7 +201,7 @@ public class DictionaryController extends Controller {
 					
 					dictionary.setTotalWords(dictionary.getTotalWords() + 1);
 					dao.save(dictionary);
-					
+					Global.loadDictionariesAndAbbreviations();
 					vo.setMessage("Word added successfully to the dictionary");
 				} else {
 					// validation failed...

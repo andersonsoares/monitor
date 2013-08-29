@@ -1,7 +1,15 @@
 @(dictionaryList: List[models.Dictionary])
 @import helper._
 
-@main("Twitter Monitor", "dictionaries") {
+@pageTitle = {
+	@views.html.partials.page_title_top("Dictionaries","","icon-book")
+}
+
+@scripts = {
+	
+}
+
+@main("Twitter Monitor", "dictionaries", scripts, pageTitle) {
 
 
 	<div id="progressContent" class="container hide">
@@ -160,14 +168,24 @@
 				
 				if (code == 200) {
 					// everything ok
-					alertify.success(response.message)
+					//alertify.success(response.message)
+					Growl.success({
+		                title: "Creating dictionary!",
+		                text: response.message,
+		                sticky: true
+		            })
 					interv = setInterval(verifyProgress, 1000);
 					
 				} else {
 					if (code == 400) {
 						//validation failed
 						$.each(response.map.errors, function(index) {
-							alertify.error(response.map.errors[index].errorMsg);
+							//alertify.error(response.map.errors[index].errorMsg);
+							Growl.error({
+				                title: "Error!",
+				                text: response.map.errors[index].errorMsg,
+				                sticky: true
+				            })
 						});
 					}
 				}
