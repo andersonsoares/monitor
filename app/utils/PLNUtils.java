@@ -17,6 +17,7 @@ import play.Logger;
 import ptstemmer.Stemmer;
 import ptstemmer.Stemmer.StemmerType;
 import ptstemmer.exceptions.PTStemmerException;
+import system.AnalyseCheck;
 import system.Singletons;
 
 import com.google.common.base.CharMatcher;
@@ -37,7 +38,7 @@ public class PLNUtils {
 	}
 	
 	public static String replaceAndRemoveURLs(String str) {
-		return str.replaceAll("((www\\.[\\s]+)|(https?://[^\\s]+))", "");
+		return str.replaceAll("(www\\.[\\s]+|https?://[^\\s]+)", "");
 	}
 	
 	public static String replaceUSERs(String str) {
@@ -395,6 +396,7 @@ public class PLNUtils {
 		}
 	}
 	
+	
 	/**
 	 * Method that analyse the tweet tokens and verify if each
 	 * token stemmed with Orengo Algorithm is in the
@@ -460,7 +462,60 @@ public class PLNUtils {
 			if (considerSIGLAs) {
 				if (isSigla(string) && abbreviations.contains(new Abbreviation(string))) {
 					correctWordsCount++;
+					if (!string.equals("USER") && !string.equals("URL")) {
+						normalizedTweet = normalizedTweet.replace(string, "ABBREVIATION");
+					}
 					continue;
+				}
+			} else {
+				if (isSigla(string) && abbreviations.contains(new Abbreviation(string))) {
+					if (!string.equals("USER") && !string.equals("URL")) {
+						normalizedTweet = normalizedTweet.replace(string, "");
+					}
+					continue;
+				}
+			}
+			if (string.equals("HASHTAG") || string.equals("USER") || string.equals("URL")) {
+				correctWordsCount++;
+			} else {
+				if (dicionario.contains(string.toLowerCase())) {
+					correctWordsCount++;
+				}	
+			}
+				
+		}
+		
+		tokens = normalizedTweet.split(" ");
+		float rate = (float)correctWordsCount / tokens.length;
+		
+		return rate;
+	}
+	
+	public static AnalyseCheck analyseCheck(String tweet, HashSet<String> dicionario,
+			List<Abbreviation> abbreviations, boolean considerHashtag, boolean considerUser,
+			boolean considerUrl, boolean considerSIGLAs) {
+		
+		tweet = normalizeText(tweet, considerHashtag, considerUrl, considerUser);
+		String[] tokens = tweet.split(" ");
+		
+		int correctWordsCount = 0;
+		StringBuilder sb = new StringBuilder("");
+		for (String string : tokens) {
+			
+			if (considerSIGLAs) {
+				if (isSigla(string) && abbreviations.contains(new Abbreviation(string))) {
+					correctWordsCount++;
+					if (!string.equals("USER") && !string.equals("URL")) {
+						sb.append("ABBREVIATION").append(" ");
+					}
+					continue;
+				} else {
+					sb.append(string).append(" ");
+				}
+				
+			} else {
+				if (!isSigla(string) || !abbreviations.contains(new Abbreviation(string))) {
+					sb.append(string).append(" ");
 				}
 			}
 			if (string.equals("HASHTAG") || string.equals("USER") || string.equals("URL")) {
@@ -475,7 +530,9 @@ public class PLNUtils {
 		
 		float rate = (float)correctWordsCount / tokens.length;
 		
-		return rate;
+		AnalyseCheck analyseCheck = new AnalyseCheck(sb.toString(), rate, correctWordsCount, tokens.length);
+		
+		return analyseCheck;
 	}
 	
 	/**

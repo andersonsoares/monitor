@@ -10,20 +10,18 @@ import models.Dictionary;
 import models.Event;
 import models.EventAnalysis;
 import models.Tweet;
-import models.Word;
 
 import org.bson.types.ObjectId;
 
 import play.Logger;
+import play.cache.Cache;
 import utils.PLNUtils;
 import utils.SendMail;
 
 import com.google.code.morphia.Key;
 
-import dao.AbbreviationDAO;
 import dao.EventAnalysisDAO;
 import dao.TweetDAO;
-import dao.WordDAO;
 import enums.SentimentEnum;
 
 public class AnalyseEventService implements Runnable {
@@ -82,18 +80,6 @@ public class AnalyseEventService implements Runnable {
 			 * filtrar tweets 'corretos'
 			 */
 			
-			// carregar lista de siglas
-			AbbreviationDAO abbreviationDAO = new AbbreviationDAO();
-			List<Abbreviation> abbreviations = abbreviationDAO.listAll();
-			
-			// carregar dicionario para a memoria
-			WordDAO wordDAO = new WordDAO();
-			List<Word> words = wordDAO.listByDictionaryId(dictionary.getId());
-			HashSet<String> dictionaryWords = new HashSet<String>();
-			for (Word word : words) {
-				dictionaryWords.add(word.getName());
-			}
-			
 			// save the actual analyse to db
 
 			EventAnalysis eventAnalysis = new EventAnalysis(
@@ -128,8 +114,9 @@ public class AnalyseEventService implements Runnable {
 						
 						// Analisar e classificar cada tweet como 
 						// INCORRETO, POSITIVO, NEGATIVO, NEUTRO
+						@SuppressWarnings("unchecked")
 						SentimentEnum analysisResult = PLNUtils.analyseTweet(t.getText(), 
-								dictionaryWords, abbreviations, correctRate, considerHashtag,
+								(HashSet<String>)Cache.get(dictionary.getId().toString()), (List<Abbreviation>)Cache.get("abbreviations"), correctRate, considerHashtag,
 								considerUser, considerUrl, considerSigla);
 						
 						if (analysisResult.equals(SentimentEnum.INCORRECT)) {

@@ -2,14 +2,18 @@ package system;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import listeners.TwitterStatusListener;
 import listeners.UserStreamListener;
+import models.Abbreviation;
+import models.Dictionary;
 import models.Event;
 import models.Tweet;
+import models.Word;
 
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
@@ -39,7 +43,10 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.mongodb.MongoClient;
 
+import dao.AbbreviationDAO;
+import dao.DictionaryDAO;
 import dao.TweetDAO;
+import dao.WordDAO;
 import enums.TypeEnum;
 
 /**
@@ -75,10 +82,41 @@ public class Global extends GlobalSettings {
 			Logger.info("Iniciando Jobs");
 			startSchedulers();
 		}
+		
+		loadDictionariesAndAbbreviations();
 	   
 	}
 	
 	
+	private void loadDictionariesAndAbbreviations() {
+		
+		long init = System.currentTimeMillis();
+		
+		AbbreviationDAO abbreviationDAO = new AbbreviationDAO();
+		List<Abbreviation> abbreviations = abbreviationDAO.listAll();
+		
+		Cache.set("abbreviations", abbreviations);
+		
+		// carregar dicionario para a memoria
+		WordDAO wordDAO = new WordDAO();
+		DictionaryDAO dictionaryDAO = new DictionaryDAO();
+		List<Dictionary> dictionariesList = dictionaryDAO.listAll();
+		for (Dictionary dic : dictionariesList) {
+			List<Word> words = wordDAO.listByDictionaryId(dic.getId());
+			HashSet<String> dictionaryWords = new HashSet<String>();
+			for (Word word : words) {
+				dictionaryWords.add(word.getName());
+			}
+			words = null;
+			Cache.set(dic.getId().toString(), dictionaryWords);
+		}
+		
+		Logger.info("Dictionaries and abbreviations (re)loaded in "+(System.currentTimeMillis()-init)+" ms");
+		
+		
+	}
+
+
 	private void startGlobalVars(Application app) throws PTStemmerException {
 		
 		CONSUMER_KEY1 = 		app.configuration().getString("twitter.consumer_key1");
