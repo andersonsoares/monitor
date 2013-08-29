@@ -8,6 +8,7 @@ import play.cache.Cache;
 
 import models.Dictionary;
 import models.Word;
+import system.Global;
 import utils.PLNUtils;
 
 import com.google.code.morphia.Key;
@@ -69,6 +70,8 @@ public class FillDictionaryService implements Runnable {
 		Logger.info("Time elapsed: "+(System.currentTimeMillis() - initialTime)+" ms");
 		
 		Cache.remove("createDictionaryProgress");
+		
+		Global.loadDictionariesAndAbbreviations();
 		
 	}
 
