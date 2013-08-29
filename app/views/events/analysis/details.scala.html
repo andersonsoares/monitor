@@ -169,20 +169,24 @@
 						    <div class="avatar"><img src="@tweet.getProfile_image_url()" class="avatar-small"></div>
 						    <div class="info">
 						      <span class="name">
-						      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.POSITIVE)) {
-						      <span class="label label-success">positive</span> @tweet.getText()
-						      } 
-						      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.NEGATIVE)) {
-						      <span class="label label-red">negative</span> @tweet.getText()
-						      }
-						      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.NEUTRAL)) {
-						      <span class="label">neutral</span> @tweet.getText()
-						      }
-						      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.INCORRECT)) {
-						      <span class="label label-warning">incorrect</span> @tweet.getText()
-						      } 
+							      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.POSITIVE)) {
+							      <span class="label label-success">positive</span>
+							      } 
+							      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.NEGATIVE)) {
+							      <span class="label label-red">negative</span>
+							      }
+							      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.NEUTRAL)) {
+							      <span class="label">neutral</span>
+							      }
+							      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.INCORRECT)) {
+							      <span class="label label-warning">incorrect</span>
+							      } 
+							      <strong id="tweetText-@tweet.getId()" style="margin-left: 10px;">@tweet.getText()</strong>
 						      </span>
 						      <span class="time"><i class="icon-time"></i> @tweet.getCreatedAt()</span>
+						    </div>
+						    <div id="details-@tweet.getId().toString()" class="content">
+							    
 						    </div>
 						</li>
 						
@@ -213,7 +217,59 @@
 	
 	
 	<script type="text/javascript">
-
+	
+	var dictionaryId = '@eventAnalysis.getDictionary().getId().toString()';
+	var considerWhat = [];
+	@if(eventAnalysis.isConsiderHashtag()) {
+	considerWhat.push('hashtags');
+	}
+	@if(eventAnalysis.isConsiderUrl()) {
+	considerWhat.push('urls');
+	}
+	@if(eventAnalysis.isConsiderUser()) {
+	considerWhat.push('users');
+	}
+	@if(eventAnalysis.isConsiderSigla()) {
+	considerWhat.push('siglas');
+	}
+	
+	function analyseCheck(tweetId) {
+		
+		$.ajax({
+			url: '@routes.ToolsController.analyseCheck()',
+			type: 'POST',
+			data: {
+				tweet: jQuery('#tweetText-'+tweetId).text(),
+				considerWhat: considerWhat,
+				dictionaryId: dictionaryId
+			},
+			success: function(response) {
+				var code = response.code;
+				
+				if (code == 200) {
+					// everything ok
+					var totalAnalysed = response.map.analyseCheck.totalAnalysed;
+					var totalCorrect = response.map.analyseCheck.totalCorrect;
+					var correctRate = response.map.analyseCheck.correctRate*100;
+					jQuery('#details-'+tweetId).empty()
+					jQuery('#details-'+tweetId).html('<span style="margin-right: 10px" class="label">'+parseFloat(correctRate).toFixed(2)+'% - '+totalCorrect+' of '+totalAnalysed+' <i class="icon-ok"></i></span> '+response.map.analyseCheck.normalizedText)
+					
+					
+				} else {
+					if (code == 400) {
+						//validation failed
+						
+					}
+				}
+				
+			},
+			error: function(response) {
+				console.log(response)
+			}
+		});	
+		
+	}
+	
 	$(document).ready(function() {
 		
 		data = jQuery('#pieChartValuesWithoutIncorrects').text()
@@ -238,6 +294,10 @@
 	            }
 	        }
 	    });
+		
+		@for(tweet<-tweetsList) {	
+			analyseCheck('@tweet.getId()');
+		}
 
 		
 		

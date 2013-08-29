@@ -495,6 +495,10 @@ public class PLNUtils {
 			List<Abbreviation> abbreviations, boolean considerHashtag, boolean considerUser,
 			boolean considerUrl, boolean considerSIGLAs) {
 		
+		if (dicionario==null || abbreviations==null) {
+			return new AnalyseCheck(tweet, 0.0f, 0, 0);
+		}
+		
 		tweet = normalizeText(tweet, considerHashtag, considerUrl, considerUser);
 		String[] tokens = tweet.split(" ");
 		
@@ -530,7 +534,7 @@ public class PLNUtils {
 		
 		float rate = (float)correctWordsCount / tokens.length;
 		
-		AnalyseCheck analyseCheck = new AnalyseCheck(sb.toString(), rate, correctWordsCount, tokens.length);
+		AnalyseCheck analyseCheck = new AnalyseCheck(sb.toString(), rate, tokens.length, correctWordsCount);
 		
 		return analyseCheck;
 	}

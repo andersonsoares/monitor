@@ -24,6 +24,9 @@ GET		/events/:eventId/analysis				@controllers.EventController.pageAnalysis(even
 GET		/events/:eventId/getTotalDiffUsers		@controllers.EventController.getTotalDiffUsers(eventId: String)
 GET		/events/:eventId/getTweetsCountPerDay 	@controllers.EventController.getTweetsCountPerDay(eventId: String)
 
+GET		/tools/analyseCheck						@controllers.ToolsController.pageAnalyseCheck()
+POST	/tools/analyseCheck						@controllers.ToolsController.analyseCheck()
+
 GET		/dictionaries							@controllers.DictionaryController.pageList()
 POST	/dictionaries							@controllers.DictionaryController.create()
 GET		/dictionaries/statusCreate				@controllers.DictionaryController.statusCreate()
