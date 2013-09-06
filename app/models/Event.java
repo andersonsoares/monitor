@@ -13,6 +13,7 @@ import org.bson.types.ObjectId;
 import play.data.validation.Constraints.Required;
 import play.data.validation.ValidationError;
 
+import com.google.code.morphia.annotations.Embedded;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Indexed;
@@ -66,6 +67,10 @@ public class Event {
 	 * Total number of tweets
 	 */
 	private int nrTweets;
+	
+	@Embedded
+	private List<GraphicPoint> graphicPoints = new ArrayList<GraphicPoint>();
+	private int totalTweetsLastGraphicCreation;
 	
 	
 	// ---------------------------------------------------------------------
@@ -194,6 +199,23 @@ public class Event {
 				return errors;
 			}
 			return null;
+		}
+
+		public int getTotalTweetsLastGraphicCreation() {
+			return totalTweetsLastGraphicCreation;
+		}
+
+		public void setTotalTweetsLastGraphicCreation(
+				int totalTweetsLastGraphicCreation) {
+			this.totalTweetsLastGraphicCreation = totalTweetsLastGraphicCreation;
+		}
+
+		public List<GraphicPoint> getGraphicPoints() {
+			return graphicPoints;
+		}
+
+		public void setGraphicPoints(List<GraphicPoint> graphicPoints) {
+			this.graphicPoints = graphicPoints;
 		}
 		
 

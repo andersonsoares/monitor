@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import models.Dictionary;
 import models.Event;
 import models.EventAnalysis;
+import models.GraphicPoint;
 import models.Tweet;
 import models.forms.AnalyseForm;
 import models.forms.GetTweetsForm;
@@ -27,7 +28,6 @@ import play.mvc.Result;
 import scala.concurrent.duration.Duration;
 import services.AnalyseEventService;
 import services.GetTweetsService;
-import system.ChartParam;
 import system.ReturnToView;
 import system.ValidationError;
 import utils.DateUtils;
@@ -391,44 +391,49 @@ public Result pageTeste(String eventId) {
 	
 	public Result getTweetsCountPerDay(String eventId) {
 		
-		long init = System.currentTimeMillis();
+		ReturnToView vo = new ReturnToView();
+		HashMap<String, Object> map = new HashMap<String, Object>();
 		try {
 			ObjectId _eventId = new ObjectId(eventId);
 			EventDAO eventDAO = new EventDAO();
 			Event event = eventDAO.findById(_eventId);
 			
-			TweetDAO tweetDAO = new TweetDAO();
-			
-			ReturnToView vo = new ReturnToView();
-			HashMap<String, Object> map = new HashMap<String, Object>();
-			List<ChartParam> chartParams = new ArrayList<ChartParam>();
-			
-			
-			Date aux = event.getStartDate();
-			Date finishDate = event.getFinishDate();
-			Date now = new Date(System.currentTimeMillis());
-			if (now.before(finishDate)) {
-				finishDate = now;
-			}
-			
-			chartParams.add(new ChartParam(aux.getTime(), tweetDAO.countInInterval(_eventId, event.getStartDate(), DateUtils.getFinalOfTheDay(event.getStartDate()))));
-			
-			
-			
-			
-			
-			while(true) {
-				aux = DateUtils.getInitNextDay(aux);
-				Date finalDia = DateUtils.getFinalOfTheDay(aux);
-				if (finalDia.after(finishDate)) {
-					chartParams.add(new ChartParam(aux.getTime(), tweetDAO.countInInterval(_eventId, aux, finishDate)));
-					break;
+			if (event.getNrTweets() > event.getTotalTweetsLastGraphicCreation()) {
+				Logger.info("Gerando grafico novamente");
+
+				TweetDAO tweetDAO = new TweetDAO();
+				
+				List<GraphicPoint> graphicPoints = new ArrayList<GraphicPoint>();
+				
+				Date aux = event.getStartDate();
+				Date finishDate = event.getFinishDate();
+				Date now = new Date(System.currentTimeMillis());
+				if (now.before(finishDate)) {
+					finishDate = now;
 				}
-				chartParams.add(new ChartParam(aux.getTime(), tweetDAO.countInInterval(_eventId, aux, finalDia)));
+				
+				graphicPoints.add(new GraphicPoint(aux.getTime(), tweetDAO.countInInterval(_eventId, event.getStartDate(), DateUtils.getFinalOfTheDay(event.getStartDate()))));
+				
+				while(true) {
+					aux = DateUtils.getInitNextDay(aux);
+					Date finalDia = DateUtils.getFinalOfTheDay(aux);
+					if (finalDia.after(finishDate)) {
+						graphicPoints.add(new GraphicPoint(aux.getTime(), tweetDAO.countInInterval(_eventId, aux, finishDate)));
+						break;
+					}
+					graphicPoints.add(new GraphicPoint(aux.getTime(), tweetDAO.countInInterval(_eventId, aux, finalDia)));
+				}
+				
+				event.setGraphicPoints(graphicPoints);
+				event.setTotalTweetsLastGraphicCreation(event.getNrTweets());
+				eventDAO.save(event);
+				
+				map.put("countPerDay", graphicPoints);
+			} else {
+				Logger.info("Grafico ja foi gerado ;)");
+				map.put("countPerDay", event.getGraphicPoints());
 			}
 			
-			System.out.println("Elapsed time: "+(System.currentTimeMillis() - init));
-			map.put("countPerDay", chartParams);
 			vo.setMap(map);
 			return ok(Json.toJson(vo));
 			

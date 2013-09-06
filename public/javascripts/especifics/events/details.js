@@ -24,8 +24,8 @@ $(document).ready(function() {
     		var set = [];
     		$.each(response.map.countPerDay, function() {
                 set.push({
-                    x : this.label,
-                    y : parseInt(this.value, 10)
+                    x : this.x,
+                    y : parseInt(this.y, 10)
                 });
             });
     		
