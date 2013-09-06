@@ -505,7 +505,6 @@ public class PLNUtils {
 		}
 		
 		tweet = normalizeText(tweet, considerHashtag, considerUrl, considerUser);
-		System.out.println(tweet);
 		String[] tokens = tweet.split(" ");
 		
 		int correctWordsCount = 0;
@@ -524,7 +523,7 @@ public class PLNUtils {
 				}
 				
 			} else {
-				if (!isSigla(string) || !abbreviations.contains(new Abbreviation(string))) {
+				if (string.equals("USER") || string.equals("URL") || !isSigla(string) || !abbreviations.contains(new Abbreviation(string))) {
 					sb.append(string).append(" ");
 				}
 			}

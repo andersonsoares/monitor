@@ -47,7 +47,6 @@ public class ToolsController extends Controller {
 		boolean considerSigla = considerWhat.contains("siglas");
 		
 		String _dictionaryId = form.getDictionaryId();
-		
 		@SuppressWarnings("unchecked")
 		AnalyseCheck analyseCheck = PLNUtils.analyseCheck(tweet, (HashSet<String>)Cache.get(_dictionaryId), (List<Abbreviation>)Cache.get("abbreviations"), considerHashtag, considerUser, considerUrl, considerSigla);
 		
