@@ -462,22 +462,23 @@ public class PLNUtils {
 		String[] tokens = normalizedTweet.split(" ");
 		
 		int correctWordsCount = 0;
+		StringBuilder sb = new StringBuilder("");
 		for (String string : tokens) {
 			
 			if (considerSIGLAs) {
 				if (isSigla(string) && abbreviations.contains(new Abbreviation(string))) {
 					correctWordsCount++;
 					if (!string.equals("USER") && !string.equals("URL")) {
-						normalizedTweet = normalizedTweet.replace(string, "ABBREVIATION");
+						sb.append("ABBREVIATION").append(" ");
 					}
 					continue;
+				} else {
+					sb.append(string).append(" ");
 				}
+				
 			} else {
-				if (isSigla(string) && abbreviations.contains(new Abbreviation(string))) {
-					if (!string.equals("USER") && !string.equals("URL")) {
-						normalizedTweet = normalizedTweet.replace(string, "");
-					}
-					continue;
+				if (!isSigla(string) || !abbreviations.contains(new Abbreviation(string))) {
+					sb.append(string).append(" ");
 				}
 			}
 			if (string.equals("HASHTAG") || string.equals("USER") || string.equals("URL")) {
@@ -489,8 +490,7 @@ public class PLNUtils {
 			}
 				
 		}
-		
-		tokens = normalizedTweet.split(" ");
+		tokens = sb.toString().split(" ");
 		float rate = (float)correctWordsCount / tokens.length;
 		
 		return rate;
@@ -505,6 +505,7 @@ public class PLNUtils {
 		}
 		
 		tweet = normalizeText(tweet, considerHashtag, considerUrl, considerUser);
+		System.out.println(tweet);
 		String[] tokens = tweet.split(" ");
 		
 		int correctWordsCount = 0;
@@ -536,10 +537,14 @@ public class PLNUtils {
 			}
 				
 		}
+		String normalizedText = sb.toString();
+		if (normalizedText.endsWith(" "))
+			normalizedText = normalizedText.substring(0, normalizedText.length()-1);
+		tokens = normalizedText.split(" ");
 		
 		float rate = (float)correctWordsCount / tokens.length;
 		
-		AnalyseCheck analyseCheck = new AnalyseCheck(sb.toString(), rate, tokens.length, correctWordsCount);
+		AnalyseCheck analyseCheck = new AnalyseCheck(normalizedText, rate, tokens.length, correctWordsCount);
 		
 		return analyseCheck;
 	}
@@ -590,6 +595,8 @@ public class PLNUtils {
 		tweet = PLNUtils.removeWhiteSpacesNotNecessary(tweet);
 		if (tweet.startsWith(" "))
 			tweet = tweet.substring(1);
+		if (tweet.endsWith(" "))
+			tweet = tweet.substring(0, tweet.length()-1);
 		return tweet;
 	}
 	
