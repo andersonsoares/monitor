@@ -12,6 +12,34 @@
 
 @main("Twitter Monitor", "events", scripts, pageTitle) {
 
+<div class="container-fluid padded">
+    <div class="row-fluid">
+
+      <!-- Breadcrumb line -->
+
+      <div id="breadcrumbs">
+        <div class="breadcrumb-button blue">
+          <span class="breadcrumb-label"><i class="icon-comments"></i> <a href="@routes.Application.index()">Events</a></span>
+          <span class="breadcrumb-arrow"><span></span></span>
+        </div>
+
+        <div class="breadcrumb-button">
+          <span class="breadcrumb-label">
+            <i class="icon-comment"></i> <a href="@routes.EventController.pageDetails(event.getId().toString())">@event.getName()</a>
+          </span>
+          <span class="breadcrumb-arrow"><span></span></span>
+        </div>
+        
+        <div class="breadcrumb-button">
+          <span class="breadcrumb-label">
+            <i class="icon-bar-chart"></i>Analysis
+          </span>
+          <span class="breadcrumb-arrow"><span></span></span>
+        </div>
+      </div>
+    </div>
+</div>
+
 @views.html.events.analysis.newForm(averageEllapsedTime, dictionaryList, event)
 
 <div id="urlRunAnalysis" class="hidden">@routes.EventController.analyse()</div>

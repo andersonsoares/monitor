@@ -399,7 +399,7 @@ public Result pageTeste(String eventId) {
 			Event event = eventDAO.findById(_eventId);
 			
 			if (event.getNrTweets() > event.getTotalTweetsLastGraphicCreation()) {
-				Logger.info("Gerando grafico novamente");
+				Logger.info(event.getName()+": Novos tweets! Gerando grafico novamente...");
 
 				TweetDAO tweetDAO = new TweetDAO();
 				
@@ -430,7 +430,6 @@ public Result pageTeste(String eventId) {
 				
 				map.put("countPerDay", graphicPoints);
 			} else {
-				Logger.info("Grafico ja foi gerado ;)");
 				map.put("countPerDay", event.getGraphicPoints());
 			}
 			
