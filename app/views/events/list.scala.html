@@ -3,19 +3,21 @@
 @import helper._
 @import helper.twitterBootstrap._
 
-@scripts = {
-	<script src="@routes.Assets.at("js/utils.js")" type="text/javascript"></script>
-	<script src="@routes.Assets.at("js/jquery.powertip.min.js")" type="text/javascript"></script>
+@pageTitle = {
 }
 
-@main("Twitter Monitor 2.0", "events", scripts) {
+@scripts = {
+	
+}
 
-	<div class="hide">
+@main("Twitter Monitor 2.0", "events", scripts, pageTitle) {
+
+<h2>Events List</h2>
+
+<div class="span8">
+@for((event, index) <- eventsList.zipWithIndex) {
 		
-		@for(event <- eventsList) {
-		
-			<div id="@event.getId()-keywordsTip">
-				<p><b><u>Keywords list</u></b></p>
+		<div class="box closable-chat-box tip" data-placement="right" title="
 				@for((key, value) <- event.getKeywords()) {
 					@if(value.name == "TEXT") {
 						<p>Contains: @key</p>		 	
@@ -23,82 +25,39 @@
 				 		<p>Following: @@@key</p>
 				 	}		
 				}
-			
-			</div>
-		
-		}
-		
-	</div>
-	
-	<div class="container">
-		
-		
-		<h1>Events</h1>
-		
-	    <div class="jetstrap-highlighted well">
-	    	<a href="@routes.EventController.pageCreate()"><button class="btn btn-success">Create new Event</button></a>
-	    </div>
-	
-		<div class="row-fluid">
-			<div class="span12">
-				<table id="tableEventsList" class="table table-hover">
-					<thead>
-						<tr>
-							<th>#</th>
-							<th>Event name</th>
-							<th>Situation</th>
-							<th>Number Tweets</th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						@for(event <- eventsList) {
-							<tr>
-								<td></td>
-								<td><a id="@event.getId()-name" href="@routes.EventController.pageDetails(event.getId().toString())">@event.getName()</a></td>
-								
-								<td id="situation_@event.getId()">
-									@if(event.getSituation().name == "STARTED") {
-										<script type="text/javascript"> 
-											var interv_@event.getId() = setInterval(function(){
-												jQuery('#situation_@event.getId()').html("@event.getSituation() and will finish in "+ellapsedTime(new Date(), new Date(@event.getFinishDate().getTime())));
-											},1000);
-										</script>
-									} else {
-										<script type="text/javascript">
-											var interv_@event.getId() = setInterval(function(){
-												jQuery('#situation_@event.getId()').html("@event.getSituation() "+ellapsedTime(new Date(@event.getFinishDate().getTime()), new Date())+ " ago");
-											},1000);
-										</script>
-									}
-								</td>
-								<td>@event.getNrTweets()</td>
-								<td><a href="@routes.EventController.pageDetails(event.getId().toString())">Details</a></td>
-							</tr>
-						}		
-					</tbody> 
-					
-				</table>
-			</div>
+		">
+		  <div class="box-content padded" onclick="location.href=window.location.origin+'@routes.EventController.pageDetails(event.getId().toString())'" style="cursor: pointer;">
+		    <div class="fields">
+		      <ul>
+		        <li><b><h3>@event.getName()</h3></b></li>
+		        <li class="note">
+		        	<i class="icon-time"></i> @event.getStartDate() - @event.getFinishDate()
+		        	@if(event.getSituation().equals(enums.Situation.NEVER_STARTED)) {
+	        		<span class="label label-black">@event.getSituation()</span>
+	        		}
+	        		@if(event.getSituation().equals(enums.Situation.STARTED)) {
+	        		<span class="label label-blue">@event.getSituation()</span>
+	        		}
+	        		@if(event.getSituation().equals(enums.Situation.FINISHED)) {
+	        		<span class="label label-default">@event.getSituation()</span>
+	        		}
+	        		@if(event.getSituation().equals(enums.Situation.ANALYSED)) {
+	        		<span class="label label-green">@event.getSituation()</span>
+	        		}	
+		        </li>
+		        
+		      </ul>
+	          <div class="news-time">
+        		<span>@event.getNrTweets()</span> tweets
+      		  </div>	
+		    </div>
+		  </div>
 		</div>
-	</div>
 	
-	<script type="text/javascript">
-		$(document).ready(function() {
-			
-			jQuery('#mainContent').fadeIn()
-			
-			@for(event <- eventsList) {
-		
-				jQuery('#@event.getId()-name').data('powertiptarget','@event.getId()-keywordsTip')
-				jQuery('#@event.getId()-name').powerTip({
-					placement: 'e',
-					mouseOnToPopup: true
-				})
-		
-			}			
-		});
-	</script>
+	}
+	
+</div>
 
+	
     
 }

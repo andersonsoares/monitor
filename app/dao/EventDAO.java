@@ -36,7 +36,7 @@ public class EventDAO extends BaseDAO<Event> {
 		
 		query.or(criteria);
 		
-		return query.asList();
+		return query.order("-nrTweets").asList();
 	}
 	
 	/**
