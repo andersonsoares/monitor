@@ -3,12 +3,16 @@
 @import helper._
 @import helper.twitterBootstrap._
 
-@scripts = {
-
-	<script src="@routes.Assets.at("js/bootstrap-datetimepicker.min.js")" type="text/javascript"></script>
+@pageTitle = {
+	
 }
 
-@main("Twitter Monitor 2.0", "events", scripts) {
+@scripts = {
+
+	<script src="@routes.Assets.at("javascripts/bootstrap-datetimepicker.min.js")" type="text/javascript"></script>
+}
+
+@main("Twitter Monitor", "events", scripts, pageTitle) {
     
 	<div class="container jetstrap-highlighted well">
 	
