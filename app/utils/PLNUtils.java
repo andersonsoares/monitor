@@ -477,7 +477,7 @@ public class PLNUtils {
 				}
 				
 			} else {
-				if (!isSigla(string) || !abbreviations.contains(new Abbreviation(string))) {
+				if (string.equals("USER") || string.equals("URL") || !isSigla(string) || !abbreviations.contains(new Abbreviation(string))) {
 					sb.append(string).append(" ");
 				}
 			}
