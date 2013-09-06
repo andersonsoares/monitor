@@ -72,6 +72,9 @@ public class Event {
 	private List<GraphicPoint> graphicPoints = new ArrayList<GraphicPoint>();
 	private int totalTweetsLastGraphicCreation;
 	
+	private int totalDiffUsers;
+	private int totalTweetsLastDiffUsersCreation;
+	
 	
 	// ---------------------------------------------------------------------
 	
@@ -216,6 +219,23 @@ public class Event {
 
 		public void setGraphicPoints(List<GraphicPoint> graphicPoints) {
 			this.graphicPoints = graphicPoints;
+		}
+
+		public int getTotalTweetsLastDiffUsersCreation() {
+			return totalTweetsLastDiffUsersCreation;
+		}
+
+		public void setTotalTweetsLastDiffUsersCreation(
+				int totalTweetsLastDiffUsersCreation) {
+			this.totalTweetsLastDiffUsersCreation = totalTweetsLastDiffUsersCreation;
+		}
+
+		public int getTotalDiffUsers() {
+			return totalDiffUsers;
+		}
+
+		public void setTotalDiffUsers(int totalDiffUsers) {
+			this.totalDiffUsers = totalDiffUsers;
 		}
 		
 

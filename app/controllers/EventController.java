@@ -381,9 +381,19 @@ public Result pageTeste(String eventId) {
 		Event event = eventDAO.findById(_eventId);
 		
 		if (event != null) {
-			TweetDAO tweetDAO = new TweetDAO();
 			
-			long total = tweetDAO.countTotalDiffUsers(_eventId);
+			long total = 0;
+			if (event.getNrTweets() > event.getTotalTweetsLastDiffUsersCreation()) {
+				Logger.info(event.getName()+" - Atualizando total de usuarios diferentes");
+				TweetDAO tweetDAO = new TweetDAO();
+				total = tweetDAO.countTotalDiffUsers(_eventId);
+				event.setTotalDiffUsers((int)total);
+				event.setTotalTweetsLastDiffUsersCreation(event.getNrTweets());
+				eventDAO.save(event);
+			} else {				
+				total = event.getTotalDiffUsers();
+			}
+			
 			return ok(Json.toJson(total));
 		}
 		return notFound();
