@@ -23,6 +23,7 @@ GET		/events/:eventId/analysis/:eventAnalysisId	@controllers.EventController.pag
 GET		/events/:eventId/analysis				@controllers.EventController.pageAnalysis(eventId: String, orderBy: String ?= "", order: String ?= "desc")
 GET		/events/:eventId/getTotalDiffUsers		@controllers.EventController.getTotalDiffUsers(eventId: String)
 GET		/events/:eventId/getTweetsCountPerDay 	@controllers.EventController.getTweetsCountPerDay(eventId: String)
+GET		/events/:eventId/getTweetsByDay			@controllers.EventController.getTweetsByDay(eventId: String)
 
 GET		/tools/analyseCheck						@controllers.ToolsController.pageAnalyseCheck()
 POST	/tools/analyseCheck						@controllers.ToolsController.analyseCheck()

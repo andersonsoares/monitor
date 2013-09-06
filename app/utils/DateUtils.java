@@ -35,4 +35,19 @@ public class DateUtils {
 		return finalOfTheDay;
 	}
 	
+	public static Date getNextHour(Date date) {
+		Date nextDay;
+		
+		Calendar cal = Calendar.getInstance();
+		
+		cal.setTime(date);
+		cal.add(Calendar.HOUR, 1);
+		cal.clear(Calendar.HOUR_OF_DAY);
+		cal.clear(Calendar.SECOND);
+		cal.clear(Calendar.MINUTE);
+		nextDay = cal.getTime();
+		
+		return nextDay;
+	}
+	
 }

@@ -452,6 +452,57 @@ public Result pageTeste(String eventId) {
 		}
 	}
 	
+	public Result getTweetsByDay(String eventId) {
+		
+		try {
+			
+			ObjectId _eventId = new ObjectId(eventId);
+			EventDAO eventDAO = new EventDAO();
+			Event event = eventDAO.findById(_eventId);
+			
+			if (event != null) {
+				
+				ReturnToView vo = new ReturnToView();
+				HashMap<String, Object> map = new HashMap<String, Object>();
+		
+				Long dateInMillis = Long.parseLong(request().getQueryString("date"));
+				
+				Date startDate = new Date(dateInMillis);
+				Date aux = startDate;
+				Date finishDate = DateUtils.getFinalOfTheDay(startDate);
+				Date now = new Date(System.currentTimeMillis());
+				
+				if (now.after(finishDate)) {			
+					TweetDAO tweetDAO = new TweetDAO();
+					List<GraphicPoint> graphicPoints = new ArrayList<GraphicPoint>();
+					
+					graphicPoints.add(new GraphicPoint(aux.getTime(), tweetDAO.countInInterval(_eventId, startDate, DateUtils.getNextHour(startDate))));
+					
+					while (aux.before(finishDate)) {
+						aux = DateUtils.getNextHour(aux);
+						Date nextHour = DateUtils.getNextHour(aux);
+						if (nextHour.after(finishDate)) {
+							graphicPoints.add(new GraphicPoint(aux.getTime(), tweetDAO.countInInterval(_eventId, aux, finishDate)));
+							break;
+						}
+						graphicPoints.add(new GraphicPoint(aux.getTime(), tweetDAO.countInInterval(_eventId, aux, nextHour)));
+					}
+					
+					map.put("countPerHour", graphicPoints);
+					vo.setMap(map);
+					
+					return ok(Json.toJson(vo));
+				}
+			}
+			
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+		return notFound();
+	}
+	
 	
 	
 }
