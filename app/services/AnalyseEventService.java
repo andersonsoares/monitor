@@ -180,7 +180,7 @@ public class AnalyseEventService implements Runnable {
 				
 			} catch(Exception e) {
 				Logger.info("Algum erro ocorreu");
-				e.printStackTrace();
+				Logger.error(e.toString());
 				analysisDAO.delete(eventAnalysis);
 				Logger.info("Rollback analysis..!");
 			}
