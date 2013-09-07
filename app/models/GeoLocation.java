@@ -5,6 +5,10 @@ public class GeoLocation {
 	private double lontitude;
 	private double latitude;
 	
+	public GeoLocation() {
+		
+	}
+	
 	public GeoLocation(double lontitude, double latitude) {
 		this.setLontitude(lontitude);
 		this.setLatitude(latitude);
