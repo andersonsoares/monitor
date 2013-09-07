@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.bson.types.ObjectId;
 
 import com.google.code.morphia.Key;
+import com.google.code.morphia.annotations.Embedded;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Indexed;
@@ -35,6 +36,9 @@ public class Tweet {
 	private long retweet_count;
 
 	private boolean retweeted;
+	
+	@Embedded
+	private GeoLocation geoLocation;
 	
 	// user author attributes
 	private long twitterUserId;
@@ -165,6 +169,16 @@ public class Tweet {
 
 	public void setEventAnalysis(HashMap<ObjectId, SentimentEnum> eventAnalysis) {
 		this.eventAnalysis = eventAnalysis;
+	}
+
+
+	public GeoLocation getGeoLocation() {
+		return geoLocation;
+	}
+
+
+	public void setGeoLocation(GeoLocation geoLocation) {
+		this.geoLocation = geoLocation;
 	}
 	
 }
