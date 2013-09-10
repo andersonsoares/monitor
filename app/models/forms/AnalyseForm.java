@@ -1,7 +1,10 @@
 package models.forms;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import play.data.format.Formats.DateTime;
 
 public class AnalyseForm {
 
@@ -18,6 +21,13 @@ public class AnalyseForm {
 	private float correctRate;
 	
 	private String email;
+	
+	
+	@DateTime(pattern="dd/MM/yyyy HH:mm:ss aa")
+	private Date startDate;
+	@DateTime(pattern="dd/MM/yyyy HH:mm:ss aa")
+	private Date finishDate;
+	
 	
 	private List<String> considerWhat = new ArrayList<String>();
 	
@@ -70,6 +80,22 @@ public class AnalyseForm {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public Date getFinishDate() {
+		return finishDate;
+	}
+
+	public void setFinishDate(Date finishDate) {
+		this.finishDate = finishDate;
+	}
+
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
 	}
 	
 }

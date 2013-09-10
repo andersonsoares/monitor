@@ -43,6 +43,9 @@ public class EventAnalysis {
 	@Indexed
 	private boolean considerUrl;
 	
+	private Date startDateInterval;
+	private Date finishDateInterval;
+	
 	private Date createdAt;
 	// Analysis duration in milliseconds
 	private long ellapsedTime;
@@ -81,13 +84,39 @@ public class EventAnalysis {
 		this.totalIncorrect 		= totalIncorrect;
 		this.ellapsedTime 			= ellapsedTime;
 	}
+	
+	public EventAnalysis(Key<Event> event, Key<Dictionary> dictionary, String dictionaryName,
+			int totalTweetsAnalysed, float correctRate, boolean considerSigla,
+			boolean considerHashtag, boolean considerUser, boolean considerUrl,
+			int totalPositives, int totalNegatives,
+			int totalNeutral, int totalIncorrect, long ellapsedTime, Date startDateInterval,
+			Date finishDateInterval) {
+		super();
+		this.event 					= event;
+		this.totalTweetsAnalysed 	= totalTweetsAnalysed;
+		this.correctRate 			= correctRate;
+		this.dictionary 			= dictionary;
+		this.dictionaryName 		= dictionaryName;
+		this.considerSigla 			= considerSigla;
+		this.considerHashtag 		= considerHashtag;
+		this.considerUser 			= considerUser;
+		this.considerUrl 			= considerUrl;
+		this.createdAt 				= new Date();
+		this.totalPositives 		= totalPositives;
+		this.totalNegatives 		= totalNegatives;
+		this.totalNeutral 			= totalNeutral;
+		this.totalIncorrect 		= totalIncorrect;
+		this.ellapsedTime 			= ellapsedTime;
+		this.startDateInterval 		= startDateInterval;
+		this.finishDateInterval 	= finishDateInterval;
+	}
 
 	// getters & setters;;
 	
 	public EventAnalysis(Key<Event> event, Key<Dictionary> dictionary, String dictionaryName, int totalTweetsAnalysed,
 			float correctRate, boolean considerSigla,
 			boolean considerHashtag, boolean considerUser,
-			boolean considerUrl) {
+			boolean considerUrl, Date startDateInterval, Date finishDateInterval) {
 		this.event 					= event;
 		this.totalTweetsAnalysed 	= totalTweetsAnalysed;
 		this.correctRate 			= correctRate;
@@ -98,6 +127,8 @@ public class EventAnalysis {
 		this.considerUser 			= considerUser;
 		this.considerUrl 			= considerUrl;
 		this.createdAt 				= new Date();
+		this.startDateInterval 		= startDateInterval;
+		this.finishDateInterval 	= finishDateInterval;
 	}
 
 	public ObjectId getId() {
@@ -226,6 +257,22 @@ public class EventAnalysis {
 
 	public void setDictionaryName(String dictionaryName) {
 		this.dictionaryName = dictionaryName;
+	}
+
+	public Date getFinishDateInterval() {
+		return finishDateInterval;
+	}
+
+	public void setFinishDateInterval(Date finishDateInterval) {
+		this.finishDateInterval = finishDateInterval;
+	}
+
+	public Date getStartDateInterval() {
+		return startDateInterval;
+	}
+
+	public void setStartDateInterval(Date startDateInterval) {
+		this.startDateInterval = startDateInterval;
 	}
 	
 	

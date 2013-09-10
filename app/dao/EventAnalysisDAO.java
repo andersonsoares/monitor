@@ -1,5 +1,6 @@
 package dao;
 
+import java.util.Date;
 import java.util.List;
 
 import models.Dictionary;
@@ -30,7 +31,8 @@ public class EventAnalysisDAO extends BaseDAO<EventAnalysis> {
 	 */
 	public EventAnalysis isThisEventAlreadyBeenAnalysedWithThisParams(ObjectId eventId,
 			ObjectId dictionaryId, long totalTweets, float correctRate, boolean considerHashtag,
-			boolean considerUser, boolean considerUrl, boolean considerSigla) {
+			boolean considerUser, boolean considerUrl, boolean considerSigla, Date startDateInterval,
+			Date finishDateInterval) {
 		
 		EventAnalysis eventAnalysis = createQuery()
 		.filter("event", 				new Key<Event>(Event.class, eventId))
@@ -41,6 +43,8 @@ public class EventAnalysisDAO extends BaseDAO<EventAnalysis> {
 		.filter("considerUser", 		considerUser)
 		.filter("considerUrl", 			considerUrl)
 		.filter("considerSigla", 		considerSigla)
+		.filter("startDateInterval", 	startDateInterval)
+		.filter("finishDateInterval",   finishDateInterval)
 		.get();
 		
 		return eventAnalysis;

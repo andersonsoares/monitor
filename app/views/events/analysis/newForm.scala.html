@@ -10,6 +10,23 @@
   <div class="modal-body">
     <form id="formNew" class="form-horizontal fill-up separate-sections">
     <input type="hidden" name="eventId" value="@event.getId().toString()">
+    
+    <div class="row-fluid">
+    	<div class="span6">
+    	From
+		<div id="startDate" class="input-append date">
+			<input class="input-small" name="startDate" id="startDate" data-format="dd/MM/yyyy hh:mm:ss PP" type="text" placeholder="start date..." value="@event.getStartDate().format("dd/MM/yyyy HH:mm:ss aa")"></input> 
+			<span class="add-on"> <i data-time-icon="icon-time"data-date-icon="icon-calendar"></i></span>
+		</div>
+		</div>
+	    <div class="span6">
+	    To
+	    <div id="finishDate" class="input-append date">
+	    	<input name="finishDate" id="finishDate" data-format="dd/MM/yyyy hh:mm:ss PP" type="text" placeholder="finish date..." value="@event.getFinishDate().format("dd/MM/yyyy HH:mm:ss aa")"></input> 
+			<span class="add-on"> <i data-time-icon="icon-time" data-date-icon="icon-calendar"> </i></span>
+		</div>
+		</div>
+	</div>
       <div>
         <label>Select the dictionary with 'correct' words</label>
         <select id="dictionaryId" name="dictionaryId" class="input-xlarge">

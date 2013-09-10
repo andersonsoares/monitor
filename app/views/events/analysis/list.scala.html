@@ -7,7 +7,8 @@
 }
 
 @scripts = {
-	<script src="@routes.Assets.at("javascripts/especifics/events/analysis/list.js")" type="text/javascript"></script>	
+	<script src="@routes.Assets.at("javascripts/especifics/events/analysis/list.js")" type="text/javascript"></script>
+	<script src="@routes.Assets.at("javascripts/bootstrap-datetimepicker.min.js")" type="text/javascript"></script>	
 }
 
 @main("Twitter Monitor", "events", scripts, pageTitle) {
@@ -78,12 +79,13 @@
 	<thead>
 		<tr>
 			<td></td>
-			<td class="sorting">Total Tweets Analysed</td>
-			<td>Correct Rate (%)</td>
-			<td>Also considering</td>
-			<td>Dictionary used</td>
-			<td>Duration</td>
-			<td>Created At</td>
+			<td style="text-align: center;">Interval</td>
+			<td style="text-align: center;" class="sorting">Total Tweets Analysed</td>
+			<td style="text-align: center;">Correct Rate (%)</td>
+			<td style="text-align: center;">Also considering</td>
+			<td style="text-align: center;">Dictionary used</td>
+			<td style="text-align: center;">Duration</td>
+			<td style="text-align: center;">Created At</td>
 			<td></td>
 		</tr>
 	</thead>
@@ -96,6 +98,11 @@
 			} else {
 		        <td style="width: 60px;"><div class="sparkline" data-color="green"><!--5,6,8,14,18,10,12,16,15,16,12,15--></div></td>
 			}
+			<td style="text-align: center;width: 150px;">
+			@if(analysis.getStartDateInterval() == null) { @event.getStartDate().format("dd/MM/yyyy HH:mm:ss") } else { @analysis.getStartDateInterval().format("dd/MM/yyyy - HH:mm:ss") }
+			<br>To<br>
+			@if(analysis.getFinishDateInterval() == null) { @event.getFinishDate().format("dd/MM/yyyy HH:mm:ss") } else { @analysis.getFinishDateInterval().format("dd/MM/yyyy - HH:mm:ss") }
+			</td>
 			<td style="text-align: center;width: 130px;">@analysis.getTotalTweetsAnalysed()</td>
 			<td style="text-align: center;width: 80px;">@analysis.getCorrectRate() %</td>
 			<td style="text-align: center;">
@@ -119,7 +126,7 @@
 			</td>
 	        <td style="text-align: center;">@analysis.getDictionaryName()</td>
 			<td id="ellapsedTime" style="text-align: center;width: 60px;">@analysis.getEllapsedTime() ms</td>
-			<td style="text-align: center;width: 200px;">@analysis.getCreatedAt()</td>
+			<td style="text-align: center;width: 200px;">@analysis.getCreatedAt().format("dd/MM/yyyy - HH:mm:ss")</td>
 			<td style="text-align: center;width: 90px;"><button class="btn btn-mini"><a href="@routes.EventController.pageAnalysisDetails(event.getId().toString(), analysis.getId().toString())">See details</a></button></td>
 		</tr>	
 	}

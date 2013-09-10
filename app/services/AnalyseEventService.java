@@ -1,6 +1,7 @@
 package services;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +32,8 @@ public class AnalyseEventService implements Runnable {
 	private Dictionary dictionary;
 	private Event event;
 	private String email;
+	private Date startDate;
+	private Date finishDate;
 	
 
 	public AnalyseEventService(Event event, 
@@ -44,13 +47,15 @@ public class AnalyseEventService implements Runnable {
 	}
 
 	public AnalyseEventService(Event event, Dictionary dictionary,
-			float correctRate, List<String> considerWhat, String email) {
+			float correctRate, List<String> considerWhat, String email, Date startDate, Date finishDate) {
 		
 		this.event = event;
 		this.dictionary = dictionary;
 		this.correctRate = correctRate;
 		this.considerWhat = considerWhat;
 		this.email = email;
+		this.startDate = startDate;
+		this.finishDate = finishDate;
 	}
 
 	@Override
@@ -65,13 +70,15 @@ public class AnalyseEventService implements Runnable {
 		boolean considerSigla = considerWhat.contains("siglas");
 		
 		TweetDAO tweetDAO = new TweetDAO();
-		long totalTweets = tweetDAO.countAll(event.getId());
+		long totalTweets = tweetDAO.countAll(event.getId(), startDate, finishDate);
+		System.out.println(startDate+" - "+finishDate);
+		System.out.println("Total Tweets: "+totalTweets);
 		
 		EventAnalysisDAO analysisDAO = new EventAnalysisDAO();
 		
 		// Verificar se ja existe uma analise com os mesmos parametros
 		EventAnalysis existentAnalysis = analysisDAO.isThisEventAlreadyBeenAnalysedWithThisParams(event.getId(), dictionary.getId(),
-				totalTweets, correctRate, considerHashtag, considerUser, considerUrl, considerSigla);
+				totalTweets, correctRate, considerHashtag, considerUser, considerUrl, considerSigla, startDate, finishDate);
 		if (existentAnalysis == null) {
 			
 			Logger.info("Não existe analise.. vamos fazer!");
@@ -91,7 +98,9 @@ public class AnalyseEventService implements Runnable {
 					considerSigla,
 					considerHashtag,
 					considerUser,
-					considerUrl);
+					considerUrl,
+					startDate,
+					finishDate);
 			
 			try {
 				analysisDAO.save(eventAnalysis);
@@ -109,7 +118,7 @@ public class AnalyseEventService implements Runnable {
 				
 				for (int offset=0; offset < totalTweets; offset+=LIMIT) {
 					
-					List<Tweet> list = tweetDAO.getTweets(event.getId(), LIMIT, offset);
+					List<Tweet> list = tweetDAO.getTweets(event.getId(), LIMIT, offset, startDate, finishDate);
 					for (Tweet t : list) {
 						
 						// Analisar e classificar cada tweet como 

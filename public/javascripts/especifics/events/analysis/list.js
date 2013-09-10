@@ -1,5 +1,18 @@
 $(document).ready(function() {
 	
+	$('#startDate').datetimepicker({
+		language : 'pt-BR',
+		maskInput: true,
+		pick12HourFormat: true,
+		format   : 'dd/MM/yyyy hh:mm:ss PP'
+	});
+	$('#finishDate').datetimepicker({
+		language : 'pt-BR',
+		maskInput: true,
+		pick12HourFormat: true,
+		format   : 'dd/MM/yyyy hh:mm:ss PP'
+	});
+	
 	jQuery("#buttonSend").click(function(e) {
 		e.preventDefault();
 		

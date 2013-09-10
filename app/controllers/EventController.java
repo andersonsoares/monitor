@@ -81,13 +81,15 @@ public class EventController extends Controller {
 	 * And call the AnalyseEventService to do the job done! :)
 	 */
 	public Result analyse() {
+		
 		Form<AnalyseForm> form = analyseForm.bindFromRequest();
 		AnalyseForm analyseForm = form.get();
 		
 		ReturnToView vo = new ReturnToView();
+		
+		
 		float correctRate = analyseForm.getCorrectRate();
 		if (correctRate < 0 || correctRate > 100) {
-			
 			vo.setCode(400);
 			vo.setMessage("Correct Rate must be > 0 and < 100");
 			return ok(Json.toJson(vo));
@@ -100,6 +102,23 @@ public class EventController extends Controller {
 		Event event = new EventDAO().findById(eventId);
 		
 		if (event != null) {
+			
+			Date startDate = analyseForm.getStartDate();
+			Date finishDate = analyseForm.getFinishDate();
+			
+			if (startDate != null && finishDate != null && startDate.after(finishDate)) {
+				vo.setCode(400);
+				vo.setMessage("Start date cant be after Finish date");
+				return ok(Json.toJson(vo));
+			}
+			
+			if (startDate == null || startDate.before(event.getStartDate())) {
+				startDate = event.getStartDate();
+			}
+			if (finishDate == null || finishDate.after(event.getFinishDate())) {
+				finishDate = event.getFinishDate();
+			}
+			
 			ObjectId dictionaryId = new ObjectId(analyseForm.getDictionaryId());
 			Dictionary dictionary = new DictionaryDAO().findById(dictionaryId);
 			
@@ -109,7 +128,7 @@ public class EventController extends Controller {
 				
 				Akka.system().scheduler().scheduleOnce(
 						Duration.create(0, TimeUnit.SECONDS), 
-						new AnalyseEventService(event, dictionary, correctRate, considerWhat, email),
+						new AnalyseEventService(event, dictionary, correctRate, considerWhat, email, startDate, finishDate),
 						Akka.system().dispatcher());
 				
 				if (email.isEmpty()) {
@@ -119,7 +138,7 @@ public class EventController extends Controller {
 				}
 				return ok(Json.toJson(vo));
 				
-			} 
+			}
 		} 
 		return badRequest();
 	}
