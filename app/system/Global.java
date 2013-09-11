@@ -1,5 +1,6 @@
 package system;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +24,8 @@ import play.GlobalSettings;
 import play.Logger;
 import play.cache.Cache;
 import play.libs.Akka;
+import play.mvc.Action;
+import play.mvc.Http.Request;
 import ptstemmer.exceptions.PTStemmerException;
 import ptstemmer.implementations.OrengoStemmer;
 import scala.concurrent.duration.Duration;
@@ -56,6 +59,12 @@ import enums.TypeEnum;
  * @author Anderson Soares <aersandersonsoares@gmail.com>
  */
 public class Global extends GlobalSettings {
+	
+	@Override
+	public Action<?> onRequest(Request request, Method method) {
+		Logger.info("Request from ["+request.remoteAddress()+"] to ["+request.method()+"] "+request.path());
+		return super.onRequest(request, method);
+	}
 	
 	@Override
 	public void onStart(Application app) {
