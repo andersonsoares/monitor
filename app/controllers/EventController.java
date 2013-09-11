@@ -278,6 +278,7 @@ public class EventController extends Controller {
 
 	
 	public Result pageAnalysisDetails(String eventId, String eventAnalysisId, String kind, int page, int pageLength) {
+		long i = System.currentTimeMillis();
 		
 		ObjectId id = new ObjectId(eventId);
 		EventDAO eventDAO = new EventDAO();
@@ -296,12 +297,13 @@ public class EventController extends Controller {
 				int total = 0;
 				List<Tweet> tweetsList;
 				
+				long init = System.currentTimeMillis();
+				Logger.info(init-i+" ms");
 				
 				if (kind.equals("all") || (!kind.equals("positives") && !kind.equals("negatives") && !kind.equals("neutral") && !kind.equals("incorrect") && !kind.equals("all"))) {
 					total = eventAnalysis.getTotalTweetsAnalysed();
-					
 					tweetsList = tweetDAO.getTweetsAfterAnalysedBy(event.getId(), eventAnalysis.getId(), page-1, pageLength);
-					return ok(views.html.events.analysis.details.render(event, eventAnalysis, tweetsList, "all",page,pageLength,eventAnalysis.getTotalTweetsAnalysed()));
+					return ok(views.html.events.analysis.details.render(event, eventAnalysis, tweetsList, "all",page,pageLength,total));
 					
 				} else {
 					SentimentEnum sentiment = null;
@@ -321,6 +323,8 @@ public class EventController extends Controller {
 					
 					tweetsList = tweetDAO.getTweetsAfterAnalysedByWithSentiment(event.getId(), eventAnalysis.getId(), sentiment, page-1, pageLength);
 					
+					long end = System.currentTimeMillis();
+					Logger.info(end-init+" ms to load tweets");
 					return ok(views.html.events.analysis.details.render(event, eventAnalysis, tweetsList, kind,page,pageLength,total));
 				}
 				
