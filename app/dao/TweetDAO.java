@@ -10,6 +10,8 @@ import models.Tweet;
 import org.bson.types.ObjectId;
 
 import com.google.code.morphia.Key;
+import com.google.code.morphia.query.Query;
+import com.google.code.morphia.query.UpdateOperations;
 import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -183,6 +185,19 @@ public class TweetDAO extends BaseDAO<Tweet> {
 			.asList();
 		
 		return tweetsList;
+	}
+
+	public void removeEventAnalysis(ObjectId eventId, ObjectId eventAnalysisId) {
+		
+		Query<Tweet> query = createQuery()
+			.filter("event", new Key<Event>(Event.class, eventId))
+			.field("eventAnalysis."+eventAnalysisId.toString()).exists();
+		
+		UpdateOperations<Tweet> operation = createUpdateOperations()
+				.unset("eventAnalysis."+eventAnalysisId.toString());
+		
+		update(query, operation);
+		
 	}
 
 }

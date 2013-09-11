@@ -34,6 +34,7 @@ import utils.DateUtils;
 
 import com.google.code.morphia.Key;
 import com.google.inject.Inject;
+import com.mongodb.WriteResult;
 
 import dao.DictionaryDAO;
 import dao.EventAnalysisDAO;
@@ -520,6 +521,33 @@ public Result pageTeste(String eventId) {
 		
 		
 		return notFound();
+	}
+	
+	
+	public Result removeAnalysis(String _eventId, String _eventAnalysisId) {
+		
+		EventDAO eventDAO = new EventDAO();
+		EventAnalysisDAO analysisDAO = new EventAnalysisDAO();
+		ObjectId eventId = new ObjectId(_eventId);
+		Event event = eventDAO.findById(eventId);
+		ObjectId eventAnalysisId = new ObjectId(_eventAnalysisId);
+		if (event != null) {
+			
+			EventAnalysis eventAnalysis = analysisDAO.findById(eventAnalysisId);
+			
+			if (eventAnalysis != null) {
+				
+				// atualizar todos os tweets que foram analisados por esta analise
+				// e remover a analise :P
+				TweetDAO tweetDAO = new TweetDAO();
+				tweetDAO.removeEventAnalysis(eventId, eventAnalysisId);
+				WriteResult res = analysisDAO.delete(eventAnalysis);
+				Logger.info("Event analysis removed: "+res);
+			}
+			
+		}
+		
+		return badRequest();
 	}
 	
 	
