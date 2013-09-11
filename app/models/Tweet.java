@@ -25,6 +25,7 @@ public class Tweet {
 	/*
 	 * HashMap key is the EventAnalysis id on DB!!
 	 */
+	@Indexed
 	private HashMap<ObjectId, SentimentEnum> eventAnalysis; 
 	
 	// Tweets default attributes by Twitter
@@ -56,7 +57,7 @@ public class Tweet {
 	// Default Constructor
 	public Tweet() {
 		this.createdAt = new Date(System.currentTimeMillis());
-		eventAnalysis = new HashMap<ObjectId,SentimentEnum>();
+		setEventAnalysis(new HashMap<ObjectId,SentimentEnum>());
 	}
 	
 
@@ -161,6 +162,14 @@ public class Tweet {
 		this.correctRate = correctRate;
 	}
 
+	public GeoLocation getGeoLocation() {
+		return geoLocation;
+	}
+
+
+	public void setGeoLocation(GeoLocation geoLocation) {
+		this.geoLocation = geoLocation;
+	}
 
 	public HashMap<ObjectId, SentimentEnum> getEventAnalysis() {
 		return eventAnalysis;
@@ -169,16 +178,6 @@ public class Tweet {
 
 	public void setEventAnalysis(HashMap<ObjectId, SentimentEnum> eventAnalysis) {
 		this.eventAnalysis = eventAnalysis;
-	}
-
-
-	public GeoLocation getGeoLocation() {
-		return geoLocation;
-	}
-
-
-	public void setGeoLocation(GeoLocation geoLocation) {
-		this.geoLocation = geoLocation;
 	}
 	
 }
