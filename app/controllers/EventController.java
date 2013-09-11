@@ -298,7 +298,7 @@ public class EventController extends Controller {
 				List<Tweet> tweetsList;
 				
 				long init = System.currentTimeMillis();
-				Logger.info(init-i+" ms");
+				Logger.info(init-i+" ms"); 
 				
 				if (kind.equals("all") || (!kind.equals("positives") && !kind.equals("negatives") && !kind.equals("neutral") && !kind.equals("incorrect") && !kind.equals("all"))) {
 					total = eventAnalysis.getTotalTweetsAnalysed();
