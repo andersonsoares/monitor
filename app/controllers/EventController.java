@@ -300,9 +300,12 @@ public class EventController extends Controller {
 				long init = System.currentTimeMillis();
 				Logger.info(init-i+" ms"); 
 				
+				tweetsList = new ArrayList<Tweet>();
+				
 				if (kind.equals("all") || (!kind.equals("positives") && !kind.equals("negatives") && !kind.equals("neutral") && !kind.equals("incorrect") && !kind.equals("all"))) {
 					total = eventAnalysis.getTotalTweetsAnalysed();
-					tweetsList = tweetDAO.getTweetsAfterAnalysedBy(event.getId(), eventAnalysis.getId(), page-1, pageLength);
+//					tweetsList = tweetDAO.getTweetsAfterAnalysedBy(event.getId(), eventAnalysis.getId(), page-1, pageLength);
+					
 					return ok(views.html.events.analysis.details.render(event, eventAnalysis, tweetsList, "all",page,pageLength,total));
 					
 				} else {
@@ -321,7 +324,7 @@ public class EventController extends Controller {
 						total = eventAnalysis.getTotalIncorrect();
 					}
 					
-					tweetsList = tweetDAO.getTweetsAfterAnalysedByWithSentiment(event.getId(), eventAnalysis.getId(), sentiment, page-1, pageLength);
+//					tweetsList = tweetDAO.getTweetsAfterAnalysedByWithSentiment(event.getId(), eventAnalysis.getId(), sentiment, page-1, pageLength);
 					
 					long end = System.currentTimeMillis();
 					Logger.info(end-init+" ms to load tweets");
