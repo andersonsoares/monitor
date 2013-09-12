@@ -29,7 +29,7 @@ GET		/events/:eventId/getTweetsByDay							@controllers.EventController.getTweet
 
 GET		/tools/analyseCheck										@controllers.ToolsController.pageAnalyseCheck()
 POST	/tools/analyseCheck										@controllers.ToolsController.analyseCheck()
-
+ 
 GET		/dictionaries											@controllers.DictionaryController.pageList()
 POST	/dictionaries											@controllers.DictionaryController.create()
 GET		/dictionaries/statusCreate								@controllers.DictionaryController.statusCreate()
