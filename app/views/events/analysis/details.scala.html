@@ -251,13 +251,18 @@
 	
 	function loadTweets() {
 		
+		var ul = jQuery('#tweetsList');
+		ul.append('Retrieving tweets, it might take a while <img src="@routes.Assets.at("images/loading.gif")">')
 		$.ajax({
 			url: '@routes.EventController.getTweetsByAnalysis(event.getId().toString, eventAnalysis.getId().toString(), kind, page, pageLength)',
 			type: 'GET',
 			success: function(response) {
-				var ul = jQuery('#tweetsList');
 				var tagSentiment = "";
+
+				ul.empty();
 				$.each(response.map.tweetsList, function(index, tweet) {
+					
+					
 					var sentiment = response.map.tweetsList[index].eventAnalysis['@eventAnalysis.getId().toString()'];
 					
 					if (sentiment == 'POSITIVE') {
