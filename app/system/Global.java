@@ -71,7 +71,14 @@ public class Global extends GlobalSettings {
 	    	dbOp = (BasicDBObject) cur.next();
 	    	System.out.println("\n\n\n\n");
 	    	System.out.println(dbOp.toString());
-	    	System.out.println("Seconds running: "+dbOp.get("secs_running"));
+	    	System.out.println(dbOp.containsField("secs_running"));
+	    	System.out.println(dbOp.containsKey("secs_running"));
+	    	System.out.println(dbOp.containsKey((Object)"secs_running"));
+//	    	System.out.println("Seconds running: "+dbOp.get("secs_running"));
+//	    	System.out.println("Seconds running: "+dbOp.getString("secs_running"));
+//	    	System.out.println("Seconds running: "+dbOp.getInt("secs_running"));
+//	    	System.out.println("Seconds running: "+dbOp.getLong("secs_running"));
+//	    	System.out.println("Seconds running: "+dbOp.getDouble("secs_running"));
 	    }
 //		String ip = request.remoteAddress();
 		// ignore ips = google botrs..
