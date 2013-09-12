@@ -69,9 +69,7 @@ public class Global extends GlobalSettings {
 		BasicDBObject dbOp;
 	    while (cur.hasNext()) {
 	    	dbOp = (BasicDBObject) cur.next();
-	    	if (dbOp.containsField("secs_running")) {
-	    		System.out.println("Operarion(field) id: "+dbOp.get("opid"));
-	    	}
+	    	System.out.println("Seconds running: "+dbOp.get("secs_running"));
 	    }
 //		String ip = request.remoteAddress();
 		// ignore ips = google botrs..
