@@ -65,7 +65,7 @@ public class Global extends GlobalSettings {
 	@Override
 	public Action<?> onRequest(Request request, Method method) {
 		
-		DBCursor cur = Singletons.mongo.getDB("monitor").getCollection("$cmd.sys.inprog").find(new BasicDBObject("$all", 1));
+		DBCursor cur = Singletons.mongo.getDB("monitor").getCollection("$cmd.sys.inprog").find();
 		BasicDBObject dbOp;
 	    while (cur.hasNext()) {
 	    	dbOp = (BasicDBObject) cur.next();
