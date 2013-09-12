@@ -44,6 +44,8 @@ import com.google.code.morphia.logging.slf4j.SLF4JLogrImplFactory;
 import com.google.code.morphia.validation.MorphiaValidation;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
 
 import dao.AbbreviationDAO;
@@ -62,7 +64,21 @@ public class Global extends GlobalSettings {
 	
 	@Override
 	public Action<?> onRequest(Request request, Method method) {
-		Logger.info("Request from ["+request.remoteAddress()+"] to ["+request.method()+"] "+request.path());
+		
+		DBCursor cur = Singletons.mongo.getDB("monitor").getCollection("$cmd.sys.inprog").find(new BasicDBObject("$all", 1));
+		BasicDBObject dbOp;
+	    while (cur.hasNext()) {
+	    	dbOp = (BasicDBObject) cur.next();
+	    	if (dbOp.containsField("secs_running")) {
+	    		System.out.println("Operarion(field) id: "+dbOp.get("opid"));
+	    	}
+	    }
+//		String ip = request.remoteAddress();
+		// ignore ips = google botrs..
+//		List<String> ignoredIps = Arrays.asList("66.249.73.202");
+//		if (!ignoredIps.contains(ip)) {
+			Logger.info("Request from ["+request.remoteAddress()+"] to ["+request.method()+"] "+request.path());
+//		}
 		return super.onRequest(request, method);
 	}
 	
