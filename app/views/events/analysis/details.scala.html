@@ -1,4 +1,4 @@
-@(event: models.Event, eventAnalysis: EventAnalysis, tweetsList: List[Tweet], kind: String, page: Int, pageLength: Int, total: Int) 
+@(event: models.Event, eventAnalysis: EventAnalysis, kind: String, page: Int, pageLength: Int, total: Int) 
 
 @import helper._
 
@@ -161,36 +161,9 @@
 		      <div class="box-content padded">
 		        <div class="tab-content">
 		          <div >
-		          	<ul class="chat-box timeline">
+		          	<ul id="tweetsList" class="chat-box timeline">
 		          	
-		          	@for(tweet <- tweetsList) {
 		          	
-		          		<li class="arrow-box-left gray">
-						    <div class="avatar"><img src="@tweet.getProfile_image_url()" class="avatar-small"></div>
-						    <div class="info">
-						      <span class="name">
-							      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.POSITIVE)) {
-							      <span class="label label-success">positive</span>
-							      } 
-							      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.NEGATIVE)) {
-							      <span class="label label-red">negative</span>
-							      }
-							      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.NEUTRAL)) {
-							      <span class="label">neutral</span>
-							      }
-							      @if(tweet.getEventAnalysis().get(eventAnalysis.getId()).equals(enums.SentimentEnum.INCORRECT)) {
-							      <span class="label label-warning">incorrect</span>
-							      } 
-							      <strong id="tweetText-@tweet.getId()" style="margin-left: 10px;">@tweet.getText()</strong>
-						      </span>
-						      <span class="time"><i class="icon-time"></i> @tweet.getCreatedAt()</span>
-						    </div>
-						    <div id="details-@tweet.getId().toString()" class="content">
-							    
-						    </div>
-						</li>
-						
-					}
 		          	</ul>
 		          </div>
 		          
@@ -270,6 +243,43 @@
 		
 	}
 	
+	function getURLParameter(name) {
+	    return decodeURI(
+	        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
+	    );
+	}
+	
+	function loadTweets() {
+		
+		$.ajax({
+			url: '@routes.EventController.getTweetsByAnalysis(event.getId().toString, eventAnalysis.getId().toString(), kind, page, pageLength)',
+			type: 'GET',
+			success: function(response) {
+				var ul = jQuery('#tweetsList');
+				var tagSentiment = "";
+				$.each(response.map.tweetsList, function(index, tweet) {
+					var sentiment = response.map.tweetsList[index].eventAnalysis['@eventAnalysis.getId().toString()'];
+					
+					if (sentiment == 'POSITIVE') {
+						tagSentiment = '<span class="label label-success">positive</span>'
+					}
+					if (sentiment == 'NEGATIVE') {
+						tagSentiment = '<span class="label label-red">negative</span>'
+					}
+					if (sentiment == 'NEUTRAL') {
+						tagSentiment = '<span class="label">neutral</span>'
+					}
+					if (sentiment == 'INCORRECT') {
+						tagSentiment = '<span class="label label-warning">incorrect</span>'
+					}
+					ul.append('<li class="arrow-box-left gray"><div class="avatar"><img src="'+tweet.profile_image_url+'" class="avatar-small"></div><div class="info"><span class="name">'+tagSentiment+'<strong id="tweetText-'+tweet.tweetId+'" style="margin-left: 10px;">'+tweet.text+'</strong></span><span class="time"><i class="icon-time"></i> '+tweet.createdAt+'</span></div><div id="details-'+tweet.tweetId+'" class="content"></div></li>')
+					analyseCheck(tweet.tweetId);
+				});
+			}
+		})
+		
+	}
+	
 	$(document).ready(function() {
 		
 		data = jQuery('#pieChartValuesWithoutIncorrects').text()
@@ -295,12 +305,8 @@
 	        }
 	    });
 		
-		@for(tweet<-tweetsList) {	
-			analyseCheck('@tweet.getId()');
-		}
 
-		
-		
+		loadTweets();
 	 
 	});
 	

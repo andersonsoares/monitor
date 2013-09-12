@@ -276,9 +276,59 @@ public class EventController extends Controller {
 		return notFound();
 	}
 
+	public Result getTweetsByAnalysis(String eventId, String eventAnalysisId, String kind, int page, int pageLength) {
+		
+		ObjectId id = new ObjectId(eventId);
+		EventDAO eventDAO = new EventDAO();
+		Event event = eventDAO.findById(id);
+		
+		ReturnToView vo = new ReturnToView();
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		
+		if (event != null) {
+			EventAnalysisDAO analysisDAO = new EventAnalysisDAO();
+			
+			ObjectId _eventAnalysisId = new ObjectId(eventAnalysisId);
+			EventAnalysis eventAnalysis = analysisDAO.findById(_eventAnalysisId);
+			
+			if (eventAnalysis != null) {
+				
+				TweetDAO tweetDAO = new TweetDAO();
+				
+				List<Tweet> tweetsList;
+				
+				if (kind.equals("all") || (!kind.equals("positives") && !kind.equals("negatives") && !kind.equals("neutral") && !kind.equals("incorrect") && !kind.equals("all"))) {
+					tweetsList = tweetDAO.getTweetsAfterAnalysedBy(event.getId(), eventAnalysis.getId(), page-1, pageLength);
+					map.put("tweetsList", tweetsList);
+				} else {
+					SentimentEnum sentiment = null;
+					if (kind.equals("positives")) {
+						sentiment = SentimentEnum.POSITIVE;
+					} else if(kind.equals("negatives")) {
+						sentiment = SentimentEnum.NEGATIVE;
+					} else if(kind.equals("neutral")) {
+						sentiment = SentimentEnum.NEUTRAL;
+					} else if(kind.equals("incorrect")) {
+						sentiment = SentimentEnum.INCORRECT;
+					}
+					
+					tweetsList = tweetDAO.getTweetsAfterAnalysedByWithSentiment(event.getId(), eventAnalysis.getId(), sentiment, page-1, pageLength);
+					
+					map.put("tweetsList", tweetsList);
+				}
+				
+				vo.setMap(map);
+				
+				return ok(Json.toJson(vo));
+				
+			}
+			
+		}
+		
+		return notFound();
+	}
 	
 	public Result pageAnalysisDetails(String eventId, String eventAnalysisId, String kind, int page, int pageLength) {
-		long i = System.currentTimeMillis();
 		
 		ObjectId id = new ObjectId(eventId);
 		EventDAO eventDAO = new EventDAO();
@@ -292,21 +342,11 @@ public class EventController extends Controller {
 			
 			if (eventAnalysis != null) {
 				
-				TweetDAO tweetDAO = new TweetDAO();
-				
-				int total = 0;
-				List<Tweet> tweetsList;
-				
-				long init = System.currentTimeMillis();
-				Logger.info(init-i+" ms"); 
-				
-				tweetsList = new ArrayList<Tweet>();
-				
+				int total = 0;	
 				if (kind.equals("all") || (!kind.equals("positives") && !kind.equals("negatives") && !kind.equals("neutral") && !kind.equals("incorrect") && !kind.equals("all"))) {
 					total = eventAnalysis.getTotalTweetsAnalysed();
-//					tweetsList = tweetDAO.getTweetsAfterAnalysedBy(event.getId(), eventAnalysis.getId(), page-1, pageLength);
 					
-					return ok(views.html.events.analysis.details.render(event, eventAnalysis, tweetsList, "all",page,pageLength,total));
+					return ok(views.html.events.analysis.details.render(event, eventAnalysis, "all",page,pageLength,total));
 					
 				} else {
 					SentimentEnum sentiment = null;
@@ -324,11 +364,7 @@ public class EventController extends Controller {
 						total = eventAnalysis.getTotalIncorrect();
 					}
 					
-//					tweetsList = tweetDAO.getTweetsAfterAnalysedByWithSentiment(event.getId(), eventAnalysis.getId(), sentiment, page-1, pageLength);
-					
-					long end = System.currentTimeMillis();
-					Logger.info(end-init+" ms to load tweets");
-					return ok(views.html.events.analysis.details.render(event, eventAnalysis, tweetsList, kind,page,pageLength,total));
+					return ok(views.html.events.analysis.details.render(event, eventAnalysis, kind,page,pageLength,total));
 				}
 				
 			}
