@@ -69,6 +69,8 @@ public class Global extends GlobalSettings {
 		BasicDBObject dbOp;
 	    while (cur.hasNext()) {
 	    	dbOp = (BasicDBObject) cur.next();
+	    	System.out.println("\n\n\n\n");
+	    	System.out.println(dbOp.toString());
 	    	System.out.println("Seconds running: "+dbOp.get("secs_running"));
 	    }
 //		String ip = request.remoteAddress();
