@@ -257,29 +257,37 @@
 			url: '@routes.EventController.getTweetsByAnalysis(event.getId().toString, eventAnalysis.getId().toString(), kind, page, pageLength)',
 			type: 'GET',
 			success: function(response) {
-				var tagSentiment = "";
-
-				ul.empty();
-				$.each(response.map.tweetsList, function(index, tweet) {
-					
-					
-					var sentiment = response.map.tweetsList[index].eventAnalysis['@eventAnalysis.getId().toString()'];
-					
-					if (sentiment == 'POSITIVE') {
-						tagSentiment = '<span class="label label-success">positive</span>'
+				
+				if (response.code == 200) {
+				
+					var tagSentiment = "";
+	
+					ul.empty();
+					$.each(response.map.tweetsList, function(index, tweet) {
+						
+						
+						var sentiment = response.map.tweetsList[index].eventAnalysis['@eventAnalysis.getId().toString()'];
+						
+						if (sentiment == 'POSITIVE') {
+							tagSentiment = '<span class="label label-success">positive</span>'
+						}
+						if (sentiment == 'NEGATIVE') {
+							tagSentiment = '<span class="label label-red">negative</span>'
+						}
+						if (sentiment == 'NEUTRAL') {
+							tagSentiment = '<span class="label">neutral</span>'
+						}
+						if (sentiment == 'INCORRECT') {
+							tagSentiment = '<span class="label label-warning">incorrect</span>'
+						}
+						ul.append('<li class="arrow-box-left gray"><div class="avatar"><img src="'+tweet.profile_image_url+'" class="avatar-small"></div><div class="info"><span class="name">'+tagSentiment+'<strong id="tweetText-'+tweet.tweetId+'" style="margin-left: 10px;">'+tweet.text+'</strong></span><span class="time"><i class="icon-time"></i> '+tweet.createdAt+'</span></div><div id="details-'+tweet.tweetId+'" class="content"></div></li>')
+						analyseCheck(tweet.tweetId);
+					});
+				} else {
+					if (response.code == 400) {
+						ul.html('<span class="status-error">'+response.message+'</span>');
 					}
-					if (sentiment == 'NEGATIVE') {
-						tagSentiment = '<span class="label label-red">negative</span>'
-					}
-					if (sentiment == 'NEUTRAL') {
-						tagSentiment = '<span class="label">neutral</span>'
-					}
-					if (sentiment == 'INCORRECT') {
-						tagSentiment = '<span class="label label-warning">incorrect</span>'
-					}
-					ul.append('<li class="arrow-box-left gray"><div class="avatar"><img src="'+tweet.profile_image_url+'" class="avatar-small"></div><div class="info"><span class="name">'+tagSentiment+'<strong id="tweetText-'+tweet.tweetId+'" style="margin-left: 10px;">'+tweet.text+'</strong></span><span class="time"><i class="icon-time"></i> '+tweet.createdAt+'</span></div><div id="details-'+tweet.tweetId+'" class="content"></div></li>')
-					analyseCheck(tweet.tweetId);
-				});
+ 				}
 			}
 		})
 		
