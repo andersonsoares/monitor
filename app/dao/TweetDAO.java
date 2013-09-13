@@ -150,7 +150,6 @@ public class TweetDAO extends BaseDAO<Tweet> {
 			int page, int pageLength) {
 		
 		List<Tweet> tweetsList = createQuery()
-			.filter("event", new Key<Event>(Event.class, eventId))
 			.field("eventAnalysis."+eventAnalysisId.toString()).exists()
 			.limit(pageLength)
 			.offset(page*pageLength)
@@ -177,7 +176,6 @@ public class TweetDAO extends BaseDAO<Tweet> {
 			ObjectId eventAnalysisId, SentimentEnum sentiment, int page, int pageLength) {
 		
 		List<Tweet> tweetsList = createQuery()
-			.filter("event", new Key<Event>(Event.class, eventId))
 			.filter("eventAnalysis."+eventAnalysisId.toString(), sentiment)
 			.limit(pageLength)
 			.offset(page*pageLength)
@@ -190,7 +188,6 @@ public class TweetDAO extends BaseDAO<Tweet> {
 	public void removeEventAnalysis(ObjectId eventId, ObjectId eventAnalysisId) {
 		
 		Query<Tweet> query = createQuery()
-			.filter("event", new Key<Event>(Event.class, eventId))
 			.field("eventAnalysis."+eventAnalysisId.toString()).exists();
 		
 		UpdateOperations<Tweet> operation = createUpdateOperations()
