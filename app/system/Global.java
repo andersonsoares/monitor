@@ -44,8 +44,6 @@ import com.google.code.morphia.logging.slf4j.SLF4JLogrImplFactory;
 import com.google.code.morphia.validation.MorphiaValidation;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
 
 import dao.AbbreviationDAO;
@@ -65,22 +63,7 @@ public class Global extends GlobalSettings {
 	@Override
 	public Action<?> onRequest(Request request, Method method) {
 		
-		DBCursor cur = Singletons.mongo.getDB("monitor").getCollection("$cmd.sys.inprog").find();
-		BasicDBObject dbOp;
-	    while (cur.hasNext()) {
-	    	dbOp = (BasicDBObject) cur.next();
-	    	System.out.println("\n\n\n\n");
-	    	System.out.println(dbOp.toString());
-	    	Map<?, ?> map = dbOp.toMap();
-	    	for (Object object : map.keySet()) {
-				System.out.println(map.get(object));
-			}
-//	    	System.out.println("Seconds running: "+dbOp.get("secs_running"));
-//	    	System.out.println("Seconds running: "+dbOp.getString("secs_running"));
-//	    	System.out.println("Seconds running: "+dbOp.getInt("secs_running"));
-//	    	System.out.println("Seconds running: "+dbOp.getLong("secs_running"));
-//	    	System.out.println("Seconds running: "+dbOp.getDouble("secs_running"));
-	    }
+		
 //		String ip = request.remoteAddress();
 		// ignore ips = google botrs..
 //		List<String> ignoredIps = Arrays.asList("66.249.73.202");

@@ -31,6 +31,7 @@ import services.GetTweetsService;
 import system.ReturnToView;
 import system.ValidationError;
 import utils.DateUtils;
+import utils.MongoDBUtils;
 
 import com.google.code.morphia.Key;
 import com.google.inject.Inject;
@@ -278,11 +279,17 @@ public class EventController extends Controller {
 
 	public Result getTweetsByAnalysis(String eventId, String eventAnalysisId, String kind, int page, int pageLength) {
 		
+		ReturnToView vo = new ReturnToView();
+		if (MongoDBUtils.verifyIfThereIsLongCurrentOpRunning()) {
+			vo.setMessage("Server is busy... try again later");
+			vo.setCode(400);
+			return ok(Json.toJson(vo));
+		}
+		
 		ObjectId id = new ObjectId(eventId);
 		EventDAO eventDAO = new EventDAO();
 		Event event = eventDAO.findById(id);
 		
-		ReturnToView vo = new ReturnToView();
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		
 		if (event != null) {
@@ -349,18 +356,13 @@ public class EventController extends Controller {
 					return ok(views.html.events.analysis.details.render(event, eventAnalysis, "all",page,pageLength,total));
 					
 				} else {
-					SentimentEnum sentiment = null;
 					if (kind.equals("positives")) {
-						sentiment = SentimentEnum.POSITIVE;
 						total = eventAnalysis.getTotalPositives();
 					} else if(kind.equals("negatives")) {
-						sentiment = SentimentEnum.NEGATIVE;
 						total = eventAnalysis.getTotalNegatives();
 					} else if(kind.equals("neutral")) {
-						sentiment = SentimentEnum.NEUTRAL;
 						total = eventAnalysis.getTotalNeutral();
 					} else if(kind.equals("incorrect")) {
-						sentiment = SentimentEnum.INCORRECT;
 						total = eventAnalysis.getTotalIncorrect();
 					}
 					
