@@ -49,9 +49,7 @@ public class MongoDBUtils {
 		
 		DBCursor cur = Singletons.mongo.getDB("monitor").getCollection("$cmd.sys.inprog").find();
 		BasicDBObject dbOp;
-		int i = 0;
 	    while (cur.hasNext()) {
-	    	System.out.println(i);
 	    	dbOp = (BasicDBObject) cur.next();
 	    	JsonNode currentOpString = Json.parse(dbOp.toString());
 	    	CurrentOp currentOp = Json.fromJson(currentOpString, CurrentOp.class);
