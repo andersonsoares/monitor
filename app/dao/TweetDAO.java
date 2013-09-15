@@ -200,4 +200,14 @@ public class TweetDAO extends BaseDAO<Tweet> {
 		
 	}
 
+	/**
+	 * Delete all tweets that have eventId
+	 * @param eventId
+	 */
+	public void removeAllByEvent(ObjectId eventId) {
+		Query<Tweet> query = createQuery()
+				.filter("event", new Key<Event>(Event.class, eventId));
+		deleteByQuery(query);
+	}
+
 }

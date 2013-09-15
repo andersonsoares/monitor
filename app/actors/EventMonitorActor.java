@@ -55,6 +55,7 @@ public class EventMonitorActor extends UntypedActor {
 			
 			if (activeEvents.size() != eventsOnCache.size()) {
 				Logger.info("Syncronizing cached keywords");
+				dao.updateTweetsCountFromAllTweets();
 				syncCacheWith(activeEvents);
 				Logger.info("Restarting twitter streamming");
 				restartStream();

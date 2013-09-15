@@ -10,6 +10,7 @@ import models.EventAnalysis;
 import org.bson.types.ObjectId;
 
 import com.google.code.morphia.Key;
+import com.google.code.morphia.query.Query;
 
 import dao.base.BaseDAO;
 
@@ -107,6 +108,16 @@ public class EventAnalysisDAO extends BaseDAO<EventAnalysis> {
 		return createQuery()
 		.filter("event", new Key<Event>(Event.class, eventId))
 		.countAll();
+	}
+
+	/**
+	 * Remove all eventAnalysiss that have eevntId
+	 * @param eventId
+	 */
+	public void removeAllByEvent(ObjectId eventId) {
+		Query<EventAnalysis> query = createQuery()
+				.filter("event", new Key<Event>(Event.class, eventId));
+		deleteByQuery(query);
 	}
 	
 	

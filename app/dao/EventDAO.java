@@ -60,4 +60,21 @@ public class EventDAO extends BaseDAO<Event> {
 		UpdateOperations<Event> ops = ds.createUpdateOperations(entityClazz).set("nrTweets", tweetCount);
 		ds.update(query, ops);
 	}
+
+	public void updateTweetsCountFromAllTweets() {
+		
+		List<Event> events = listAll();
+		
+		Query<Event> query = null;
+		UpdateOperations<Event> ops = null;
+		TweetDAO tweetDAO = new TweetDAO();
+		for (Event event : events) {
+			query = createQuery().
+					field(Mapper.ID_KEY).equal(event.getId());
+			ops = createUpdateOperations()
+					.set("nrTweets", tweetDAO.countAll(event.getId()));
+			ds.update(query, ops);
+		}
+		
+	}
 }

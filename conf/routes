@@ -3,14 +3,15 @@
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               							controllers.Assets.at(path="/public", file)
 # ~~~~
-GET     /robots.txt             controllers.Assets.at(path="/public", file="robots.txt")
-GET     /humans.txt             controllers.Assets.at(path="/public", file="humans.txt")
+GET     /robots.txt             								controllers.Assets.at(path="/public", file="robots.txt")
+GET     /humans.txt             								controllers.Assets.at(path="/public", file="humans.txt")
 
 
 # Home page
 GET     /                       			  					@controllers.Application.index()
 GET		/events/create											@controllers.EventController.pageCreate()
 POST    /events        			                				@controllers.EventController.save()
+DELETE    /events/:eventId        			                	@controllers.EventController.removeEvent(eventId: String)
 
 POST	/events/analyse											@controllers.EventController.analyse()
 

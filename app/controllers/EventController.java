@@ -568,6 +568,27 @@ public Result pageTeste(String eventId) {
 		return notFound();
 	}
 	
+	/**
+	 * Method to remove event. Also remove all eventAnalysis and tweets related
+	 * with the event
+	 * @param _eventId
+	 * @return
+	 */
+	public Result removeEvent(String _eventId) {
+		
+		EventDAO eventDAO = new EventDAO();
+		ObjectId eventId = new ObjectId(_eventId);
+		Event event = eventDAO.findById(eventId);
+		if (event != null) {
+			TweetDAO tweetDAO = new TweetDAO();
+			EventAnalysisDAO analysisDAO = new EventAnalysisDAO();
+			analysisDAO.removeAllByEvent(eventId);
+			tweetDAO.removeAllByEvent(eventId);
+			eventDAO.delete(event);
+		}
+		return badRequest();
+	}
+	
 	
 	public Result removeAnalysis(String _eventId, String _eventAnalysisId) {
 		
