@@ -186,6 +186,18 @@ public class TweetDAO extends BaseDAO<Tweet> {
 		
 		return tweetsList;
 	}
+	
+	public List<Tweet> listTweets(ObjectId eventId, int page, int pageLength) {
+		
+		List<Tweet> tweetsList = createQuery()
+				.filter("event", new Key<Event>(Event.class, eventId))
+				.limit(pageLength)
+				.offset(page*pageLength)
+				.order("-createdAt")
+				.asList();
+		
+		return tweetsList;
+	}
 
 	public void removeEventAnalysis(ObjectId eventId, ObjectId eventAnalysisId) {
 		

@@ -168,7 +168,7 @@
 		          </div>
 		          
 		          <hr>
-		          @views.html.paginateTweets(page,pageLength,total, event.getId().toString(), eventAnalysis.getId().toString(), kind, routes.EventController.pageAnalysisDetails(_,_,_,_,_))
+		          @views.html.paginateTweetsByKind(page,pageLength,total, event.getId().toString(), eventAnalysis.getId().toString(), kind, routes.EventController.pageAnalysisDetails(_,_,_,_,_))
 		          <div>
 		          <a href="#"><button class="btn btn-default" rel="tooltip" data-placement="top" data-original-title="Download"><i class="icon-download-alt"></i></button></a>
 		          </div> 

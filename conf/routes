@@ -20,6 +20,8 @@ GET		/events/getTweets/:filename								@controllers.EventController.getTweetsIn
 GET		/events/getTweetStatus									@controllers.EventController.getTweetStatus()
 GET		/events/:eventId/teste									@controllers.EventController.pageTeste(eventId: String)
 GET		/events/:eventId										@controllers.EventController.pageDetails(eventId: String)
+GET		/events/:eventId/listTweetsAsync						@controllers.EventController.listTweetsAsync(eventId: String, page: Integer ?= 1, pageLength: Integer ?= 50)
+GET		/events/:eventId/listTweets								@controllers.EventController.listTweets(eventId: String, page: Integer ?= 1, pageLength: Integer ?= 50)
 GET		/events/:eventId/analysis/:eventAnalysisId/getTweets 	@controllers.EventController.getTweetsByAnalysis(eventId: String, eventAnalysisId: String, kind: String ?= "positives", page: Integer ?= 1, pageLength: Integer ?= 5)
 GET		/events/:eventId/analysis/:eventAnalysisId				@controllers.EventController.pageAnalysisDetails(eventId: String, eventAnalysisId: String, kind: String ?= "positives", page: Integer ?= 1, pageLength: Integer ?= 5)
 DELETE		/events/:eventId/analysis/:eventAnalysisId			@controllers.EventController.removeAnalysis(eventId: String, eventAnalysisId: String)

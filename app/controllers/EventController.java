@@ -335,6 +335,52 @@ public class EventController extends Controller {
 		return notFound();
 	}
 	
+	public Result listTweets(String eventId, int page, int pageLength) {
+		
+		
+		ObjectId id = new ObjectId(eventId);
+		EventDAO eventDAO = new EventDAO();
+		Event event = eventDAO.findById(id);
+		
+		if (event != null) {
+			
+			int total = event.getNrTweets();
+			
+			return ok(views.html.events.listTweets.render(event,page,pageLength,total));
+		
+			
+		}
+		
+		return notFound();
+	}
+	
+	public Result listTweetsAsync(String eventId, int page, int pageLength) {
+		
+		ReturnToView vo = new ReturnToView();
+		ObjectId id = new ObjectId(eventId);
+		EventDAO eventDAO = new EventDAO();
+		Event event = eventDAO.findById(id);
+		
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		
+		if (event != null) {
+			
+			TweetDAO tweetDAO = new TweetDAO();
+			
+			List<Tweet> tweetsList = tweetDAO.listTweets(event.getId(), page-1, pageLength);
+			map.put("tweetsList", tweetsList);
+			
+			
+			vo.setMap(map);
+			
+			return ok(Json.toJson(vo));
+			
+			
+		}
+		
+		return notFound();
+	}
+	
 	public Result pageAnalysisDetails(String eventId, String eventAnalysisId, String kind, int page, int pageLength) {
 		
 		ObjectId id = new ObjectId(eventId);

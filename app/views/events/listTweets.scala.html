@@ -1,0 +1,119 @@
+@(event: models.Event, page: Int, pageLength: Int, total: Int) 
+
+@import helper._
+
+@pageTitle = {
+	@views.html.partials.page_title_top(event.getName()+" ("+event.getSituation()+")", event.getStartDate().format("dd/MM/yyyy HH:mm:ss")+" - "+event.getFinishDate().format("dd/MM/yyyy HH:mm:ss"), "icon-comments", "Total Tweets", event.getNrTweets(), "", 0, "", 0)
+}
+
+@scripts = {
+	
+}
+
+@main("Twitter Monitor", "events", scripts, pageTitle) {
+
+<div class="container-fluid padded">
+    <div class="row-fluid">
+
+      <!-- Breadcrumb line -->
+
+      <div id="breadcrumbs">
+        <div class="breadcrumb-button blue">
+          <span class="breadcrumb-label"><i class="icon-comments"></i> <a href="@routes.Application.index()">Events</a></span>
+          <span class="breadcrumb-arrow"><span></span></span>
+        </div>
+
+        <div class="breadcrumb-button">
+          <span class="breadcrumb-label">
+            <i class="icon-comment"></i> <a href="@routes.EventController.pageDetails(event.getId().toString())">@event.getName()</a>
+          </span>
+          <span class="breadcrumb-arrow"><span></span></span>
+        </div>
+        
+        <div class="breadcrumb-button">
+          <span class="breadcrumb-label">
+            <i class="icon-list-ol"></i> Tweets List
+          </span>
+          <span class="breadcrumb-arrow"><span></span></span>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="container-fluid padded">
+   
+
+	<div class="row-fluid">
+		
+		
+		<div class="span12">
+			<div class="box">
+		      <div class="box-header">
+		
+		        <div class="title">Tweets <i class="icon-twitter"></i></div>
+		      </div>
+		
+		      <div class="box-content padded">
+		        <div class="tab-content">
+		        @views.html.paginateTweets(page,pageLength,total, event.getId().toString(), routes.EventController.listTweets(_,_,_))
+		        <hr>
+		          <div >
+		          	<ul id="tweetsList" class="chat-box timeline">
+		          	
+		          	
+		          	</ul>
+		          </div>
+		          
+		          <hr>
+		          @views.html.paginateTweets(page,pageLength,total, event.getId().toString(), routes.EventController.listTweets(_,_,_)) 
+		        </div>
+		      </div>
+		    </div>
+	    </div>
+    </div>
+  	
+</div>
+	
+	
+	<script type="text/javascript">
+	
+	function getURLParameter(name) {
+	    return decodeURI(
+	        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
+	    );
+	}
+	
+	function loadTweets() {
+		
+		var ul = jQuery('#tweetsList');
+		ul.append('Retrieving tweets, it might take a while <img src="@routes.Assets.at("images/loading.gif")">')
+		$.ajax({
+			url: '@routes.EventController.listTweetsAsync(event.getId().toString, page, pageLength)',
+			type: 'GET',
+			success: function(response) {
+				
+				if (response.code == 200) {
+				
+					ul.empty();
+					$.each(response.map.tweetsList, function(index, tweet) {
+
+						ul.append('<li class="arrow-box-left gray"><div class="avatar"><img src="'+tweet.profile_image_url+'" class="avatar-small"></div><div class="info"><span class="name"><strong id="tweetText-'+tweet.tweetId+'" style="margin-left: 10px;">'+tweet.text+'</strong></span><span class="time"><i class="icon-time"></i> '+tweet.createdAt+'</span></div><div id="details-'+tweet.tweetId+'" class="content"></div></li>')
+					});
+				} else {
+					if (response.code == 400) {
+						ul.html('<span class="status-error">'+response.message+'</span>');
+					}
+ 				}
+			}
+		})
+		
+	}
+	
+	$(document).ready(function() {
+		
+		loadTweets();
+	 
+	});
+	
+	</script>
+}
