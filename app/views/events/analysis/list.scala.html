@@ -3,7 +3,7 @@
 @import helper._
 
 @pageTitle = {
-	@views.html.partials.page_title_top(event.getName()+" ("+event.getSituation()+")", event.getStartDate()+" - "+event.getFinishDate(), "icon-comments", "Total Tweets", event.getNrTweets(), "", 0, "", 0)
+	@views.html.partials.page_title_top(event.getName()+" ("+event.getSituation()+")", event.getStartDate().format("dd/MM/yyyy HH:mm:ss")+" - "+event.getFinishDate().format("dd/MM/yyyy HH:mm:ss"), "icon-comments", "Total Tweets", event.getNrTweets(), "", 0, "", 0)
 }
 
 @scripts = {

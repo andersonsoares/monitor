@@ -26,12 +26,13 @@
 				 	}		
 				}
 		">
-		  <div class="box-content padded" onclick="location.href=window.location.origin+'@routes.EventController.pageDetails(event.getId().toString())'" style="cursor: pointer;">
+		  <div class="box-content padded linkdiv">
+		  <a href="@routes.EventController.pageDetails(event.getId().toString())"></a>
 		    <div class="fields">
 		      <ul>
 		        <li><b><h3>@event.getName()</h3></b></li>
 		        <li class="note">
-		        	<i class="icon-time"></i> @event.getStartDate() - @event.getFinishDate()
+		        	<i class="icon-time"></i> @event.getStartDate().format("dd/MM/yyyy HH:mm:ss") - @event.getFinishDate().format("dd/MM/yyyy HH:mm:ss")
 		        	@if(event.getSituation().equals(enums.Situation.NEVER_STARTED)) {
 	        		<span class="label label-black">@event.getSituation()</span>
 	        		}
