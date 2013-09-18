@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -354,6 +355,7 @@ public class EventController extends Controller {
 		return notFound();
 	}
 	
+	
 	public Result listTweetsAsync(String eventId, int page, int pageLength) {
 		
 		ReturnToView vo = new ReturnToView();
@@ -368,6 +370,47 @@ public class EventController extends Controller {
 			TweetDAO tweetDAO = new TweetDAO();
 			
 			List<Tweet> tweetsList = tweetDAO.listTweets(event.getId(), page-1, pageLength);
+			map.put("tweetsList", tweetsList);
+			
+			
+			vo.setMap(map);
+			
+			return ok(Json.toJson(vo));
+			
+			
+		}
+		
+		return notFound();
+	}
+	
+	public Result listTweetsByDayAsync(String eventId) {
+		
+		ReturnToView vo = new ReturnToView();
+		ObjectId id = new ObjectId(eventId);
+		EventDAO eventDAO = new EventDAO();
+		Event event = eventDAO.findById(id);
+		
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		
+		if (event != null) {
+			
+			Long dateInMillis = Long.parseLong(request().getQueryString("date"));
+			Date startDate = new Date(dateInMillis);
+			Date finishDate = DateUtils.getNextHour(startDate);
+			
+			TweetDAO tweetDAO = new TweetDAO();
+			
+			long tweetsCount = tweetDAO.countInInterval(event.getId(), startDate, finishDate);
+			int limit = 5;
+			List<Tweet> tweetsList = new ArrayList<Tweet>();
+			if (tweetsCount > limit) {
+				//create randomnumber between 0 and totaltweets in the day
+				Random r = new Random();
+				int offset = r.nextInt((int)tweetsCount-limit);
+				
+				tweetsList = tweetDAO.listRandomTweetsByDay(event.getId(), startDate, finishDate, limit, offset);
+			} 
+			
 			map.put("tweetsList", tweetsList);
 			
 			
@@ -420,35 +463,6 @@ public class EventController extends Controller {
 		}
 		
 		return notFound();
-	}
-	
-public Result pageTeste(String eventId) {
-		
-		try {
-			ObjectId id = new ObjectId(eventId);
-			
-			EventDAO eventDAO = new EventDAO();
-			Event event = eventDAO.findById(id);
-			
-			if (event != null) {
-				
-				DictionaryDAO dictionaryDAO = new DictionaryDAO();
-				
-				List<Dictionary> dictionariesList = dictionaryDAO.listAll();
-				
-				return ok(views.html.events.teste.render(event, dictionariesList));
-				
-				
-			} else {
-				// event doesnt exist
-				return badRequest();
-			}
-			
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-			return badRequest();
-		}
-		
 	}
 	
 	public Result pageCreate() {

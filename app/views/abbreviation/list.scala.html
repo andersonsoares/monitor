@@ -46,19 +46,19 @@
 		function removeAbbreviation(e, id) {
 			e.preventDefault()
 			
-			alertify.confirm("Are your sure?", function (e, str) {
-				if (e) {
-					$.ajax({
-						url: '/abbreviations?abbreviationId='+id,
-						type: 'DELETE',
-						success: function(response) {
-							jQuery('#row-'+id).fadeOut();
-							alertify.success('Removed!')
-						}
-					})					
-				}
-			});
 			
+			$.ajax({
+				url: '/abbreviations?abbreviationId='+id,
+				type: 'DELETE',
+				success: function(response) {
+					jQuery('#row-'+id).fadeOut();
+					Growl.success({
+		                title: "Removed",
+		                text: "successfuly",
+		                sticky: true
+		            })
+				}
+			});	
 		}
 		
 		

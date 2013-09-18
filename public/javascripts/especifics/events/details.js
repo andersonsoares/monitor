@@ -114,6 +114,34 @@ var optsGraphHours = {
         axisPaddingLeft: 30,
         dataFormatX: function (x) { return Date.create(x); },
         tickFormatX: function (x) { return x.format('{HH}:{mm}'); },
+        click: function(d, i) {
+        	var ul = jQuery('#tweetsList');
+        	ul.append('Retrieving tweets, it might take a while <img src="/assets/images/loading.gif">')
+        	var date = Date.parse(d.x);
+        	$.ajax({
+            	url: jQuery('#urlListTweetsAsyncByDay').text(),
+            	type: 'GET',
+            	data: {
+            		date: date
+            	},
+            	success: function(response) {
+            		console.log(response)
+            		if (response.code == 200) {
+	            		ul.empty();
+						$.each(response.map.tweetsList, function(index, tweet) {
+	
+							var horario = Date.create(tweet.createdAt)
+							var horarioFormatado = horario.format('{HH}:{mm}:{ss}')
+							ul.append('<li class="arrow-box-left gray"><div class="avatar"><img src="'+tweet.profile_image_url+'" class="avatar-small"></div><div class="info"><span class="name"><strong id="tweetText-'+tweet.tweetId+'" style="margin-left: 10px;">'+tweet.text+'</strong></span><span class="time"><i class="icon-time"></i> '+horarioFormatado+'</span></div><div id="details-'+tweet.tweetId+'" class="content"></div></li>')
+						});
+					} else {
+						if (response.code == 400) {
+							ul.html('<span class="status-error">'+response.message+'</span>');
+						}
+	 				}
+            	}
+        	});
+        },
         mouseover: function (d, i) {
         	 var pos = $(this).offset();
         		

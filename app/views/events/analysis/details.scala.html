@@ -280,7 +280,9 @@
 						if (sentiment == 'INCORRECT') {
 							tagSentiment = '<span class="label label-warning">incorrect</span>'
 						}
-						ul.append('<li class="arrow-box-left gray"><div class="avatar"><img src="'+tweet.profile_image_url+'" class="avatar-small"></div><div class="info"><span class="name">'+tagSentiment+'<strong id="tweetText-'+tweet.tweetId+'" style="margin-left: 10px;">'+tweet.text+'</strong></span><span class="time"><i class="icon-time"></i> '+tweet.createdAt+'</span></div><div id="details-'+tweet.tweetId+'" class="content"></div></li>')
+						var horario = Date.create(tweet.createdAt)
+						var horarioFormatado = horario.format('{dd}/{MM}/{yyyy} {HH}:{mm}:{ss}')
+						ul.append('<li class="arrow-box-left gray"><div class="avatar"><img src="'+tweet.profile_image_url+'" class="avatar-small"></div><div class="info"><span class="name">'+tagSentiment+'<strong id="tweetText-'+tweet.tweetId+'" style="margin-left: 10px;">'+tweet.text+'</strong></span><span class="time"><i class="icon-time"></i> '+horarioFormatado+'</span></div><div id="details-'+tweet.tweetId+'" class="content"></div></li>')
 						analyseCheck(tweet.tweetId);
 					});
 				} else {

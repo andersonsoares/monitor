@@ -222,4 +222,16 @@ public class TweetDAO extends BaseDAO<Tweet> {
 		deleteByQuery(query);
 	}
 
+	public List<Tweet> listRandomTweetsByDay(ObjectId eventId, Date startDate,
+			Date finishDate, int limit, int offset) {
+		
+		return createQuery()
+				.filter("event", new Key<Event>(Event.class, eventId))
+				.field("createdAt").greaterThanOrEq(startDate)
+				.field("createdAt").lessThanOrEq(finishDate)
+				.limit(limit)
+				.offset(offset)
+				.asList();
+	}
+
 }
