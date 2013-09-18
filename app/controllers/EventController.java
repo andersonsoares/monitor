@@ -402,11 +402,16 @@ public class EventController extends Controller {
 			
 			long tweetsCount = tweetDAO.countInInterval(event.getId(), startDate, finishDate);
 			int limit = 5;
+			int offset = 0;
 			List<Tweet> tweetsList = new ArrayList<Tweet>();
-			if (tweetsCount > limit) {
+			if (tweetsCount > 0) {
 				//create randomnumber between 0 and totaltweets in the day
 				Random r = new Random();
-				int offset = r.nextInt((int)tweetsCount-limit);
+				if (tweetsCount < limit) { 
+					offset = 0;
+				} else {
+					offset = r.nextInt((int)tweetsCount-limit);
+				}
 				
 				tweetsList = tweetDAO.listRandomTweetsByDay(event.getId(), startDate, finishDate, limit, offset);
 			} 

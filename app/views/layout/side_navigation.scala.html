@@ -25,11 +25,10 @@
             <li @if(activeLink.equals("dictionaries")) {class="active"}>
               <span class="glow"></span>
 
-              <a href="#">
+              <a href="@routes.DictionaryController.pageList()">
                   <i class="icon-book icon-2x"></i>
                     <span>
                       Dictionaries
-                      <i class="icon-caret-down"></i>
                     </span>
 
               </a>
@@ -44,8 +43,7 @@
 
             <li @if(activeLink.equals("abbreviations")) {class="active"}>
               <span class="glow"></span>
-              <!-- <a href="@routes.AbbreviationController.pageList()"> -->
-              <a href="#">
+              <a href="@routes.AbbreviationController.pageList()">
                   <i class="icon-font icon-2x"></i>
                   <span>Abbreviations</span>
               </a>
@@ -57,13 +55,13 @@
 
         
 
-            <li class="">
+          <!--   <li class="">
               <span class="glow"></span>
               <a href="#">
                   <i class="icon-wrench icon-2x"></i>
                   <span>Tools</span>
               </a>
-            </li>    
+            </li>     -->
 
   </ul>
 

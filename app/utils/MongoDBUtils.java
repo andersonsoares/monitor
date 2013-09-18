@@ -47,9 +47,7 @@ public class MongoDBUtils {
 	 */
 	public static boolean verifyIfThereIsLongCurrentOpRunning() {
 		
-		Singletons.mongo.getDB("admin").authenticate("aers", "08n10398".toCharArray());
-		
-		DBCursor cur = Singletons.mongo.getDB("admin").getCollection("$cmd.sys.inprog").find();
+		DBCursor cur = Singletons.mongo.getDB("monitor").getCollection("$cmd.sys.inprog").find();
 		BasicDBObject dbOp;
 	    while (cur.hasNext()) {
 	    	dbOp = (BasicDBObject) cur.next();
